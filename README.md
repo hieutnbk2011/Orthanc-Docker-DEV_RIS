@@ -1,5 +1,5 @@
 # Orthanc-Docker-DEV_RIS
-# Coming Soon:  Integrated Docker Compose Package with:
+Coming Soon:  Integrated Docker Compose Package with:
 
   1.  Orthanc with PIP modules for python, custom script and wkhtmltopdf for PDF file creation.
   2.  Postgres
