@@ -220,39 +220,10 @@ height:30px;
 	</ul>
 
 	<div id = "basic_tools">
-        <div style = "margin:auto;text-align:center;width:max-content;"><?php echo $pacs->serverStatusWidget(); ?></div>
-		<form class="row" id = "orthancselector" method = "POST" action = "devtool">
-
-						<select style = "width: auto;margin: auto;height:auto;" class="form-control" id="orthanc_host" name="orthanc_host" onchange = "$('#orthancselector').submit()">
-						<?php
-
-							$optionslist = "";
-							$servers = OrthancAPI::getServersArray();
-
-							if (count($servers) == 0) {
-								$optionslist .= '<option disabled value="" selected="selected">You Do not have a Server Configured.</option>';
-							}
-							else if (count($servers) > 1  && !isset($_SESSION["orthanc_host"])) {
-								$optionslist.= '<option value="" selected="selected">SELECT AN ORTHANC SERVER</option>';
-							}
-							foreach ($servers as $server) {
-
-								$optionselected = "";
-
-								if ( (isset($_SESSION['orthanc_host']) && ($_SESSION['orthanc_host'] == $server->id)) || count($servers) == 1) {
-
-									$optionselected = ' selected = "selected"';
-									$_SESSION["orthanc_host"] = $server->id;
-								}
-								$display = OrthancAPI::createAPIandInfoFromServerID($server->id)->display;
-								$optionslist.='<option value="' . $server->id  . '"' .  $optionselected . '>' . $display  . '</option>';
-
-							}
-							echo $optionslist;
-						?>
-						</select>
-						@csrf
-						</form>
+        <div style = "margin:auto;text-align:center;width:max-content;font-size:12px;">
+        <?php  echo $pacs->serverStatusWidget(); ?>
+        <?php  echo Widgets::PACSSelectorTool("devtool"); ?>
+        </div>
 
 	<!-- Service Section Start-->
 		<div class="row">

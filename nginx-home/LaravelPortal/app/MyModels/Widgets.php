@@ -1,6 +1,7 @@
 <?php
 namespace App\MyModels;
 use App\Actions\Orthanc\OrthancAPI;
+use Illuminate\Support\Facades\Session;
 
 class Widgets  {
 
@@ -9,6 +10,40 @@ class Widgets  {
 
     function __construct() {
 
+    }
+
+    public static function PACSSelectorTool($action) {
+
+        $html = '<form class="row" id = "orthancselector" method = "POST" action = "' . $action . '">
+        <select style = "width: auto;margin: auto;height:auto;" class="form-control" id="orthanc_host" name="orthanc_host">';
+        $optionslist = "";
+        $servers = OrthancAPI::getServersArray();
+
+        if (count($servers) == 0) {
+            $optionslist .= '<option disabled value="" selected="selected">You Do not have a Server Configured.</option>';
+        }
+        else if (count($servers) > 1  && empty(session('orthanc_host'))) {
+            $optionslist.= '<option value="" selected="selected">SELECT AN ORTHANC SERVER</option>';
+        }
+        foreach ($servers as $server) {
+
+            $optionselected = "";
+
+            if ( (!empty(session('orthanc_host')) && (session('orthanc_host') == $server->id)) || count($servers) == 1) {
+                $optionselected = ' selected = "selected"';
+            }
+            $display = OrthancAPI::createAPIandInfoFromServerID($server->id)->display;
+            $optionslist.='<option value="' . $server->id  . '"' .  $optionselected . '>' . $display  . '</option>';
+
+        }
+        $html .= $optionslist;
+        $html .='</select><input type="hidden" name="_token" value="' . csrf_token() . '" /></form>
+        <script>
+        $("#orthanc_host").on("change", function(e) {
+        $(this).closest("form").submit();
+        });
+        </script>';
+        return $html;
     }
 
 

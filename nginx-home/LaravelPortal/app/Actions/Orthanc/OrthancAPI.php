@@ -8,7 +8,6 @@ use ReallySimpleJWT\Token;
 use App\MyModels\DatabaseFactory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
-session_start();  // need to replace that with the session handler.
 
 class OrthancAPI  {
 
@@ -28,7 +27,7 @@ class OrthancAPI  {
     public static function setHost($orthanc_host = false) {
 
         if (!$orthanc_host) {
-            if (empty(config('myconfigs.DEFAULT_ORTHANC_HOST'))) die("No Default Orthanc Configured.");
+            if (empty(config('myconfigs.DEFAULT_ORTHANC_HOST'))) echo "No Default Orthanc Configured.";
     		else session(['orthanc_host' => config('myconfigs.DEFAULT_ORTHANC_HOST')]);
         }
         session(['orthanc_host' => $orthanc_host]);
@@ -38,8 +37,9 @@ class OrthancAPI  {
 
         Debugbar::error("Constructor for app/Actions/OrthancAPI:  SessionHost:  " . session("orthanc_host"));
 
-    	if(!Session::has('orthanc_host')) {
-    		die("No Default Orthanc Configured.");
+    	if(session("orthanc_host") == null ) {
+    		echo "Setting server to Default.";
+    		session(['orthanc_host' => config('myconfigs.DEFAULT_ORTHANC_HOST')]);
     	}
 
 		self::$Authorization = config('myconfigs.API_Authorization');
@@ -322,8 +322,9 @@ Used for downloadDCMStudyUUID, downloadZipStudyUUID
     	$server = DatabaseFactory::selectByQuery($query, [$id])->fetch(\PDO::FETCH_OBJ);
     	if ($server) {
     	$APIStrings = new \stdClass();
-    	$APIStrings->base = $server->nginx_admin_url . ' - ' . $server->api_url;
-    	$APIStrings->display = $server->nginx_admin_url . ' - ' . $server->api_url .  '/' . '    AET:  ' . $server->AET. '    Name:  ' . $server->server_name ;
+    	$APIStrings->api_url = $server->api_url;
+    	$APIStrings->server = $server;
+    	$APIStrings->display ='AET:  ' . $server->AET. '    Name:  ' . $server->server_name ;
     	return $APIStrings;
     	}
     	else return false;

@@ -84,9 +84,11 @@ Route::middleware(['auth:sanctum', 'verified'])->get('/readers', function () {
 
 // READERS PORTAL PAGE POST
 
-Route::middleware(['auth:sanctum', 'verified'])->post('/readers', function () {
+Route::middleware(['auth:sanctum', 'verified'])->post('/readers', function (Request $request) {
 
-    if (isset($_POST['orthanc_host'])) OrthancAPI::setHost($_POST['orthanc_host']);
+    if (!empty($request->input('orthanc_host'))) {
+        OrthancAPI::setHost($request->input('orthanc_host'));
+    }
     $user = Auth::user();
     Debugbar::error($user);
     Debugbar::error($user->patientid);
@@ -104,8 +106,10 @@ Route::middleware(['auth:sanctum', 'verified'])->get('/devtool', function () {
 })->name('devtool');
 
 // DEVTOOL PORTAL PAGE, POST TO Switch Server
-Route::middleware(['auth:sanctum', 'verified'])->post('/devtool', function () {
-
+Route::middleware(['auth:sanctum', 'verified'])->post('/devtool', function (Request $request) {
+    if (!empty($request->input('orthanc_host'))) {
+        OrthancAPI::setHost($request->input('orthanc_host'));
+    }
     $user = Auth::user();
     Debugbar::error($user);
     return view('devtool');
