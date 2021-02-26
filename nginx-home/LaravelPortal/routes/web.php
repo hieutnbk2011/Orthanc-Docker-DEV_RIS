@@ -85,6 +85,8 @@ Route::middleware(['auth:sanctum', 'verified'])->get('/readers', function () {
 // READERS PORTAL PAGE POST
 
 Route::middleware(['auth:sanctum', 'verified'])->post('/readers', function () {
+
+    if (isset($_POST['orthanc_host'])) OrthancAPI::setHost($_POST['orthanc_host']);
     $user = Auth::user();
     Debugbar::error($user);
     Debugbar::error($user->patientid);
@@ -278,13 +280,13 @@ Route::middleware(['auth:sanctum', 'verified'])->post('loadallstudies', function
 // RADIOLOGY REPORTING ROUTES, REORGANIZE LATER
 
 Route::middleware(['auth:sanctum', 'verified'])->post('/Reports/radreport_templates_list', function(Request $request) {
-    // $list = (new Reports($request))->templateslist($request);
-    echo '{"error":"Not Setup Yet"}';
+    $list = (new Reports($request))->templateslist();
+    echo $list;
 })->name('radreport_templates_list');
 
 Route::middleware(['auth:sanctum', 'verified'])->post('/HL7/getallhl7_reports', function(Request $request) {
-    // $list = Reports::radreport_templates_list($request);
-    echo '{"error":"Not Setup Yet"}';
+   $list = (new Reports($request))->templateslist();
+    echo $list;
 })->name('getallhl7_reports');
 
 

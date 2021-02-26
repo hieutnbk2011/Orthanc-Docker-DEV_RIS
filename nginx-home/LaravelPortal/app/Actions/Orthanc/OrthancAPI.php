@@ -6,6 +6,8 @@ use App\Actions\Orthanc\UtilityFunctions;
 use Illuminate\Support\Facades\Auth;
 use ReallySimpleJWT\Token;
 use App\MyModels\DatabaseFactory;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Session;
 session_start();  // need to replace that with the session handler.
 
 class OrthancAPI  {
@@ -14,7 +16,7 @@ class OrthancAPI  {
     public $result;
     public $server;
 //  public $showAll;
-    public $curlerror;
+    public $curlerror = false;
     public $curl_error_text;
     private static $Authorization;
     private static $Token;
@@ -23,13 +25,21 @@ class OrthancAPI  {
     public $responsecode;
     private static $fulltags = true;
 
+    public static function setHost($orthanc_host = false) {
+
+        if (!$orthanc_host) {
+            if (empty(config('myconfigs.DEFAULT_ORTHANC_HOST'))) die("No Default Orthanc Configured.");
+    		else session(['orthanc_host' => config('myconfigs.DEFAULT_ORTHANC_HOST')]);
+        }
+        session(['orthanc_host' => $orthanc_host]);
+    }
+
     public function __construct() {
-        //Debugbar::error("Constructor for OrthancAPI:  SessionHost|POST:  " . $_SESSION["orthanc_host"] . ':' . $_POST["orthanc_host"]);
-        $this->curlerror = false;
-        if (isset($_POST["orthanc_host"])) $_SESSION["orthanc_host"] = $_POST["orthanc_host"];
-    	if (!isset($_SESSION["orthanc_host"])) {
-    		if (config('myconfigs.DEFAULT_ORTHANC_HOST') == "") die("No Default Orthanc Configured.");
-    		$_SESSION["orthanc_host"] = config('myconfigs.DEFAULT_ORTHANC_HOST');
+
+        Debugbar::error("Constructor for app/Actions/OrthancAPI:  SessionHost:  " . session("orthanc_host"));
+
+    	if(!Session::has('orthanc_host')) {
+    		die("No Default Orthanc Configured.");
     	}
 
 		self::$Authorization = config('myconfigs.API_Authorization');
@@ -49,7 +59,7 @@ class OrthancAPI  {
 //         'ip' => $_SERVER['REMOTE_ADDR']
 //
 // 		);
-    	$this->initServer($_SESSION["orthanc_host"]);
+    	$this->initServer(session("orthanc_host"));
 //     	$this->showAll = false;
     }
 	// Setup the Server local and remote REST API URLS, sets the flag for what kind of server it is also, local or remote.

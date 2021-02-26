@@ -3,6 +3,7 @@ namespace App\MyModels;
 use \DB;
 use \Debugbar;
 use Illuminate\Http\Request;
+use App\MyModels\DatabaseFactory;
 // use App\Actions\Orthanc\UtilityFunctions;
 // use Illuminate\Support\Facades\Auth;
 // use ReallySimpleJWT\Token;
@@ -23,18 +24,18 @@ class Reports {
     public $oldstatus;
     public $datetime;
     public $htmlreport;
+    private $request;
 
-    public function __construct() {
+    public function __construct(Request $request) {
 
+        $this->request = $request;
   	}
 
-    public function templateslist(Request $request)  {
+    public function templateslist()  {
 
-            return true;
+            Debugbar::error($this->request);
 
-            Debugbar::error($request);
-            return var_dump($request);
-           if (Request::post('option') == 'getlist') {
+           if ($this->request->input('option') == 'getlist') {
 
             // array of array of reports
             // $templatearray['id'] = $row['id'];
@@ -44,7 +45,7 @@ class Reports {
             // $templatearray['modality'] = $row['modality'];
 
             $responsearray["user"] = "none";
-            $templates = $this::getModalityReportTemplates(Request::post('modality'));
+            $templates = $this::getModalityReportTemplates($this->request->input('modality'));
             //   print_r($templates);
             $html = '<option value="">Select a Template</option>';
 
@@ -58,17 +59,19 @@ class Reports {
     }
 
     public function getModalityReportTemplates ($modality) {
-        return true;
-        $conn = DatabaseFactory::getFactory()->getConnection();
+
+        // $conn = DatabaseFactory::getFactory()->getConnection();
         // array of array of reports matching the $modality
         $array = array();
         $query = "SELECT * from report_templates WHERE modality = ? OR modality = 'ALL' AND active = 1  ORDER BY subspecialty, description";
         $parameters = [$modality];
-        $stmt = $conn->prepare($query);
-        $stmt->execute($parameters);
-        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+//         $stmt = $conn->prepare($query);
+//         $stmt->execute($parameters);
+//         $result = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        $result = DB::connection('mysql2')->select($query,$parameters);
         foreach ($result as $row) {
         $templatearray = [];
+        $row = (array)$row;
         $templatearray['radreport_id'] = $row['radreport_id'];
         $templatearray['type'] = $row['type'];
         $templatearray['description'] = $row['description'];
