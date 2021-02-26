@@ -1,0 +1,57 @@
+# Dicom-File-Format
+
+# Dicom-Meta-Information-Header
+(0002,0000) UL 202                                        # FileMetaInformationGroupLength
+(0002,0001) OB 00\01                                     # FileMetaInformationVersion
+(0002,0002) UI [NONE] # MediaStorageSOPClassUID
+(0002,0003) UI [1.2.276.0.7230010.3.1.4.2831176407.11154.1448031138.805061] # MediaStorageSOPInstanceUID
+(0002,0010) UI [LittleEndianExplicit]                     # TransferSyntaxUID
+(0002,0012) UI [1.2.276.0.7230010.3.0.3.6.0]             # ImplementationClassUID
+(0002,0013) SH [OFFIS_DCMTK_360]                         # ImplementationVersionName
+
+# Dicom-Data-Set
+(0008,0005) CS [ISO_IR 100]                  # SpecificCharacterSet
+(0008,0050) SH [DEVACC00000005]          # AccessionNumber
+(0008,0060) CS [MR]                 # Modality
+(0008,0080) LO [Cayman Medical Ltd.]          # InstitutionName
+(0008,0090) PN [0001:Scotti^Stephen^^Dr.^,M.D., Ph.D]      # ReferringPhysiciansName
+(0008,1030) LO  [MRI BRAIN / BRAIN STEM]      # RequestedProcedureDescription
+(0010,0010) PN [Scotti^Stephen^Douglas]              # PatientName
+(0010,0020) LO [D]                # PatientID
+(0010,0030) DA [19571116]         # PatientBirthDate
+(0010,0040) CS [M]               # PatientSex
+(0010,1040) LO [2508 Delaware St SE^Unit 163^Minneapolis^MN^55414^US]               # PatientAddress
+(0010,2154) SH [US-6513130209^PRN^PH^sscotti@mac.com]               # PatientTelephoneNumbers
+(0010,2155) LT [US-6513130209^WPN^PH^sscotti@mac.com]               # PatientTelecomInformation
+(0010,2000) LO []            # MedicalAlerts
+(0010,2110) LO []                # Allergies
+(0010,21B0) LT [test] # AdditionalPatientHistory
+(0020,000d) UI [1.3.6.1.4.1.56016.1.20210127100000]         # StudyInstanceUID
+(0020,0010) SH [0001]         # StudyID
+(0032,1060) LO [MRI BRAIN / BRAIN STEM]        #  RequestedProcedureDescription
+(0040,1001) SH [0001]                 # RequestedProcedureID
+(0040,1003) SH [R]           # RequestedProcedurePriority
+(0040,0100) SQ (Sequence with explicit length #=1)           # ScheduledProcedureStepSequence
+(fffe,e000) na (Item with explicit length #=6)           # Item
+(0040,0001) AE [AETITLE_MRI]           # ScheduledStationAETitle
+(0040,0002) DA [20210127]           # ScheduledProcedureStepStartDate
+(0040,0003) TM [100000]           # ScheduledProcedureStepStartTime
+(0040,0007) LO [MRI BRAIN / BRAIN STEM]           # ScheduledProcedureStepDescription
+(0040,0009) SH [0001]           # ScheduledProcedureStepID
+(0008,0060) CS [MR]           # Modality
+(fffe,e00d) na (ItemDelimitationItem for re-encoding)   #   0, 0 ItemDelimitationItem
+(fffe,e0dd) na (SequenceDelimitationItem for re-encod.) #   0, 0 SequenceDelimitationItem
+(0008,0096) SQ (Sequence with explicit length #=1)           # ReferringPhysicianIdentificationSequence
+(fffe,e000) na (Item with explicit length #=4)           # Item
+(0008,0080) LO [Cayman Medical Ltd.]           # InstitutionName
+(0040,1101) SQ (Sequence with explicit length #=1)           # PersonIdentificationCodeSequence
+(fffe,e000) na (Item with explicit length #=3)           # Item
+(0008,0100) SH [0001]           # CodeValue
+(0008,0102) SH [L]           # CodingSchemeDesignator
+(0008,0104) LO [Local Code]           # CodeMeaning
+(fffe,e00d) na (ItemDelimitationItem for re-encoding)           # ItemDelimitationItem
+(fffe,e0dd) na (SequenceDelimitationItem for re-encoding)           # SequenceDelimitationItem
+(0040,1103) LO [US-6513130209^WPN^PH^sscotti@sscotti.org]           # PersonTelephoneNumbers
+(0040,1104) LT [US-6513130209^WPN^PH^sscotti@sscotti.org]           # PersonTelecomInformation, [Phone^WPN^CP^email]
+(fffe,e00d) na (ItemDelimitationItem for re-encoding)           # ItemDelimitationItem
+(fffe,e0dd) na (SequenceDelimitationItem for re-encoding.)           # SequenceDelimitationItem

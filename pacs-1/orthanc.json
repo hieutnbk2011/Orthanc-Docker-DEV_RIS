@@ -1,0 +1,138 @@
+{
+
+    // Enable the transparent compression of the DICOM instances
+    "StorageCompression" : false,
+
+    // Maximum size of the storage in MB (a value of "0" indicates no
+    // limit on the storage size)
+    "MaximumStorageSize" : 0,
+
+    // Maximum number of patients that can be stored at a given time
+    // in the storage (a value of "0" indicates no limit on the number
+    // of patients)
+    "MaximumPatientCount" : 0,
+
+    // String representation of a JSON object/array containing the
+    // options to use in the LUA scripts. Typically used to provide
+    // dynamic values from the environment
+    // Configure based on what is copied in DOCKER
+    "LuaScripts" : [
+    //    "/etc/orthanc/cfind-filter.lua"
+	],
+
+
+    // Whether or not SSL is enabled
+    "SslEnabled" : false,
+
+    // Path to the SSL certificate (meaningful only if SSL is enabled)
+    "SslCertificate" : "/etc/orthanc/tls/ca-crt.pem",
+    "HttpsVerifyPeers": true,
+
+
+    // When the following option is "true", if an error is encountered
+    // while calling the REST API, a JSON message describing the error
+    // is put in the HTTP answer. This feature can be disabled if the
+    // HTTP client does not properly handles such answers.
+    "HttpDescribeErrors" : true,
+
+    // Enable HTTP compression to improve network bandwidth utilization,
+    // at the expense of more computations on the server. Orthanc
+    // supports the "gzip" and "deflate" HTTP encodings.
+    "HttpCompressionEnabled" : true,
+
+
+    /**
+    * Configuration of the DICOM server
+    **/
+
+
+    // Check whether the called AET corresponds during a DICOM request
+    "DicomCheckCalledAet" : true,
+
+    // The DICOM port
+    "DicomPort" : 4242,
+
+    // The default encoding that is assumed for DICOM files without
+    // "SpecificCharacterSet" DICOM tag. The allowed values are "Ascii",
+    // "Utf8", "Latin1", "Latin2", "Latin3", "Latin4", "Latin5",
+    // "Cyrillic", "Windows1251", "Arabic", "Greek", "Hebrew", "Thai",
+    // "Japanese", and "Chinese".
+    "DefaultEncoding" : "Utf8",
+
+    // The transfer syntaxes that are accepted by Orthanc C-Store SCP
+    "DeflatedTransferSyntaxAccepted"     : true,
+    "JpegTransferSyntaxAccepted"         : true,
+    "Jpeg2000TransferSyntaxAccepted"     : true,
+    "JpegLosslessTransferSyntaxAccepted" : true,
+    "JpipTransferSyntaxAccepted"         : true,
+    "Mpeg2TransferSyntaxAccepted"        : true,
+    "RleTransferSyntaxAccepted"          : true,
+
+    // Whether Orthanc accepts to act as C-Store SCP for unknown storage
+    // SOP classes (aka. "promiscuous mode")
+    "UnknownSopClassAccepted"            : false,
+
+
+    // The list of the known DICOM modalities
+    "DicomModalities" : {
+    /**
+     * Uncommenting the following line would enable Orthanc to
+     * connect to an instance of the "storescp" open-source DICOM
+     * store (shipped in the DCMTK distribution) started by the
+     * command line "storescp 2000".
+     **/  
+
+    "E-Film" : {  // long version
+    "AET" : "CMEFILM",
+    "Port" : 1004,
+    "Host" : "xxx.xxx.xxx.xxx",
+    "Manufacturer" : "Generic",
+    "AllowEcho" : true,
+    "AllowFind" : true,
+    "AllowMove" : true,
+    "AllowStore" : true
+    },
+    "HOROS-WorkStation" : { // long version
+    "AET" : "IMACLATE2013",
+    "Port" : 11112,
+    "Host" : "192.168.0.108",
+    "Manufacturer" : "Generic",
+    "AllowEcho" : true,
+    "AllowFind" : true,
+    "AllowMove" : true,
+    "AllowStore" : true
+    },
+    "FINDSCU" : {  // long version
+    "AET" : "FINDSCU",
+    "Port" : 1234,
+    "Host" : "127.0.0.1",
+    "Manufacturer" : "Generic",
+    "AllowEcho" : true,
+    "AllowFind" : true,
+    "AllowMove" : true,
+    "AllowStore" : true
+    }
+    /**
+     * A fourth parameter is available to enable patches for a
+     * specific PACS manufacturer. The allowed values are currently
+     * "Generic" (default value), "StoreScp" (storescp tool from
+     * DCMTK), "ClearCanvas", "MedInria", "Dcm4Chee", "SyngoVia",
+     * "AgfaImpax" (Agfa IMPAX), "EFilm2" (eFilm version 2), and
+     * "Vitrea". This parameter is case-sensitive.
+     **/
+    // "clearcanvas" : [ "CLEARCANVAS", "192.168.1.1", 104, "ClearCanvas" ]
+    },
+
+    // The list of the known Orthanc peers
+    "OrthancPeers" : {
+    /**
+     * Each line gives the base URL of an Orthanc peer, possibly
+     * followed by the username/password pair (if the password
+     * protection is enabled on the peer).
+     **/
+    // "peer"  : [ "http://localhost:8043/", "alice", "alicePassword" ]
+    // "peer2" : [ "http://localhost:8044/" ]
+    }
+}
+
+

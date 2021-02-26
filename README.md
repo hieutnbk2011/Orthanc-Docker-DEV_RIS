@@ -1,22 +1,39 @@
-# Orthanc-Docker-DEV_RIS
-Coming Soon:  Integrated Docker Compose Package with:
+# Purpose
 
-  1.  Orthanc with PIP modules for python, custom script and wkhtmltopdf for PDF file creation.
-  2.  Postgres
-  3.  MySQL
-  4.  NGINX with some management tools, wkhtmltopdf and dcmtk.
-  5.  PHP-FPM
-  6.  Laravel Front End having Dev Tools and Study Browser
-  7.  Primitive RIS for migration to the Laravel Framework
+This is a sample setup to demonstrate how to configure Orthanc behind an Nginx server.
 
-Full instructions to follow, but after cloning, checking out or downloading, navigate to the root of the project and execute:
+Nginx will implement the TLS (HTTPS to HTTP conversion) and will expose multiple Orthanc 
+on the same hostname and port (in this case, port 443).
 
-`docker-compose up --build`
+This demo will also show you how to configure an Orthanc peer to accept the self-signed 
+certificate of the Orthanc peer to which it connects via HTTPS.
 
-It will take quite awhile to build the container.  There may be some tweaking that can be done to improve that.  The Postgres database is for Orthanc, and the Index and Storage are on the host in the root project folder under OrthancIndex and OrthancStorage.  MWL files are also mapped to the host and to the container MWL fodler.  MySQL database is mapped to the host MySQL_DB folder at the root of the host folder.  There are a number of other setups and .sql files that are explained later.
+Furthermore, it will also show you how you can make your Orthanc Rest API `readonly` by 
+allowing only the GET requests to orthanc-C.
 
-Expect that by 1 March 2021 a working version will be here.
+# Description
 
-Study Browser with pagination, viewer(s), reporting tool, pdf/png uploader, dcm/iso downloader, get all studies for PatientID, more to come.
+This demo contains:
 
-![Study Browser](https://github.com/sscotti/Orthanc-Docker-DEV_RIS/blob/main/docs/browser.png)
+- an Nginx container that implements TLS and a reverse proxy to 3 Orthanc instances
+- an Orthanc-A container.
+- an Orthanc-B container.
+- an Orthanc-C container that is made readonly by the reverse proxy
+
+# Starting the setup
+
+- First, you'll need to generate keys and certificates for all modules.  Go in the `tls` folder and type `generate-tls.sh`
+- Then, you'll have to copy all keys and certificates to docker volumes that will be used by the nginx container.  In the `tls`folder, type `copy-tls-to-docker-volumes.sh`.
+- To start the setup, type: `docker-compose up --build`
+
+# demo
+
+- Orthanc A is accessible at [https://localhost/orthanc-a/app/explorer.html](https://localhost/orthanc-a/app/explorer.html)
+- Orthanc B is accessible at [https://localhost/orthanc-b/app/explorer.html](https://localhost/orthanc-b/app/explorer.html)
+- Orthanc C is accessible at [https://localhost/orthanc-c/app/explorer.html](https://localhost/orthanc-c/app/explorer.html)
+- Orthanc A is not accessible at [http://localhost:8042](http://localhost:8042) because it does not expose its HTTP port to the exterior of the Docker network
+- upload a study to Orthanc A
+- once the study has been uploaded, send it to the `orthanc-b-https` remote modality.  This transfer is performed over HTTPS.  We have configured Orthanc A to recognize the certificates of Orthanc B.
+- connect to Orthanc B to verify it has been transmitted.
+- from Orthanc A, send the study to the `orthanc-c-dicom` remote modality.  This transfer is performed over DICOM protocol.
+- connect to the Orthanc C interface and try to delete the patient. It shall be forbidden by nginx since it allows only the GET requests.
