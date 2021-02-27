@@ -296,17 +296,29 @@ Used for downloadDCMStudyUUID, downloadZipStudyUUID
     // passed
     public function StartServer() {
 
-		return $this->executeCURLPOSTJSON_NGINXADMIN('{"method":"StartServer","Process":"Orthanc"}');
+		return $this->executeCURLPOSTJSON_NGINXADMIN('{"method":"StartServer","api_url":"' . $this->OrthancURL. '"}');
 	}
 	// passed
 	public function StopServer() {
+        // /tools/shutdown
+		return $this->executeCURLPOSTJSON_NGINXADMIN('{"method":"StopServer","api_url":"' . $this->OrthancURL. '"}');
+	}
 
-		return $this->executeCURLPOSTJSON_NGINXADMIN('{"method":"StartServer","Process":"Orthanc"}');
+	// passed
+	public function Restart() {
+        //tools/reset
+		return $this->executeCURLPOSTJSON_NGINXADMIN('{"method":"Restart","api_url":"' . $this->OrthancURL. '"}');
+	}
+
+	// passed
+	public function Conformance() {
+        // tools/dicom-conformance
+		return $this->executeCURLPOSTJSON_NGINXADMIN('{"method":"Conformance","api_url":"' . $this->OrthancURL. '"}');
 	}
 	// passed
 	public function PHPINFO() {
 
-		return $this->executeCURLPOSTJSON_NGINXADMIN('{"method":"PHPINFO"}');
+		return $this->executeCURLPOSTJSON_NGINXADMIN('{"method":"PHPINFO","api_url":"' . $this->OrthancURL. '"}');
 	}
 	// passed
     public static function getServersArray() {

@@ -256,6 +256,25 @@ Route::middleware(['auth:sanctum', 'verified'])->post('loadallstudies', function
 
 // DEV TOOL & ORTHANC API Routes
 
+Route::middleware(['auth:sanctum', 'verified'])->post('/OrthancDev/PHPINFO', function() {
+    $orthanc = new OrthancAPI();
+    echo $orthanc->PHPINFO();
+})->name('PHPINFO');
+
+Route::middleware(['auth:sanctum', 'verified'])->post('/OrthancDev/ServerStatus', function() {
+    $orthanc = new OrthancAPI();
+    echo $orthanc->ServerStatus();
+})->name('ServerStatus');
+
+Route::middleware(['auth:sanctum', 'verified'])->post('/OrthancDev/StopServer', function() {
+    $orthanc = new OrthancAPI();
+    echo $orthanc->StopServer();
+})->name('StopServer');
+
+Route::middleware(['auth:sanctum', 'verified'])->post('/OrthancDev/StartServer', function() {
+    $orthanc = new OrthancAPI();
+    echo $orthanc->StartServer();
+})->name('StartServer');
 
 Route::middleware(['auth:sanctum', 'verified'])->post('/OrthancDev/getViewerLink', function(Request $request) {
     $orthanc = new OrthancAPI();

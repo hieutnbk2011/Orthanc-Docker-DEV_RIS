@@ -1,4 +1,6 @@
 <?php
+
+// https://book.orthanc-server.com/users/rest-cheatsheet.html?highlight=shutdown%20rest%20api
 ini_set("error_log", realpath(dirname(__FILE__)) . "/admincurl.log");
 include (realpath(dirname(__FILE__)) . "/classes/DatabaseFactory.php");
 
@@ -6,16 +8,83 @@ Class NGINXAdmin {
 
     public $OrthancServerStatus;
     public $data;
-    private $Authorization = 'Bearer CURLTOKEN';
-    private $Token = 'wxwzisme';
+    private static $Authorization = 'Bearer CURLTOKEN';
+    private static $Token = 'wxwzisme';
     private $CheckOrigin = true;
-    private $Origin = 'https://myris.medical.ky';
+    private static $Origin = 'https://myris.medical.ky';
+    private $OrthancURL;
+    private $curlerror;
+    private $curl_error_text;
+    private $result;
+    private  $userprofileJWT;
 
     public function __construct() {
     
     	$this->data = json_decode(file_get_contents('php://input'));
+    	$this->OrthancURL = $this->data->api_url;
     	
     }
+    
+    private function processCURLResults(&$ch) {
+
+		$this->result = curl_exec($ch);
+		$this->responsecode =  curl_getinfo($ch,CURLINFO_HTTP_CODE);
+		if (curl_errno($ch) || curl_getinfo($ch,CURLINFO_HTTP_CODE) != "200") {
+			$this->curlerror = true;
+			$this->curl_error_text = "Status:  " . curl_getinfo($ch,CURLINFO_HTTP_CODE) . ', Error: ' . curl_error($ch);
+			curl_close($ch);
+			return $this->result;
+		}
+		else {
+
+			$this->curlerror = false;
+			$this->curl_error_text = "No Errors";
+			curl_close($ch);
+			return $this->result;
+		}
+
+	}
+    
+    public function executeCURL($CURLOPT_URL) {
+
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_URL, $this->OrthancURL . $CURLOPT_URL);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+		curl_setopt($ch,CURLOPT_ENCODING , "gzip");
+		DatabaseFactory::logVariable("executeCURL:  " . $this->OrthancURL . $CURLOPT_URL);
+		$headers = array();
+		//$headers[] = 'Content-Type: application/x-www-form-urlencoded';
+		$headers[] = 'Authorization:' . self::$Authorization;
+		$headers[] = 'Token:' . self::$Token;
+		$headers[] = 'Origin:' . self::$Origin;
+		//$headers[] = 'Accept-Encoding:gzip';
+		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+		return $this->processCURLResults($ch);
+
+	}
+	
+	public function executeCURLPOST($url) {
+
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_URL, $this->OrthancURL . $url);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+		curl_setopt($ch, CURLOPT_POST, 1);
+		// curl_setopt($ch, CURLOPT_POSTFIELDS, $JSONQuery);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+		//curl_setopt($ch,CURLOPT_ENCODING , "gzip");
+		//Debugbar::error("OrthancModel->executeCURLPOSTJSON:  " . $this->OrthancURL . $url);
+		//Debugbar::error("OrthancModel->executeCURLPOSTJSON_Args:  " . $JSONQuery);
+		$headers = array();
+		$headers[] = 'Authorization:' . self::$Authorization;
+		$headers[] = 'Token:' . self::$Token;
+		$headers[] = 'Origin:' . self::$Origin;
+		//$headers[] = 'userprofileJWT:' . json_encode(self::$userprofileJWT);
+		//$headers[] = 'Accept-Encoding:gzip';
+		// $headers[] = 'Content-Type: application/json';
+		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+		return $this->processCURLResults($ch);
+	}
     
 	private function getallheaders() {
 	
@@ -86,32 +155,36 @@ $me = new NGINXAdmin();
 
 if ($me->isAuthorized()) {
 
-DatabaseFactory::logVariable($me->data);
-switch ($me->data->method) {
+    DatabaseFactory::logVariable($me->data);
+    // $me-data->api_url;
+    $results = new stdClass();
+    switch ($me->data->method) {
 
-case "ServerStatus":
-	echo json_encode($me->check_if_process_is_running($me->data->Process));
-	break;
-case "StopServer":
-	$results = [];
-	$pids = $me->check_if_process_is_running($me->data->Process);
-	foreach ($pids as $pid) {
-		$results[] = json_encode($me->executeScript("kill -15 " . $pid));
-	}
-	echo json_encode($results);
-	break;
-case "StartServer":
-	echo json_encode($me->LaunchBackgroundProcess("/Users/sscotti/Desktop/orthancAndPluginsOSX.stable/startOrthanc.command"));
-	break;
-case "PHPINFO":
-	echo '<h3>NGINX SERVER INFO for ADMIN</h3>';
-	phpinfo();
-	break;
+        case "StopServer":
 
-default:
-//code to be executed if n is different from all labels;
-	break;
-}
+                $me->executeCURLPOST("tools/shutdown");
+                $results->status = "Shutdown Signal Sent";
+//             $results = [];
+//             $pids = $me->check_if_process_is_running($me->data->Process);
+//             foreach ($pids as $pid) {
+//                 $results[] = json_encode($me->executeScript("kill -15 " . $pid));
+//             }
+//             echo json_encode($results);
+            break;
+        case "StartServer":
+//             echo json_encode($me->LaunchBackgroundProcess("/Users/sscotti/Desktop/orthancAndPluginsOSX.stable/startOrthanc.command"));
+
+            break;
+        case "PHPINFO":
+            echo '<h3>NGINX SERVER INFO for ADMIN</h3>';
+            phpinfo();
+            break;
+
+        default:
+        //code to be executed if n is different from all labels;
+            break;
+    }
+    echo json_encode($results);
 }
 else {
 header("HTTP/1.1 401 Unauthorized");

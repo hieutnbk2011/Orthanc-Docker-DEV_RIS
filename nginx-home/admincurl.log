@@ -13,3 +13,55 @@
 [26-Feb-2021 02:51:09 UTC] {
     "method": "PHPINFO"
 }
+[27-Feb-2021 08:49:57 UTC] {
+    "method": "PHPINFO"
+}
+[27-Feb-2021 09:10:10 UTC] {
+    "method": "StopServer",
+    "api_url": "http:\/\/pacs-1:8042\/"
+}
+[27-Feb-2021 09:10:50 UTC] {
+    "method": "StopServer",
+    "api_url": "http:\/\/pacs-1:8042\/"
+}
+[27-Feb-2021 09:11:38 UTC] {
+    "method": "StopServer",
+    "api_url": "http:\/\/pacs-1:8042\/"
+}
+[27-Feb-2021 09:11:38 UTC] executeCURL:  http://pacs-1:8042/tools/shutdown
+[27-Feb-2021 09:12:42 UTC] {
+    "method": "StopServer",
+    "api_url": "http:\/\/pacs-1:8042\/"
+}
+[27-Feb-2021 09:12:42 UTC] executeCURL:  http://pacs-1:8042/tools/shutdown
+[27-Feb-2021 09:14:21 UTC] {
+    "method": "StopServer",
+    "api_url": "http:\/\/pacs-1:8042\/"
+}
+[27-Feb-2021 09:14:21 UTC] executeCURL:  http://pacs-1:8042/tools/shutdown
+[27-Feb-2021 09:16:00 UTC] {
+    "method": "StopServer",
+    "api_url": "http:\/\/pacs-1:8042\/"
+}
+[27-Feb-2021 09:16:00 UTC] executeCURL:  http://pacs-1:8042/tools/shutdown
+[27-Feb-2021 09:16:00 UTC] {
+    "method": "StopServer",
+    "api_url": "http:\/\/pacs-1:8042\/"
+}
+[27-Feb-2021 09:16:00 UTC] executeCURL:  http://pacs-1:8042/tools/shutdown
+[27-Feb-2021 09:21:52 UTC] {
+    "method": "StopServer",
+    "api_url": "http:\/\/pacs-1:8042\/"
+}
+[27-Feb-2021 09:22:29 UTC] {
+    "method": "StopServer",
+    "api_url": "http:\/\/pacs-1:8042\/"
+}
+[27-Feb-2021 09:23:55 UTC] {
+    "method": "StopServer",
+    "api_url": "http:\/\/pacs-1:8042\/"
+}
+[27-Feb-2021 09:24:41 UTC] {
+    "method": "StopServer",
+    "api_url": "http:\/\/pacs-1:8042\/"
+}
