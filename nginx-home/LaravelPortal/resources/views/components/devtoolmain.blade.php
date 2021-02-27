@@ -5,6 +5,7 @@ use App\Actions\Orthanc\OrthancAPI;
 $pacs = new OrthancAPI();
 ?>
 <meta name="csrf-token" content="{{ csrf_token() }}">
+<link rel="stylesheet" href="/bower/font-awesome/css/all.min.css" type="text/css">
 <style>
 body * {
 font-family:courier !important;
@@ -46,12 +47,12 @@ padding: 5px;
 margin: 5px;
 font-size:12px;
 }
-#myModal .string { color: green; }
-#myModal .number { color: darkorange; }
-#myModal .boolean { color: blue; }
-#myModal .null { color: magenta; }
-#myModal .key { color: #0158ff; }
-#myModal {white-space: break-spaces;}
+#devModal .string { color: green; }
+#devModal .number { color: darkorange; }
+#devModal .boolean { color: blue; }
+#devModal .null { color: magenta; }
+#devModal .key { color: #0158ff; }
+#devModal {white-space: break-spaces;}
 select option:disabled {
     color: #999;
     font-weight: bold;
@@ -178,9 +179,11 @@ height:30px;
 	}
 
 </style>
+<!-- For the Viewer and upload pic overlay -->
 
+<div id="myNav" class="vieweroverlay"><a href="" class="closebtn"><i class="fas fa-window-close"></i></a><div id="dynamiciframe"></div></div>
 <!-- The Modal -->
-<div class="modal fade hide" id="myModal" data-keyboard="true" data-backdrop="true" tabindex='-1'>
+<div class="modal fade hide" id="devModal" data-keyboard="true" data-backdrop="true" tabindex='-1'>
 
   <div class="modal-dialog">
     <div class="modal-content">
@@ -678,7 +681,9 @@ $APIURL = $pacs->getAPIURL();
 
 	function setUpConfigsSelect() {
 
-	    result = JSON.parse('<?php echo $pacs->getOrthancConfigs("ALL"); ?>');
+	    result = '<?php echo str_replace("\n", "", $pacs->getOrthancConfigs("ALL")); ?>';
+	    // The response from Orthanc has line breaks, pretty printed.
+	    result = JSON.parse(result);
 	    selectlist = '<option value = "ALL">ALL</option>';
 	    console.log(result);
         $.each(result, function( index, value ) {
@@ -759,9 +764,11 @@ $APIURL = $pacs->getAPIURL();
 //         });
 //         console.log(postdata);
         postdata = $(this).closest("form").serialize();
+        if ($(this).data("devcontroller") != "downloadZipStudyUUID" && $(this).data("devcontroller") != "downloadDCMStudyUUID" ) {
 	    OrthancDevControllerCallDisplay($(this).data("devcontroller"), postdata, $(this).data("devcontroller"));
 	    $("input, select").css({"border":"1px solid black", "outline-style": "unset"});
 	    $($(this).data("param")).css({"border":"2px solid green", "outline-style": "dashed"});
+	    }
 	});
 	//  Sets the Headers Automatically for all requests, just need to get the AUTHTOKEN
 	//  Query the NGINX Server when a user signs in and return them an Auth Token for a one time use for the session.
@@ -1109,9 +1116,9 @@ $APIURL = $pacs->getAPIURL();
 
 	function showmodal (title, body) {
 
-		$("#myModal .modal-body").html(body);
-		$("#myModal .modal-title").html(title);
-		$('#myModal').modal('show');
+		$("#devModal .modal-body").html(body);
+		$("#devModal .modal-title").html(title);
+		$('#devModal').modal('show');
 
 	}
 
@@ -1413,7 +1420,7 @@ function openViwerByUUID(uuid) {
 	});
 	$("[data-action='uploadstudy']").on("click", function(e) {
 
-			$("#dynamiciframe").append($('<iframe style="width:100%;border:none;margin:0px;overflow:scroll;background-color:transparent;height: 100vh;" class="vieweroverlay-content" id="viewerframe" src="/Studies/upload_study?mrn=' + $("#uploadmrn").val() + '"></iframe>'));
+			$("#dynamiciframe").append($('<iframe style="width:100%;border:none;margin:0px;overflow:scroll;background-color:transparent;height: 100vh;color:white !important;" class="vieweroverlay-content" id="viewerframe" src="/Studies/upload_study?mrn=' + $("#uploadmrn").val() + '"></iframe>'));
 			document.getElementById("myNav").style.width = "100%";
 			$("body").css("overflow", "hidden");
 	});

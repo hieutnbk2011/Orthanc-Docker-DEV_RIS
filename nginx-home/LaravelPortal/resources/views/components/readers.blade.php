@@ -604,6 +604,7 @@ $(document).on("click, contextmenu", '.viewstudy', function(event) {
 	// Preview, stores the current report fields into arrays, changes the tags, basically working
 
     $(document).contents().on("click", "#previewreport", function(){  // seems to be working for the most part.
+
             undoHTML = $(".reportdiv .htmlmarkup").clone(true,true);  //deep clone.
             var selects = $(".reportdiv .htmlmarkup").find("select");
             $(selects).each(function(i) {
@@ -3638,37 +3639,84 @@ return html;
 			},
             success: function(data, textStatus, xhr) {
 
-
                 // create the select list for existing reports
                 $("#reportselectorwrapper").html('&nbsp;&nbsp;<span style="color:white;">. . . loading reports</span>');
                 response = parseMessages(data, true);
                 if (!data.error) {
-                data=response.reports;
-                reportslistoptions = "";
-                reportobjects = [];
-                email = data.user_email;
-                if (data.hl7.length != 0) {
-
-                data.hl7.forEach(function(currentValue,index) {
+                    data=response.reports;
+                    console.log(data.hl7.length);
+                    reportslistoptions = "";
+                    reportobjects = [];
+                    email = data.user_email;
+                    if (data.hl7.length != 0) {
+                    data.hl7.forEach(function(currentValue,index) {
                 	currentValue.OBX.header = currentValue.header;
                 	currentValue.OBX.footer = currentValue.footer;
                 	currentValue.OBX.body = currentValue.body;
                     addReport(currentValue.OBX);   // proceses the AJAX request, segments has all the OBX data for each report.
                 });
-                }
-                else {
-                    email = "";
-                }
-
-                finishReportSetup(email);
-
-                }
-                else {
+                    finishReportSetup(email);
+                    }
+                    else {
                     $("#reportselectorwrapper").html('<span id="noreports">There are no reports for this study</span>');
                 }
-
+                }
             }
-          });
+            });
+            }
+
+
+
+        function finishReportSetup(email) {
+
+            reportslistoptions = '<form id ="reportsselectorform" name="reportsselectorform"><select id="reportsselector" name="reportsselector">' + reportslistoptions + '</select></form>';
+
+            $("#reportselectorwrapper").html(reportslistoptions + '<input id ="loadoldreport" type="submit" class = "btn-primary btn-sm btn-show" value="Load into Editor">');  // put the select list on the page
+
+            $.each($("#reportsselector option"), function(key,value) {  // attach the report object to the option, along with the key value for report
+
+                $(this).data("reportobject", reportobjects[key]);
+                $(this).data("report", reportobjects[key].header + reportobjects[key].body + reportobjects[key].footer);
+
+            });
+
+
+            var selectList = $('#reportsselector option');  // sorts
+
+            selectList.sort(function(a,b){
+                a = a.dataset.reportdate;
+                b = b.dataset.reportdate;
+                return a.localeCompare(b);
+            });
+
+            selectList.appendTo('#reportsselector');
+
+
+            $("#reportsselector option:last-child").attr("selected", "selected");  // set the last element in the list, the latest report
+
+            $( "#reportsselector").on( "change", function() {
+                loadreport($("#reportsselector option:selected").data("report"), email);
+            });
+
+            $("#reportsselector").on("contextmenu", function(e) {
+            	e.preventDefault();
+            	e.stopImmediatePropagation();
+				loadreport($("#reportsselector option:selected").data("report"), email);
+            });
+
+            // attaches the loadoldreport handler to the button, template id varies and is for the selected report, check to see if set for hl7
+
+            $("#loadoldreport").on("click", function(e) {
+                // put the body into the editor and set content to editable
+                e.preventDefault();
+                //console.log($("#reportsselector option:selected").data("reportobject"));
+                $("#markupform").html($("#reportsselector option:selected").data("reportobject").body);
+                $("#markupform .htmlmarkup").attr("contenteditable", true);
+                $("#templateid").val("");
+                setButtons(buttonstatus.preview);
+                $("#undoreport").addClass("btn-danger btn-sm btn-show");
+                $("#undoreport").prop("disabled", true);
+            });
     }
 
 </script>

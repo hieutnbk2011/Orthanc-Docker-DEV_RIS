@@ -331,6 +331,134 @@ Used for downloadDCMStudyUUID, downloadZipStudyUUID
 
     }
 	// passed
+	public function getPatients($uuid = "") {
+
+		if ($uuid == "" || self::checkUUID($uuid)) {
+			$this->result = $this->executeCURL("patients/" . $uuid);
+			return $this->result;
+
+		}
+		else return false;
+
+	}
+	// passed
+	public function getStudies($uuid = "") {  // same as constructor for subsequent calls.
+
+		if ($uuid == "" || self::checkUUID($uuid)) {
+			$this->result = $this->executeCURL("studies/"  . $uuid);
+			return $this->result;
+		}
+		else return false;
+	}
+	// passed
+	public function getSeries($uuid = false) {  // same as constructor for subsequent calls.
+
+		if ($uuid == "" || self::checkUUID($uuid)) {
+			$this->result = $this->executeCURL("series/" . $uuid);
+			return $this->result;
+		}
+		else return false;
+	}
+	// passed
+	public function getInstances($uuid , $withtags) {
+
+		if (self::checkUUID($uuid)) {
+
+			if ($withtags == "simplified-tags" ||  $withtags == "tags") {
+			$withtags = ('/' . $withtags );  // detailed info
+			$suffix = $uuid . "/" . $withtags;
+			}
+			else $suffix = $uuid;
+		}
+		else {
+
+			if (empty($uuid)) $suffix = "";
+			else {
+			return false;  // returns false if a bad uuid format.
+			}
+		}
+
+		$this->result = $this->executeCURL("instances/" . $suffix);
+		if(!$this->result) echo '[{"error":"No Results"}]';
+        return $this->result;
+
+	}
+	// passed
+	public function getDICOMTagListforUUID($uuid) {
+
+		if (self::checkUUID($uuid)) {
+
+			$this->executeCURL("instances/" . $uuid . '/content');
+			return $this->result;  // also returns false if bad response
+		}
+		return false;
+	}
+	// passed
+	public function getDICOMTagValueforUUID ($uuid, $tagcodes) {
+        $tagcodes = explode("/", $tagcodes);
+		if (self::checkUUID($uuid)) {
+
+			$errors = false;
+			foreach ($tagcodes as $tagcode)  {
+				if (!self::checkTagCode($tagcode)) $errors = true;
+			}
+			if (!$errors) {
+			$tagcodes = implode("/", $tagcodes);
+			$this->executeCURL("instances/" . $uuid . '/content/' . $tagcodes);
+			return $this->result;
+			}
+		}
+		return false;  // gets here if bad uuid or errors in the tagcodes that were passes.
+
+	}
+
+	// passed
+	public function getInstanceDICOM($uuid) {
+
+		if (self::checkUUID($uuid)) {
+			return $this->executeCURL("instances/" . $uuid . '/file');
+		}
+		return false;
+
+	}
+
+	public function pydicom($uuid) {
+
+	 	// returns false or empty if no result
+		if (self::checkUUID($uuid)) {
+			return $this->executeCURL("pydicom/" . $uuid);
+		}
+		return false;
+
+	 }
+
+	// passed
+	public function getInstancePNGPreview ($uuid, $pngjpg) {
+
+		// returns false or empty if no result
+		if (self::checkUUID($uuid)) {
+			return $this->executeCURL("instances/" . $uuid . '/preview/', $pngjpg);
+		}
+		return false;
+
+	}
+
+	// passed
+	public function downloadZipStudyUUID ($uuid) {
+
+		$this->executeCURL("studies/" . $uuid . '/archive');
+		return $this->result;
+
+	}
+
+	// passed
+	public function downloadDCMStudyUUID ($uuid) {
+
+		$this->executeCURL("studies/" . $uuid . '/media');
+		return $this->result;
+
+    }
+
 	public function getStudiesArray ($query, $patient = false, $doctor = false, $reader = false) {
 
 		Debugbar::error($query);
@@ -629,7 +757,7 @@ Used for downloadDCMStudyUUID, downloadZipStudyUUID
 	public function getOrthancConfigs($item) {
 	    // ALL for ALL
 		$this->executeCURL("get-configs/" . $item);
-		return str_replace("\n", "", $this->result);
+		return $this->result;
 
 	}
 

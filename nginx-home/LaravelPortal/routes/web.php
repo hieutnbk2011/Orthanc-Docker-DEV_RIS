@@ -116,33 +116,6 @@ Route::middleware(['auth:sanctum', 'verified'])->post('/devtool', function (Requ
 
 })->name('devtool');
 
-// OrthancDev/downloadStudyUUID
-
-Route::middleware(['auth:sanctum', 'verified'])->post('OrthancDev/downloadStudyUUID', function (Request $request) {
-
-    if (RouteServiceProvider::$PACS) {
-
-    $user = Auth::user();
-    Debugbar::error($user);
-    $_POST = json_decode(file_get_contents('php://input'), true);
-    	if (!isset($_POST["uuid"]) || empty($_POST["uuid"]) || !isset($_POST["command"]) || ($_POST["command"] != "iso" && $_POST["command"] != "zip")) {
-    		echo '{"error":"Bad UUID or Bad Type"}';
-    	}
-
-    	else {
-    	Debugbar::error($_POST["uuid"]);
-    	Debugbar::error($_POST["command"]);
-    	$orthanc = new OrthancAPI();
-    	if($_POST["command"] == "iso") $result =  $orthanc->executeCURL("studies/" . $_POST["uuid"]. '/media');
-    	if($_POST["command"]== "zip")  $result =  $orthanc->executeCURL("studies/" . $_POST["uuid"] . '/archive');
-    	}
-    	echo $result;
-
-
-    }
-
-})->name('downloadStudyUUID');
-
 
 //  THING TO GET LIST OF MODALITIES LIST / JSON FO ROUTING
 Route::middleware(['auth:sanctum', 'verified'])->post('get_modalities', function (Request $request) {
@@ -281,6 +254,117 @@ Route::middleware(['auth:sanctum', 'verified'])->post('loadallstudies', function
     }
 })->name('loadallstudies');
 
+// DEV TOOL & ORTHANC API Routes
+
+Route::middleware(['auth:sanctum', 'verified'])->post('/OrthancDev/getOrthancConfigs', function(Request $request) {
+    $orthanc = new OrthancAPI();
+    echo $orthanc->getOrthancConfigs($request->input('key'));
+})->name('getOrthancConfigs');
+
+Route::middleware(['auth:sanctum', 'verified'])->post('/OrthancDev/getPatients', function(Request $request) {
+    $orthanc = new OrthancAPI();
+    echo $orthanc->getPatients($request->input('uuid'));
+})->name('getPatients');
+
+Route::middleware(['auth:sanctum', 'verified'])->post('/OrthancDev/getStudies', function(Request $request) {
+    $orthanc = new OrthancAPI();
+    echo $orthanc->getStudies($request->input('uuid'));
+})->name('getStudies');
+
+Route::middleware(['auth:sanctum', 'verified'])->post('/OrthancDev/getSeries', function(Request $request) {
+    $orthanc = new OrthancAPI();
+    echo $orthanc->getSeries($request->input('uuid'));
+})->name('getSeries');
+
+Route::middleware(['auth:sanctum', 'verified'])->post('/OrthancDev/getInstances', function(Request $request) {
+    $orthanc = new OrthancAPI();
+    echo $orthanc->getInstances($request->input('uuid'), $request->input('withtags'));
+})->name('getInstances');
+
+Route::middleware(['auth:sanctum', 'verified'])->post('/OrthancDev/getDICOMTagListforUUID', function(Request $request) {
+    $orthanc = new OrthancAPI();
+    echo $orthanc->getDICOMTagListforUUID($request->input('uuid'));
+})->name('getDICOMTagListforUUID');
+
+Route::middleware(['auth:sanctum', 'verified'])->post('/OrthancDev/getDICOMTagValueforUUID', function(Request $request) {
+    $orthanc = new OrthancAPI();
+    echo $orthanc->getDICOMTagValueforUUID($request->input('uuid'), $request->input('tagcodes'));
+})->name('getDICOMTagValueforUUID');
+
+Route::middleware(['auth:sanctum', 'verified'])->post('/OrthancDev/getInstanceDICOM', function(Request $request) {
+    $orthanc = new OrthancAPI();
+    echo $orthanc->pydicom($request->input('uuid'));
+})->name('getInstanceDICOM');
+
+Route::middleware(['auth:sanctum', 'verified'])->post('/OrthancDev/getInstancePNGPreview', function(Request $request) {
+    $orthanc = new OrthancAPI();
+    $raw = $orthanc->getInstancePNGPreview($request->input('uuid'), $request->input('pngjpg'));
+    $image_data_base64 =  base64_encode ($raw);  // also image/jpeg
+    echo '<img src="data:image/png;base64,' . $image_data_base64 . '" alt="img"/ >';
+})->name('getInstancePNGPreview');
+
+Route::middleware(['auth:sanctum', 'verified'])->post('/OrthancDev/downloadZipStudyUUID', function(Request $request) {
+    $orthanc = new OrthancAPI();
+    header('Content-type: application/zip');
+    echo $orthanc->downloadZipStudyUUID($request->input('uuid'));
+})->name('downloadZipStudyUUID');
+
+Route::middleware(['auth:sanctum', 'verified'])->post('/OrthancDev/downloadDCMStudyUUID', function(Request $request) {
+    $orthanc = new OrthancAPI();
+    header('Content-type: application/zip');
+    echo $orthanc->downloadDCMStudyUUID($request->input('uuid'));
+})->name('downloadDCMStudyUUID');
+
+Route::middleware(['auth:sanctum', 'verified'])->post('/OrthancDev/pydicom', function(Request $request) {
+    $orthanc = new OrthancAPI();
+    echo $orthanc->pydicom($request->input('uuid'));
+})->name('pydicom');
+
+// OrthancDev/downloadStudyUUID
+
+Route::middleware(['auth:sanctum', 'verified'])->post('OrthancDev/downloadStudyUUID', function (Request $request) {
+
+    if (RouteServiceProvider::$PACS) {
+
+    $user = Auth::user();
+    Debugbar::error($user);
+    $_POST = json_decode(file_get_contents('php://input'), true);
+    	if (!isset($_POST["uuid"]) || empty($_POST["uuid"]) || !isset($_POST["command"]) || ($_POST["command"] != "iso" && $_POST["command"] != "zip")) {
+    		echo '{"error":"Bad UUID or Bad Type"}';
+    	}
+
+    	else {
+    	Debugbar::error($_POST["uuid"]);
+    	Debugbar::error($_POST["command"]);
+    	$orthanc = new OrthancAPI();
+    	if($_POST["command"] == "iso") $result =  $orthanc->executeCURL("studies/" . $_POST["uuid"]. '/media');
+    	if($_POST["command"]== "zip")  $result =  $orthanc->executeCURL("studies/" . $_POST["uuid"] . '/archive');
+    	}
+    	echo $result;
+
+
+    }
+
+})->name('downloadStudyUUID');
+
+Route::middleware(['auth:sanctum', 'verified'])->get('/Studies/upload_study', function(Request $request) {
+    $orthanc = new OrthancAPI();
+    $uploaderdata = array(
+        "IPaddress" => gethostbyname($_SERVER['SERVER_NAME']),
+        "passfor" => "upload",
+        "data" => array (
+                "userid" => Auth::user()->id,
+                "user_name" => Auth::user()->name,
+                "mrn" => $_GET['mrn'],
+                "anon_normal" => false
+        )
+    );
+    echo '{"status","Migrating:"' . json_encode($uploaderdata). '"}';
+   // echo $orthanc->upload_study($request->input('mrn'));
+})->name('upload_study');
+
+
+
 // RADIOLOGY REPORTING ROUTES, REORGANIZE LATER
 
 Route::middleware(['auth:sanctum', 'verified'])->post('/Reports/radreport_templates_list', function(Request $request) {
@@ -289,8 +373,10 @@ Route::middleware(['auth:sanctum', 'verified'])->post('/Reports/radreport_templa
 })->name('radreport_templates_list');
 
 Route::middleware(['auth:sanctum', 'verified'])->post('/HL7/getallhl7_reports', function(Request $request) {
-   $list = (new Reports($request))->templateslist();
+   $list = Reports::getallhl7_reports($request->input('accession_number'), );
     echo $list;
 })->name('getallhl7_reports');
 
-
+Route::middleware(['auth:sanctum', 'verified'])->post('/Reports/choose_template', function(Request $request) {
+    $template = Reports::choose_template($request->input('uuid'), $request->input('templateid'));
+})->name('choose_template');
