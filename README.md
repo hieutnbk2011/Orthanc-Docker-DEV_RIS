@@ -74,6 +74,7 @@ If you get it all started up:
 The Laravel dev project does have a study browser with a PACS selector and other tools.
 
 https://github.com/sscotti/Orthanc-Docker-DEV_RIS/blob/main/docs/browser.png
+
 https://github.com/sscotti/Orthanc-Docker-DEV_RIS/blob/main/docs/devtool.png
 
 More details to be added as the project evolves.
