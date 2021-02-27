@@ -11,6 +11,18 @@ body * {
 font-family:courier !important;
 
 }
+.btn {
+    color:white !important;
+
+}
+#tagcodes {
+    width:100%;
+}
+#attachpdf label {
+    display:inline-block !important;
+    width:100px !important;
+}
+
 #delegator {
 white-space:inherit !important;
 }
@@ -29,16 +41,22 @@ height:30px;
 }
 
 .controllerButtonRow button {
+
     border:1px solid black;
-    background: rgb(0, 123, 255) !important;
+    border-radius:3px;
     color:white !important;
-    width: 100px;
-    text-align: right;
+    width: 150px;
+    text-align: center;
+
 
 }
-.controllerButtonRowform input {
+input, select, textarea {
 
+    border:1px solid black !important;
+}
 
+textarea {
+width:100%;
 }
 
 pre {
@@ -201,7 +219,7 @@ height:30px;
 
       <!-- Modal footer -->
       <div class="modal-footer">
-        <button type="button" class="uibuttonsmallred" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-info btn-sm" data-dismiss="modal">Close</button>
       </div>
 
     </div>
@@ -239,30 +257,30 @@ height:30px;
 						</h4>
 						 <img id="img" width=100%>
 						<div id = "weblinks">
-						<a href = "https://dicom.innolitics.com/" target = "_blank" class = "uibuttonsmallred">Dicom Tag Browser</a>
-						<a href = "https://book.orthanc-server.com/users/rest.html#id12" target = "_blank" class = "uibuttonsmallred">Orthanc REST API Reference</a>
-						<a href = "https://book.orthanc-server.com/index.html" target = "_blank" type="button" class = "uibuttonsmallred">Orthanc Book</a>
-						<a href = "https://book.orthanc-server.com/plugins/python.html?highlight=python" type="button" target = "_blank" class = "uibuttonsmallred">Orthanc Python Scripts</a>
-						<a href = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSBEymDKGZgskFEFF6yzge5JovGHPK_FIbEnW5a6SWUbPkX06tkoObUHh6T1XQhgj-HqFd0AWSnVFOv/pubhtml?gid=1278217352&single=true" type="button" target = "_blank" class = "uibuttonsmallred">REST CALL Cheat Sheet</a>
-						<a href = "https://packages.debian.org/unstable/orthanc-dev" type="button" target = "_blank" class = "uibuttonsmallred">Debian Dev Package</a>
-						<a href = "https://hg.orthanc-server.com/" type="button" target = "_blank" class = "uibuttonsmallred">Orthanc Mercurial Server</a>
-						<a href = "https://hg.orthanc-server.com/orthanc-tests/file/Orthanc-1.7.2/Tests/Tests.py#l1473" type="button" target = "_blank" class = "uibuttonsmallred">Orthanc Mercurial Unit Tests</a>
+						<a href = "https://dicom.innolitics.com/" target = "_blank" class = "btn btn-info btn-sm">Dicom Tag Browser</a>
+						<a href = "https://book.orthanc-server.com/users/rest.html#id12" target = "_blank" class = "btn btn-info btn-sm">Orthanc REST API Reference</a>
+						<a href = "https://book.orthanc-server.com/index.html" target = "_blank" type="button" class = "btn btn-info btn-sm">Orthanc Book</a>
+						<a href = "https://book.orthanc-server.com/plugins/python.html?highlight=python" type="button" target = "_blank" class = "btn btn-info btn-sm">Orthanc Python Scripts</a>
+						<a href = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSBEymDKGZgskFEFF6yzge5JovGHPK_FIbEnW5a6SWUbPkX06tkoObUHh6T1XQhgj-HqFd0AWSnVFOv/pubhtml?gid=1278217352&single=true" type="button" target = "_blank" class = "btn btn-info btn-sm">REST CALL Cheat Sheet</a>
+						<a href = "https://packages.debian.org/unstable/orthanc-dev" type="button" target = "_blank" class = "btn btn-info btn-sm">Debian Dev Package</a>
+						<a href = "https://hg.orthanc-server.com/" type="button" target = "_blank" class = "btn btn-info btn-sm">Orthanc Mercurial Server</a>
+						<a href = "https://hg.orthanc-server.com/orthanc-tests/file/Orthanc-1.7.2/Tests/Tests.py#l1473" type="button" target = "_blank" class = "btn btn-info btn-sm">Orthanc Mercurial Unit Tests</a>
 						https://hg.orthanc-server.com/orthanc-tests/file/Orthanc-1.7.2/Tests/Tests.py#l1473
 						</div>
 						<div>
 
-						<button data-action = "get-configs" type="button" class = "uibuttonsmallred">Get Configs</button>
+						<button data-action = "get-configs" type="button" class = "btn btn-primary btn-sm">Get Configs</button>
 						<select id="get-configs" name="get-configs"></select>
-						<button data-action = "uploadstudy" type="button" class = "uibuttonsmallred">Upload DICOM Study</button><input id = "uploadmrn" type = "text" name="mrn" value ="mrn" placeholder = "mrn">
-						<button data-action = "pydicominstance" type="button" class = "uibuttonsmallred">dump2dcm-instance</button><input id = "pydicominstance" type = "text" name="ID" value ="ID" placeholder = "ID">
+						<button data-action = "uploadstudy" type="button" class = "btn btn-primary btn-sm">Upload DICOM Study</button><input id = "uploadmrn" type = "text" name="mrn" value ="mrn" placeholder = "mrn">
+						<button data-action = "pydicominstance" type="button" class = "btn btn-primary btn-sm">dump2dcm-instance</button><input id = "pydicominstance" type = "text" name="ID" value ="ID" placeholder = "ID">
 						</div>
 
 						<div>
-						<button data-devcontroller = "ServerStatus" type="button" class = "controllerAPIButton">ServerStatus</button>
-						<button data-devcontroller = "StartServer" type="button" class = "controllerAPIButton">StartServer</button>
-						<button data-devcontroller = "StopServer" type="button" class = "controllerAPIButton">StopServer</button>
-						<button data-devcontroller = "PHPINFO" type="button" class = "controllerAPIButton">PHP INFO</button>
-						<button data-devcontroller = "getOrthancModalities" type="button" class = "controllerAPIButton">getOrthancModalities</button>
+						<button data-devcontroller = "ServerStatus" type="button" class = "btn btn-primary btn-sm">ServerStatus</button>
+						<button data-devcontroller = "StartServer" type="button" class = "btn btn-primary btn-sm">StartServer</button>
+						<button data-devcontroller = "StopServer" type="button" class = "btn btn-primary btn-sm">StopServer</button>
+						<button data-devcontroller = "PHPINFO" type="button" class = "btn btn-primary btn-sm">PHP INFO</button>
+						<button data-devcontroller = "getOrthancModalities" type="button" class = "btn btn-primary btn-sm">getOrthancModalities</button>
 						</div>
 
 
@@ -270,32 +288,29 @@ height:30px;
 						<div class = "col-sm-6">
 
 						<form>
-						<button data-devcontroller = "getPatients" type="button" class = "controllerAPIButton">getPatients</button>
+						<button data-devcontroller = "getPatients" type="button" class = "btn btn-danger btn-sm">getPatients</button>
 						<label for="patient_uuid"></label>
 						<input id="patient_uuid" name = "uuid" type="text" value="" placeholder = "uuid"/>
 						</form>
 
 						<form>
-						<button data-devcontroller = "getStudies" type="button" class = "controllerAPIButton">getStudies</button>
+						<button data-devcontroller = "getStudies" type="button" class = "btn btn-danger btn-sm">getStudies</button>
 						<label for="study_uuid"></label>
 						<input id = "study_uuid" name="uuid" type="text" value="" placeholder = "uuid"/><br>
-						<button style = "visibility:hidden;"></button><button data-devcontroller = "downloadZipStudyUUID" type="button" class = "controllerAPIButton">downloadZipStudyUUID</button><br>
-						<button style = "visibility:hidden;"></button><button data-devcontroller = "downloadDCMStudyUUID" type="button" class = "controllerAPIButton">downloadDCMStudyUUID</button>
+						<button style = "visibility:hidden;"></button><button data-devcontroller = "downloadZipStudyUUID" type="button" class = "btn btn-primary btn-sm">downloadZipStudyUUID</button><br>
+						<button style = "visibility:hidden;"></button><button data-devcontroller = "downloadDCMStudyUUID" type="button" class = "btn btn-primary btn-sm">downloadDCMStudyUUID</button>
 						</form>
 
 						<form>
-						<button data-devcontroller = "getSeries" type="button" class = "controllerAPIButton">getSeries</button>
+						<button data-devcontroller = "getSeries" type="button" class = "btn btn-danger btn-sm">getSeries</button>
 						<label for="series_uuid"></label>
 						<input id="series_uuid" name="uuid" type="text" value="" placeholder = "uuid"/>
 						</form>
 
 						<form>
-						<button data-devcontroller = "getInstances" type="button" class = "controllerAPIButton">getInstances</button>
+						<button data-devcontroller = "getInstances" type="button" class = "btn btn-danger btn-sm">getInstances</button>
 						<label for="instance_uuid"></label>
 						<input id="instance_uuid"  name = "uuid" type="text" value="" placeholder = "uuid"/><br>
-						<button style = "visibility:hidden;"></button>
-						<label for="tagcodes"></label>
-						<input id="tagcodes" type="text" name="tagcodes" value="" placeholder = "e.g. 0008,0012 is date, 0010,0020 ID, single or recursive"/>
                         <label for="withtags"></label>
                         <select name = "withtags" id="withtags">
                         <option data-controllerselect = "getInstances" value = "" selected>getInstances</option>
@@ -305,11 +320,50 @@ height:30px;
                         <option data-controllerselect = "getDICOMTagValueforUUID" value = "tags">getDICOMTagValueforUUID</option>
                         <option data-controllerselect = "getInstanceDICOM" value = "tags">getInstanceDICOM</option>
                         <option data-controllerselect = "getInstancePNGPreview" value = "tags">getInstancePNGPreview</option>
-                        </select>
+                        </select><br>
+                        <label for="tagcodes"></label>
+						<input id="tagcodes" type="text" name="tagcodes" value="" placeholder = "e.g. 0008,0012 is date, 0010,0020 ID, single or recursive"/>
 						</form>
 						</div>
-					    </div>
 
+						<div class = "col-sm-6">
+
+						<form id = "attachpdf">
+
+                            <button data-devcontroller = "addPDF" type="button" class = "btn btn-danger btn-sm">Attach HTML as PDF to Study UUID</button><br>
+                            <div class = "viewerequestwrapper">
+                                <label for="studyuuid">Study UUID</label>
+                                <input id="studyuuid" name = "studyuuid" type="text" value="" placeholder = "studyuuid"/><br>
+                                <button class="openinviwer btn btn-danger btn-sm" href="#" target="_blank" data-viewer = "osimis">Open in Osimis</button><br>
+                                <button class="openinviwer btn btn-danger btn-sm" href="#" target="_blank" data-viewer = "stone">Open in Stone</button>
+                            </div>
+
+                            <label for="reportmethod">html or base64</label>
+                            <input id="reportmethod" name = "method" type="text" value="html" placeholder = "html"/><br>
+
+                            <label for="reporthtml">raw html is method html</label>
+                            <textarea id="reporthtml" name = "html" type="text" value="<div>This is a test.</div>" placeholder = "raw html"><div>This is a test.</div></textarea><br>
+
+                            <label for="reportbase64">base64 if base64 method</label>
+                            <input id="reportbase64" name = "base64" type="text" value="" placeholder = "base64"/><br>
+
+                            <label for="reportauthor">Author</label>
+                            <input id="reportauthor" name = "author" type="text" value="Author" placeholder = "Author"/><br>
+
+                            <label for="reporttitle">Title</label>
+                            <input id="reporttitle" name = "title" type="text" value="Title" placeholder = "Title"/><br>
+
+                            <label for="reportreturn">1 or 0, returns the PDF</label>
+                            <input id="reportreturn" name = "return" type="text" value="0" placeholder = "return"/><br>
+
+                            <label for="reportattach">1 or 0 to attach</label>
+                            <input id="reportattach" name = "attach" type="text" value="1" placeholder = "attach"/><br>
+
+                            <label for="reportreaderid">Reader ID</label>
+                            <input id="reportreaderid" name = "id" type="text" value="0001" placeholder = "id"/><br>
+                        </form>
+                        </div>
+                        </div>
 
 
 						<form class="row" method="POST" accept-charset="UTF-8" id="apiselection" name="apiselection">
@@ -340,25 +394,26 @@ height:30px;
 									</option>
 								</select>
 							</div>
-							</form>
-						<div>Scratch Pad</div>
-						<textarea style = "width:100%;height:100px;text-align:left;border: 1px solid black;">
-						</textarea>
-							<div style="position: static;" class="form-group pd-right ui-draggable-handle col-md-12">
-								<button type="submit" class="uibuttonsmallred">
+						</form>
+
+                        <div class = "row">
+                        <div>Scratch Pad</div>
+						<textarea style = "width:100%;height:100px;text-align:left;border: 1px solid black;"></textarea>
+						<div style="position: static;" class="form-group pd-right ui-draggable-handle col-md-12">
+								<button type="submit" class="btn btn-info btn-sm">
 									Submit
 								</button>
 							</div>
-
-							<div class = "row">
-
-								<div class = "col-md-3">
-								<label for="data-mrn">
-									patientid for studycounts (converted to array in Controller)
-								</label>
-								<input id="data-mrn" type="text" name="data-mrn" value="DEV0000001" />
-
 							</div>
+                        <div class = "row">
+
+                            <div class = "col-md-3">
+                            <label for="data-mrn">
+                                patientid for studycounts (converted to array in Controller)
+                            </label>
+                            <input id="data-mrn" type="text" name="data-mrn" value="DEV0000001" />
+
+                        </div>
 
 
 							<div class = "col-md-3">
@@ -370,7 +425,7 @@ height:30px;
 							</div>
 							</div>
 
-							<div class = "row formatheight" style = "width:100%;">
+						<div class = "row formatheight" style = "width:100%;">
 							<div class = "col-md-3">
 								<input id="metadatavalue" type="text" name="metadatavalue" placeholder = "For Set Value" />
 								<label for="metadatachoice">
@@ -501,9 +556,9 @@ height:30px;
 							</div>
 							</div>
 
-	<button id = "createPDF" name = "createPDF" class = "uibuttonsmallred" data-target = "#MWLform">createPDF</button>
-	<button id="pdfattach" name="pdfattach" class="uibuttonsmallred">Atach To Study</button>
-	<button id="pdfopeninviewer" name="pdfopeninviewer" class="uibuttonsmallred">Open After Created</button>
+	<button id = "createPDF" name = "createPDF" class = "btn btn-info btn-sm" data-target = "#MWLform">createPDF</button>
+	<button id="pdfattach" name="pdfattach" class="btn btn-info btn-sm">Atach To Study</button>
+	<button id="pdfopeninviewer" name="pdfopeninviewer" class="btn btn-info btn-sm">Open After Created</button>
 	<div style = "width: 350px;text-align: center;margin: auto;">
 	<input id="pdfmodality" name="pdfmodality" value="OT" type="text" class="form-control">
 	<input id="pdfdescription" name="pdfdescription" value="TEST PDF" type="text" class="form-control">
@@ -512,7 +567,7 @@ height:30px;
 
 	<form id="MWLform" name = "MWLform">
 
-	  <button id = "createMWL" name = "createMWL" class = "uibuttonsmallred">Create MWL File</button>
+	  <button id = "createMWL" name = "createMWL" class = "btn btn-info btn-sm">Create MWL File</button>
 	  <div>Creates a .text file named AccessionNumber.txt and converts it to a .wl file</div>
 	  <div>Returns JSON, See Docs</div>
 	  <div class="form-group row">
@@ -644,7 +699,7 @@ height:30px;
 						Parse HL7
 					</label>
 					<textarea style = "width:100%;" id="parseHL7" type="text" name="parseHL7" value='' /></textarea>
-					<button id = "submitHL7" class = "uibuttonsmallred">Decode</button>
+					<button id = "submitHL7" class = "btn btn-info btn-sm">Decode</button>
 				</div>
 				</div>
 
@@ -664,7 +719,7 @@ height:30px;
 
 
 			<hr style="border:2px solid black;">
-			<h5>Reports Editor, Trim Reports from <a href = "https://radreport.org/" target="_blank" class = "uibuttonsmallred">https://radreport.org</a></h5>
+			<h5>Reports Editor, Trim Reports from <a href = "https://radreport.org/" target="_blank" class = "btn btn-info btn-sm">https://radreport.org</a></h5>
 			<div class="row unittests">
 				<div class="col-sm-12">
 				<button id = "radreportTrim" class = "trim">Trim Report</button>
@@ -687,7 +742,7 @@ $APIURL = $pacs->getAPIURL();
 	    selectlist = '<option value = "ALL">ALL</option>';
 	    console.log(result);
         $.each(result, function( index, value ) {
-        selectlist+= '<option value = "' + index+ '">' +index + '</option>';
+            selectlist+= '<option value = "' + index+ '">' +index + '</option>';
         });
         $("#get-configs").html(selectlist);
 	}
@@ -695,6 +750,109 @@ $APIURL = $pacs->getAPIURL();
     setUpConfigsSelect();
 
     $("#studybrowser").tabs();
+
+    function parseMessages(messages, display) {
+
+	// Accepts an Array of objects, or a String of an array of objects, returns false if not an array.
+	// displays status notices, error messages and redirects for CSFR token issues or not authorized.
+	// Also returns other values that might be in the returns data.
+	// Does not take an object or a JSON string.
+
+		error = false;
+		var returned = {};
+		var displayedtitle = "";
+		var displayedtext = "";
+
+		try {
+			if (typeof messages == "string") { // might be a string or not JSON
+			messages = JSON.parse(messages);
+			}
+		}
+		catch {
+			return messages;
+		}
+		if (!Array.isArray(messages)) messages = [messages];
+
+		$.each(messages, function( index, value ) {
+
+			if(isJsonString(value)) message = JSON.parse(value);
+			else message = value;
+			// console.log(message);
+		  if (message.status != undefined) {  // if message is set then display.
+		  displayedtext  += message.status + "<br>";
+		  }
+		// if bad token or AJAXRedirect then redirect home, but be logged out with token.
+
+		  if (message.token != undefined  || message.AJAXRedirect != undefined) {
+			setTimeout(function () {location.href = "/"}, 2000);
+			showmodal("Error", message.error);
+			return false;
+		  }
+		  if (message.error != undefined) {  // if error is set then display that and set error to true
+		  displayedtext  += message.error + "<br>";
+		  error = true;
+		  error = message.error;
+		  }
+		  else 	if (message.curl_error != undefined) {  // if error is set then display that and set error to true
+		  displayedtext  += message.curl_error + "<br>";
+		  error = true;
+		  error = message.curl_error;
+		  }
+		  else {
+			for (var k in message) {
+				returned[k] = message[k];
+		  }
+		  }
+
+		});
+
+		if (displayedtext != "" && display) showMessage("", displayedtext);
+		returned.error = error;
+		return returned;
+	}
+
+    $(".openinviwer").on("click", function(event) {
+
+        event.preventDefault();
+        uuid = $(this).closest(".viewerequestwrapper").find("#studyuuid").val();
+        viewer = $(this).data("viewer");
+
+        $.ajax({
+
+            type: "POST",
+            url: '/OrthancDev/getViewerLink',
+            dataType: "json",
+            data: {uuid: uuid,viewer: viewer}
+        })
+        .done(function(data, textStatus, jqXHR) {
+
+            response = parseMessages(data);
+            console.log(response);
+            if (response.link.includes("error:")) {
+                showMessage("", "No Connectivity with Image Server:  " + response.link );
+            }
+            else if (event.type == "click") {
+
+                $("#dynamiciframe").append($('<iframe style="width:100%;border:none;margin:0px;overflow:scroll;background-color:transparent;height: 100vh;" class="vieweroverlay-content" id="viewerframe" name ="viewerframe" src="' + response.link + '"></iframe>'));
+                //postToViewer(response.link,JWT,"viewerframe");
+                document.getElementById("myNav").style.width = "100%";
+                $("body").css("overflow", "hidden");
+
+            }
+            else if (response.success == "true" && event.type == "contextmenu") {
+                //postToViewer(response.link,JWT,"_blank");
+                window.open(response.link);
+
+            }
+            else {
+                showMessage("", "Unknown Error");
+            }
+
+        });
+    });
+
+
+
 
     function OrthancDevControllerCallResults(method,data = {}, callback) {
 
@@ -777,9 +935,8 @@ $APIURL = $pacs->getAPIURL();
 
     headers: {
 
-		'Authorization': 'Bearer AJAXDEV',
-		'Token': 'wxwzisme',
-		"accept": "application/json"
+	    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+	    'nonce': ''
 
 	},
 	complete: function(xhr, textStatus) {

@@ -596,6 +596,46 @@ Used for downloadDCMStudyUUID, downloadZipStudyUUID
         UtilityFunctions::attachMIMEToStudy($request, $this->server);
     }
 
+    public function addPDF($request) {
+
+	    if ($request->input('method')== "html") {
+
+	    $html = str_replace("\n", "", $request->input('html'));
+	    $html = str_replace("\t", "", $html);
+	    $html = str_replace("'", "&rsquo;", $html); // replace with HTML entity.
+
+	    $html = addslashes($html);
+	    $html = str_replace("/", "\\/", $html);
+	    }
+	    $jsonquery = '{"method":"' .$request->input('method').  '","html":"' .$request->input('html'). '","base64":"' .$request->input('base64'). '","title":"' .$request->input('title'). '","studyuuid":"' .$request->input('studyuuid'). '","return":' .$request->input('return'). ',"attach":' .$request->input('attach'). ',"author":"' .$request->input('author').  '"}';
+	    $this->executeCURLPOSTJSON($jsonquery,'pdfkit/htmltopdf');
+	    //$query = 'UPDATE reports SET json_request_orthanc_add_pdf = ? WHERE id = ?';
+	    Debugbar::error('pdfkit/htmltopdf');
+	    Debugbar::error($jsonquery);
+	    return $this->result;
+
+	}
+
+	public function getViewerLink($request) {
+
+		$teststatus = $this->executeCURL_checkViewerStatus();
+		$dt = \DateTime::createFromFormat("Ymd", substr($teststatus ,0, 8)); // 20210220T124946
+		// true if valid data, othewise false an assume bad connection
+
+		if ($dt) {  // value is set to alive in nginx proxy
+// 			if ($this->server->stone_viewer == 1) {
+// 			    $study = json_decode($this->getStudies($request->input('uuid')));  // need the StudyInstanceUID if Osimis, so get it.
+// 			    return $this->server->osimis_viewer_link .'study=' . $study->MainDicomTags->StudyInstanceUID;
+// 			}
+			return $this->server->osimis_viewer_link .'study=' . $request->input('uuid');
+		}
+
+		else {
+			return false;  // set to error in curl call, has to be status or error
+		}
+
+	}
+
     public function downloadStudyUUID () {
 
     $_POST = json_decode(file_get_contents('php://input'), true);
@@ -708,7 +748,7 @@ Used for downloadDCMStudyUUID, downloadZipStudyUUID
 		Debugbar::error($this->server);
 	}
 
-		public function fetch_study($id, $uuid) {
+	public function fetch_study($id, $uuid) {
 
 	    $ajaxresponse = [];
 	    $response = json_decode($this->executeCURLPOSTJSON($uuid, '/modalities/' . $id . '/store/'));

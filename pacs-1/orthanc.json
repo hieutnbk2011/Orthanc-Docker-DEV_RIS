@@ -47,7 +47,7 @@
 
 
     // Check whether the called AET corresponds during a DICOM request
-    "DicomCheckCalledAet" : true,
+    "DicomCheckCalledAet" : false,
 
     // The DICOM port
     "DicomPort" : 4242,

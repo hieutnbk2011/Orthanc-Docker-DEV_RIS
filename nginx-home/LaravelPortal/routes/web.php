@@ -256,6 +256,13 @@ Route::middleware(['auth:sanctum', 'verified'])->post('loadallstudies', function
 
 // DEV TOOL & ORTHANC API Routes
 
+
+Route::middleware(['auth:sanctum', 'verified'])->post('/OrthancDev/getViewerLink', function(Request $request) {
+    $orthanc = new OrthancAPI();
+    $link =  $orthanc->getViewerLink($request);
+    echo '[{"success":"true", "link":"' . $link . '"}]';
+})->name('getViewerLink');
+
 Route::middleware(['auth:sanctum', 'verified'])->post('/OrthancDev/getOrthancConfigs', function(Request $request) {
     $orthanc = new OrthancAPI();
     echo $orthanc->getOrthancConfigs($request->input('key'));
@@ -380,3 +387,11 @@ Route::middleware(['auth:sanctum', 'verified'])->post('/HL7/getallhl7_reports', 
 Route::middleware(['auth:sanctum', 'verified'])->post('/Reports/choose_template', function(Request $request) {
     $template = Reports::choose_template($request->input('uuid'), $request->input('templateid'));
 })->name('choose_template');
+
+Route::middleware(['auth:sanctum', 'verified'])->post('/OrthancDev/addPDF', function(Request $request) {
+    $orthanc = new OrthancAPI();
+    // for demo post "html", "rawhtml", null, author, tittle, uuid, 0, 1, readerid"
+    $orthanc->addPDF($request); //addPDF($method, $html, $base64, $author, $title, $studyuuid, $return, $attach, $id)
+    // curl -k http://localhost:8042/pdfkit/htmltopdf -d '{"method":"base64","title":"BASE64 TO PDF","studyuuid":"e6596260-fdf91aa9-0257a3c2-4778ebda-f2d56d1b","base64":"JVBERi . . .","return":1,"attach":1}'
+
+})->name('/Reports/addPDF');
