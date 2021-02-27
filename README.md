@@ -39,21 +39,23 @@ This demo contains:
 
 The Folder structure is:
 
-├── LICENSE
-├── MWLFiles       Storage directory for MWL files on the host, mapped to /var/lib/orthanc/worklists in pacs-1
-├── MySQL_DB       MySQL DB on the host, mapped to /var/lib/mysql/ in mysql_db
-├── OrthancIndex   Orthanc Postgres DB on the host, mapped to /var/lib/postgresql/data on postgres_index-db
-├── OrthancStorage Orthanc Storage on the host, mapped to /var/lib/orthanc/db on pacs-1
-├── README.md
-├── docker  probably need to delete that.
-├── docker-compose.yml
-├── docs for additional documentation
-├── mysql_init    Scripts to create (init.sql) and populate the required databases for mysql.
-├── nginx  contains the server config for nginx
-├── nginx-home    Web directory for nginx requests that are not proxied.
-├── pacs-1        The Orthanc setup files, sample dicom files, python, lua, etc.
-├── php-fpm       php-fpm setup.
-└── tls           self-signed certificate generator and copier.
+
+├── LICENSE  
+├── MWLFiles       Storage directory for MWL files on the host, mapped to /var/lib/orthanc/worklists in pacs-1  
+├── MySQL_DB       MySQL DB on the host, mapped to /var/lib/mysql/ in mysql_db  
+├── OrthancIndex   Orthanc Postgres DB on the host, mapped to /var/lib/postgresql/data on postgres_index-db   
+├── OrthancStorage Orthanc Storage on the host, mapped to /var/lib/orthanc/db on pacs-1  
+├── README.md  
+├── docker  probably need to delete that  
+├── docker-compose.yml  
+├── docs for additional documentation  
+├── mysql_init    Scripts to create (init.sql) and populate the required databases for mysql  
+├── nginx  contains the server config for nginx  
+├── nginx-home    Web directory for nginx requests that are not proxied  
+├── pacs-1        The Orthanc setup files, sample dicom files, python, lua, etc  
+├── php-fpm       php-fpm setup  
+└── tls           self-signed certificate generator and copier  
+
 
 To connect to the database(s) from the host:
 
