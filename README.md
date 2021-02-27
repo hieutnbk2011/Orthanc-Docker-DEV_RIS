@@ -66,7 +66,7 @@ If you get it all started up:
 
 1.  Orthanc:  e.g. https://nginx-tls.medical.ky/pacs-1/app/explorer.html
 2.  PHP info root of NGINX PHP:  e.g. https://nginx-tls.medical.ky/phpinfo.php
-3.  Laravel Dev front-end:  e.g. https://uploader.medical.ky/
+3.  Laravel Dev front-end:  e.g. https://uploader.medical.ky/ password should be (sscotti@sscotti.org / fzJ2nsPai757epW (or Testing!1), after you have populated the database.  Need to work on that.
 4.  API routes:  e.g.  https://nginx-tls.medical.ky/pacs-1/ &&  https://nginx-tls.medical.ky/api/ (exernal) http://pacs-1:8042/ from Docker PHP.
 5.  Old RIS:  e.g.  
 6.  https://myris.medical.ky/ (not in the repo currently)
@@ -77,4 +77,4 @@ https://github.com/sscotti/Orthanc-Docker-DEV_RIS/blob/main/docs/browser.png
 
 https://github.com/sscotti/Orthanc-Docker-DEV_RIS/blob/main/docs/devtool.png
 
-More details to be added as the project evolves.
+More details to be added as the project evolves.  Will soon put up a demo on a VPS so that you can check it out without going through the process of setting it up.
