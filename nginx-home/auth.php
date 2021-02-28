@@ -113,10 +113,8 @@ class ProxyController
 		header("HTTP/1.1 401 Unauthorized");
 
 		}
-
-    }
-    
 }
-//$me = new ProxyController()->auth();
+    
+$me = new ProxyController()->auth();
 error_log($_SERVER);
 ?>

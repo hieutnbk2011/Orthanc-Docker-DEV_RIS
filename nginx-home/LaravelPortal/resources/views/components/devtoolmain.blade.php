@@ -557,7 +557,7 @@ height:30px;
 							</div>
 
 	<button id = "createPDF" name = "createPDF" class = "btn btn-info btn-sm" data-target = "#MWLform">createPDF</button>
-	<button id="pdfattach" name="pdfattach" class="btn btn-info btn-sm">Atach To Study</button>
+	<button id="pdfattach" name="pdfattach" class="btn btn-info btn-sm">Attach To Study</button>
 	<button id="pdfopeninviewer" name="pdfopeninviewer" class="btn btn-info btn-sm">Open After Created</button>
 	<div style = "width: 350px;text-align: center;margin: auto;">
 	<input id="pdfmodality" name="pdfmodality" value="OT" type="text" class="form-control">
@@ -893,11 +893,22 @@ $APIURL = $pacs->getAPIURL();
 			},
 		})
 		.done(function(data, textStatus, jqXHR) {
-				if (isJsonString(data))  {
-				showMessage(title, '<pre>' + syntaxHighlight(data) + '</pre>' );
+
+		        if (title == "addPDF") {
+		            data = JSON.parse(data);
+				    let url = "data:application/pdf;base64," + data.base64;
+				    message = '<embed id = "frame" src="' + url+ '" style = "width:100%;height:100%;" type="application/pdf"> </embed><button id="closeresults" style="width:100%;">Close Results</button>';
+				    showMessage("PDF Report", message );
+				    // openViewerByUUID(data.status.ID);
+
+				}
+
+				else if (isJsonString(data))  {
+
+				    showMessage(title, '<pre>' + syntaxHighlight(data) + '</pre>' );
 				}
 				else {
-				showMessage(title, data);
+				    showMessage(title, data);
 				}
 		})
 		.fail(function( jqXHR, textStatus, errorThrown) {
@@ -922,14 +933,34 @@ $APIURL = $pacs->getAPIURL();
 //         });
 //         console.log(postdata);
         postdata = $(this).closest("form").serialize();
-        if ($(this).data("devcontroller") != "downloadZipStudyUUID" && $(this).data("devcontroller") != "downloadDCMStudyUUID" ) {
-	    OrthancDevControllerCallDisplay($(this).data("devcontroller"), postdata, $(this).data("devcontroller"));
-	    $("input, select").css({"border":"1px solid black", "outline-style": "unset"});
-	    $($(this).data("param")).css({"border":"2px solid green", "outline-style": "dashed"});
-	    }
+        if ($(this).data("devcontroller") != "downloadZipStudyUUID" && $(this).data("devcontroller") != "downloadDCMStudyUUID") {
+
+	        OrthancDevControllerCallDisplay($(this).data("devcontroller"), postdata, $(this).data("devcontroller"));
+	        $("input, select").css({"border":"1px solid black", "outline-style": "unset"});
+	        $($(this).data("param")).css({"border":"2px solid green", "outline-style": "dashed"});
+	     }
+
 	});
 	//  Sets the Headers Automatically for all requests, just need to get the AUTHTOKEN
 	//  Query the NGINX Server when a user signs in and return them an Auth Token for a one time use for the session.
+/*
+	For addPDF
+
+	{
+   "attachresponse": {
+      "status": {
+         "ID": "5f2940a9-08c702ac-7f59bf2e-f5c33ae4-f4a66e6b",
+         "ParentPatient": "6816cb19-844d5aee-85245eba-28e841e6-2414fae2",
+         "ParentSeries": "cd86a7b0-4e41c903-021e3533-815c009f-2b62e502",
+         "ParentStudy": "b9c08539-26f93bde-c81ab0d7-bffaf2cb-a4d0bdd0",
+         "Path": "/instances/5f2940a9-08c702ac-7f59bf2e-f5c33ae4-f4a66e6b",
+         "Status": "Success"
+      },
+      "error": "false"
+   },
+   "base64"
+
+*/
 
 	$.ajaxSetup({
 
@@ -1053,7 +1084,7 @@ $APIURL = $pacs->getAPIURL();
 
 	$("#pdfopeninviewer").on("click", function(e) {
 
-		openViwerByUUID($("#pdfstudyuuid").val());
+		openViewerByUUID($("#pdfstudyuuid").val());
 
 	});
 
@@ -1433,7 +1464,7 @@ function syntaxHighlight(json) {
 	}
 	else if (method == "orthancviewer") {
 
-		openViwerByUUID($("#uuid").val());
+		openViewerByUUID($("#uuid").val());
 	}
 	else if (method == "put") {
 		if (selected.data("query") == "metadataset") {
@@ -1442,7 +1473,7 @@ function syntaxHighlight(json) {
 	}
 });
 
-function openViwerByUUID(uuid) {
+function openViewerByUUID(uuid) {
 
 		var link = document.createElement('a');
 		link.href = apiurl + "osimis-viewer/app/index.html?study=" + uuid;
@@ -1625,7 +1656,7 @@ function openViwerByUUID(uuid) {
 		}
 		return isNaN(str);
 	}
-	let samplereport = 'This is a test of plain text.  It can accept HTML and BASE64 Encoded code also.  Still perfecting that.';
+	let samplereport = '<style>#reportnoheader * {font-family: Tahoma, Geneva, sans-serif;}.htmlmarkup, #reportswrapper > div {padding:10px;margin:0px;background: white;color: #000;;font-size: 12px;font-weight:bold;}#markupform .htmlmarkup {background:black !important;color:white;}.htmlmarkup div, #reportswrapper > div div {display:block;padding:0px;line-height: initial;margin:5px 0px 5px 0px;}.htmlmarkup label, #reportswrapper > div label{font-size: 14px;color:#000;font-weight:bold;padding-right:10px;}.htmlmarkup section > header, #reportswrapper > div section > header{color: #000;font-size: 16px;font-weight: bold;margin-bottom: 0.0cm;margin-top: 0.3cm;}.htmlmarkup section > section > header, #reportswrapper > div section > section > header{color: #000;font-size: 12px;font-weight: bold;margin-bottom: 0.0cm;margin-top: 0.3cm;text-align: left;}.htmlmarkup section > section > section > header, #reportswrapper > div section > section > section > header{color: #000;font-size: 12px;font-weight: bold;margin-bottom: 0.0cm;margin-top: 0.3cm;text-align: left;}.htmlmarkup > section{}.htmlmarkup section > section, #reportswrapper > div section > section{padding-left: 0.8cm;}.htmlmarkup p, #reportswrapper > div p{margin-bottom: 0.0cm;margin-top: 0.0cm;padding-left: 0.8cm;}reportswrapper {width:100%;}#header_info {margin: 20px auto 10px auto;width:100%;;}#header_info, #header_info td {border: 1px solid black;border-collapse: collapse;background:#DDD;font-size: 12px;font-weight: bold;padding: 2px 5px 2px 5px;}#header_info tr:nth-child(even) td {background:#FFF !important;}#disclaimer {margin:20px 10px 0px 10px;text-align: justify;font-size: 8px;}#header_info > tbody > tr > td:first-child {width:350px;}#header_info > tbody > tr > td:nth-child(2){width:250px;}#header_info > tbody > tr > td:nth-child(3){width:190px;}.htmlmarkup, #reportswrapper {width:800px}#reportbody{font-size:12px;width: 90%;word-wrap: break-word;}#sigblock{margin-top:10px;}#apiresults {line-height: normal;font-size: 16px;color: black;background: #FFF;border-radius: 20px;padding: 20px 10px 20px 10px;border: 2px solid black;width:816px;}<\/style><style>#reportheader{position:relative;width:800px;padding: 5px 5px 20px 5px;margin: 0px 0px 10px 0px;text-align:center;overflow:auto;margin:auto;}#reportheader #logo {height:60px;border:none;position:absolute;left:0;right:0;margin:auto;}#reportheader #floatleft{width:350px;display:inline-block;text-align:left;float: left;}#reportheader #floatright{width:max-content;text-align:left;float: right;padding-right:10px;}.letterheadlabel {display:inline-block;width:60px;text-align:right;margin-right:5px;}<\/style><div id = \"reportheader\"><div><div id = \"floatleft\">Cayman Medical Ltd.<br>71 Eastern Ave<br>P.O. Box 32322<br>George Town, Cayman Islands KY1-1209 <\/div><div id = \"floatright\"><span class = \"letterheadlabel\">Phone:  <\/span>KY 000-000-0000<br><span class = \"letterheadlabel\">Fax:  <\/span>KY 000-000-0000<br><span class = \"letterheadlabel\">Email:  <\/span>info@medical.ky<br><span class = \"letterheadlabel\">Website:  <\/span>https:\/\/www.medical.ky<br><\/div><\/div><\/div><div id = \"reportnoheader\"><table id = \"header_info\"><tr><td id=\"report_name\"> Patient Name: Annular Pancreas, <\/td><td id=\"report_mrn\"> Med Rec Number:  DEV0000004<\/td><td rowspan = \"6\" style=\"vertical-align:text-top;white-space:break-spaces;width:200px\">Indication:  No Order<\/td><\/tr><tr><td> DOB: Jan-01-1901<\/td><td> Sex: <\/td><\/tr><tr><td> Accession Number:  DEVACC00000010<\/td><td> Date of Exam:  Not available<\/td><\/tr><td> Referring Physician:  STEPHEN D SCOTTI M.D<\/td><td> Referring Physician ID:  0002:SCOTTI<\/td><\/tr><tr><td> Interpreting Radiologist:  Stephen Douglas Scotti M.D.<br>Interpreting Radiologist Profile ID:1<\/td><td> Report Generated:  Jan-26-2021 14:55:15<\/td><\/tr><tr><td colspan= \"2\"> Read Status:  PRELIM<\/td><\/tr><\/table><div class = \"htmlmarkup\" name=\"htmlmarkup\"><section><header>MR <span style=\"DISPLAY:INLINE-BLOCK\">RIGHT<\/span> ANKLE<\/header><p><span style=\"display:inline-block\">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.<\/span><\/p><\/section><section><header>CLINICAL INFORMATION<\/header><p><span style=\"display:inline-block\">No Order<\/span><\/p><\/section><section><header>COMPARISON<\/header><p><span style=\"display:inline-block\">None. <\/span><\/p><\/section><section><header>FINDINGS<\/header><p><label>Alignment:<\/label><span>Normal. <\/span><\/p><section><header>MEDIAL COMPARTMENT<\/header><p><label>Medial malleolus:<\/label><span>Normal. <\/span><\/p><p><label>Posterior tibial tendon:<\/label><span>Normal. <\/span><\/p><p><label>Flexor digitorum longus tendon:<\/label><span>Normal. <\/span><\/p><p><label>Deltoid ligament complex (superficial):<\/label><span>Normal. <\/span><\/p><p><label>Deltoid ligament complex (deep):<\/label><span>Normal. <\/span><\/p><p><label>Spring ligament:<\/label><span>Normal. <\/span><\/p><\/section><section><header>LATERAL COMPARTMENT<\/header><p><label>Lateral malleolus:<\/label><span>Normal. <\/span><\/p><p><label>Retromalleolar groove:<\/label><span style=\"display:inline-block\">Flat<\/span><\/p><p><label>Peroneus longus tendon:<\/label><span>Normal. <\/span><\/p><p><label>Peroneus brevis tendon:<\/label><span>Normal. <\/span><\/p><p><label>Peroneal retinaculum:<\/label><span>Normal. <\/span><\/p><p><label>Peroneus quartus:<\/label><span>Absent. <\/span><\/p><p><label>Anterior inferior tibiofibular ligament:<\/label><span>Normal. <\/span><\/p><p><label>Posterior inferior tibiofibular ligament:<\/label><span>Normal. <\/span><\/p><p><label>Anterior talofibular ligament:<\/label><span>Normal. <\/span><\/p><p><label>Calcaneofibular ligament:<\/label><span>Normal. <\/span><\/p><p><label>Posterior talofibular ligament<\/label><span>Normal. <\/span><\/p><\/section><section><header>POSTERIOR COMPARTMENT<\/header><p><label>Posterior talus:<\/label><span>Normal. <\/span><\/p><p><label>Flexor hallucis longus:<\/label><span>Normal. <\/span><\/p><p><label>Intermalleolar ligament:<\/label><span>Normal. <\/span><\/p><p><label>Achilles tendon:<\/label><span>Normal. <\/span><\/p><p><label>Plantar fascia:<\/label><span>Normal. <\/span><\/p><\/section><section><header>ARTICULATIONS<\/header><p><label>Tibiotalar joint:<\/label><span>Normal. <\/span><\/p><p><label>Subtalar joint:<\/label><span>Normal. <\/span><\/p><p><label>Tarsal joints:<\/label><span>Normal. <\/span><\/p><\/section><section><header>ANTERIOR COMPARTMENT<\/header><p><label>Anterior tibial tendon:<\/label><span>Normal. <\/span><\/p><p><label>Extensor hallucis longus:<\/label><span>Normal. <\/span><\/p><p><label>Extensor digitorum longus:<\/label><span>Normal. <\/span><\/p><p><label>Peroneus tertius:<\/label><span>Absent. <\/span><\/p><\/section><section><header>GENERAL FINDINGS<\/header><p><label>Bones:<\/label><span>Normal. <\/span><\/p><p><label>Muscles:<\/label><span>Normal. <\/span><\/p><p><label>Tarsal tunnel:<\/label><span>Normal. <\/span><\/p><p><label>Sinus tarsi:<\/label><span>Normal. <\/span><\/p><\/section><section><header>IMPRESSION<\/header><p><span style=\"display:inline-block\">1.  <\/span><\/p><\/section><\/section><\/div><div id = \"sigblock\">PRELIM<br>Electronically signed:<br><br>Reader Profile:  1<br>Stephen Douglas Scotti M.D.<br>2021-01-26 14:55:15<\/div><div id = \"disclaimer\">PRIVILEGED AND CONFIDENTIAL: The information contained in this report and communicaition contains privileged and confidential information, including patient information protected by federal and state privacy laws. It is intended only for the use of the person(s) with authorized access. If you are not the intended recipient or are not authorized access, you are hereby notified that any review, dissemination, distribution, or duplication of this communication is strictly prohibited. If you are not an intended and authoorized recipient, please contact the sender by reply email (if received via email) or otherwise contact them and destroy all copies of the original message.<\/div><\/div>';
 $("#reporthtml").val(samplereport);
 $("#reporthtml").html(samplereport);
 

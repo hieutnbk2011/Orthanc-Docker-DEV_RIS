@@ -416,8 +416,10 @@ Route::middleware(['auth:sanctum', 'verified'])->post('/Reports/choose_template'
 
 Route::middleware(['auth:sanctum', 'verified'])->post('/OrthancDev/addPDF', function(Request $request) {
     $orthanc = new OrthancAPI();
+    parse_str($request->getContent(), $output);
+    Debugbar::error($output);
     // for demo post "html", "rawhtml", null, author, tittle, uuid, 0, 1, readerid"
-    echo $orthanc->addPDF($request); //addPDF($method, $html, $base64, $author, $title, $studyuuid, $return, $attach, $id)
+    echo $orthanc->addPDF($output); //addPDF($method, $html, $base64, $author, $title, $studyuuid, $return, $attach, $id)
     // curl -k http://localhost:8042/pdfkit/htmltopdf -d '{"method":"base64","title":"BASE64 TO PDF","studyuuid":"e6596260-fdf91aa9-0257a3c2-4778ebda-f2d56d1b","base64":"JVBERi . . .","return":1,"attach":1}'
 
-})->name('/Reports/addPDF');
+})->name('addPDF');

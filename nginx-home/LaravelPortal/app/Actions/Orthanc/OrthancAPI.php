@@ -609,17 +609,12 @@ Used for downloadDCMStudyUUID, downloadZipStudyUUID
     }
 
     public function addPDF($request) {
+        $request = (object)$request;
 
-	    if ($request->input('method')== "html") {
-
-	    $html = str_replace("\n", "", $request->input('html'));
-	    $html = str_replace("\t", "", $html);
-	    $html = str_replace("'", "&rsquo;", $html); // replace with HTML entity.
-
-	    $html = addslashes($html);
-	    $html = str_replace("/", "\\/", $html);
+	    if ($request->method == "html") {
+ 	    $html = json_encode($request->html);
 	    }
-	    $jsonquery = '{"method":"' .$request->input('method').  '","html":"' .$request->input('html'). '","base64":"' .$request->input('base64'). '","title":"' .$request->input('title'). '","studyuuid":"' .$request->input('studyuuid'). '","return":' .$request->input('return'). ',"attach":' .$request->input('attach'). ',"author":"' .$request->input('author').  '"}';
+	    $jsonquery = '{"method":"' .$request->method.  '","html":' .$html . ',"base64":"' .$request->base64. '","title":"' .$request->title. '","studyuuid":"' .$request->studyuuid. '","return":' .$request->return. ',"attach":' .$request->attach. ',"author":"' .$request->author.  '"}';
 	    $this->executeCURLPOSTJSON($jsonquery,'pdfkit/htmltopdf');
 	    //$query = 'UPDATE reports SET json_request_orthanc_add_pdf = ? WHERE id = ?';
 	    Debugbar::error('pdfkit/htmltopdf');
