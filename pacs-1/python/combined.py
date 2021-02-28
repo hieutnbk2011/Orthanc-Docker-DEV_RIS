@@ -28,33 +28,56 @@ import requests # for sending CURL to Orthanc endpoint, https://www.w3schools.co
 import aiorun # https://pypi.org/project/aiorun/ # sudo python3 -m pip install aiorun
 import asyncio # https://pypi.org/project/asyncio/ # sudo python3 -m pip install asyncio
 import pprint # pretty printer 
+# from http.server import HTTPServer, BaseHTTPRequestHandler
 
-# Basic Authorization setup
+#Authorization setup
 
+# class Redirect(BaseHTTPRequestHandler):
+# 
+#     def do_GET(self):
+#         self.send_response(302)
+#         self.send_header('Location','https://nginx-tls.medical.ky/error_pages/python_redirect.php')
+#         self.send_header('data','test')
+#         self.end_headers()
+       
 def Filter(uri, **request):
 
     print('User trying to access URI: %s' % uri)
-    authorization = ""
-    token = ""
-    method = ""
-    userprofileJWT = {}
-    if 'authorization' in request['headers']:
-        authorization = request['headers']['authorization']
-    if 'token' in request['headers']:
-        token = request['headers']['token']
-    if 'method' in request['headers']:
-        method = request['headers']['method']
-    if 'userprofileJWT' in request['headers']:
-        userprofileJWT = request['headers']['userprofileJWT']
-    print("auth  :" + authorization + "  token:  " + token + "  method:  " + method )
-    print(userprofileJWT)
-   # pprint.pprint(request['method'])
-    response = dict()
-    if (authorization != "Bearer CURLTOKEN"):
-        return True
-        #return False
-    else:
-        return True  # False to forbid access
+    pprint.pprint(request)
+#     authorization = ""
+#     token = ""
+#     method = ""
+#     userprofileJWT = {}
+#     response = dict()
+#     if 'authorization' in request['headers']:
+#         authorization = request['headers']['authorization']
+#     if 'token' in request['headers']:
+#         token = request['headers']['token']
+#     if 'method' in request['headers']:
+#         method = request['headers']['method']
+#     if 'userprofileJWT' in request['headers']:
+#         userprofileJWT = request['headers']['userprofileJWT']
+#     print("auth  :" + authorization + "  token:  " + token + "  method:  " + method )
+#     print(userprofileJWT)
+#     # pprint.pprint(request['method'])
+#     url = 'https://nginx-tls.medical.ky/error_pages/python_redirect.php'
+#     response = dict()
+#     response['authorization'] = authorization
+#     response['token'] = token
+#     response['method'] = method
+#     response['userprofileJWT'] = userprofileJWT   
+#     headers = {'content-type': 'application/json'}
+#     payload = json.dumps(response, indent = 3)
+#     handler = Redirect
+#     myServer = HTTPServer(("127.0.0.1", 8099), handler)  
+#     #Redirect(request, address,server)
+#     #r = requests.post(url, data=payload, headers=headers)
+#     if (authorization != "Bearer CURLTOKEN"):
+#         return True
+#         #return False
+#     else:
+#         return True  # False to forbid access
+    return True   
 
 orthanc.RegisterIncomingHttpRequestFilter(Filter)
 
@@ -773,6 +796,7 @@ def HTMLTOPDF(output, uri, **request):
 	if request['method'] != 'POST':
 		output.SendMethodNotAllowed('POST')
 	else:
+	    print(request['body'])
 		query = json.loads(request['body'])
 		pdf = getpdf(query, output)
 

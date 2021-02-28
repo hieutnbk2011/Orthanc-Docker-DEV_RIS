@@ -1,6 +1,6 @@
-<?
+<?php
+
 use App\MyModels\Widgets;
-// use App\MyModels\Orthanc;
 use App\Actions\Orthanc\OrthancAPI;
 $pacs = new OrthancAPI();
 ?>
@@ -242,8 +242,8 @@ height:30px;
 
 	<div id = "basic_tools">
         <div style = "margin:auto;text-align:center;width:max-content;font-size:12px;">
-        <?php  echo $pacs->serverStatusWidget(); ?>
-        <?php  echo Widgets::PACSSelectorTool("devtool"); ?>
+        <?php echo $pacs->serverStatusWidget(); ?>
+        <?php echo Widgets::PACSSelectorTool("devtool"); ?>
         </div>
 
 	<!-- Service Section Start-->
@@ -261,7 +261,7 @@ height:30px;
 						<a href = "https://book.orthanc-server.com/users/rest.html#id12" target = "_blank" class = "btn btn-info btn-sm">Orthanc REST API Reference</a>
 						<a href = "https://book.orthanc-server.com/index.html" target = "_blank" type="button" class = "btn btn-info btn-sm">Orthanc Book</a>
 						<a href = "https://book.orthanc-server.com/plugins/python.html?highlight=python" type="button" target = "_blank" class = "btn btn-info btn-sm">Orthanc Python Scripts</a>
-						<a href = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSBEymDKGZgskFEFF6yzge5JovGHPK_FIbEnW5a6SWUbPkX06tkoObUHh6T1XQhgj-HqFd0AWSnVFOv/pubhtml?gid=1278217352&single=true" type="button" target = "_blank" class = "btn btn-info btn-sm">REST CALL Cheat Sheet</a>
+						<a href = "https://book.orthanc-server.com/users/rest-cheatsheet.html" type="button" target = "_blank" class = "btn btn-info btn-sm">REST CALL Cheat Sheet</a>
 						<a href = "https://packages.debian.org/unstable/orthanc-dev" type="button" target = "_blank" class = "btn btn-info btn-sm">Debian Dev Package</a>
 						<a href = "https://hg.orthanc-server.com/" type="button" target = "_blank" class = "btn btn-info btn-sm">Orthanc Mercurial Server</a>
 						<a href = "https://hg.orthanc-server.com/orthanc-tests/file/Orthanc-1.7.2/Tests/Tests.py#l1473" type="button" target = "_blank" class = "btn btn-info btn-sm">Orthanc Mercurial Unit Tests</a>
@@ -736,7 +736,7 @@ $APIURL = $pacs->getAPIURL();
 
 	function setUpConfigsSelect() {
 
-	    result = '<?php echo str_replace("\n", "", $pacs->getOrthancConfigs("ALL")); ?>';
+	    result = '<?php  echo str_replace("\n", "", $pacs->getOrthancConfigs("ALL")); ?>';
 	    // The response from Orthanc has line breaks, pretty printed.
 	    result = JSON.parse(result);
 	    selectlist = '<option value = "ALL">ALL</option>';
@@ -1625,5 +1625,8 @@ function openViwerByUUID(uuid) {
 		}
 		return isNaN(str);
 	}
+	let samplereport = 'This is a test of plain text.  It can accept HTML and BASE64 Encoded code also.  Still perfecting that.';
+$("#reporthtml").val(samplereport);
+$("#reporthtml").html(samplereport);
 
 </script>

@@ -1,4 +1,4 @@
-<?
+<?php
 use App\MyModels\Widgets;
 use App\Actions\Orthanc\OrthancAPI;
 ?>

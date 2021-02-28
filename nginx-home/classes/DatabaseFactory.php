@@ -46,7 +46,7 @@ class DatabaseFactory
     $values = array (  
     
     	'DB_TYPE' => 'mysql',
-    	'DB_HOST' => 'localhost',
+    	'DB_HOST' => 'mysql_db',
     	'DB_NAME' => "laravel",
     	'DB_PORT' => '3306',
     	'DB_CHARSET' => 'utf8',

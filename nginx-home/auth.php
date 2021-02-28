@@ -1,7 +1,6 @@
 <?php
 ini_set("error_log", realpath(dirname(__FILE__)) . "/auth.log");
-include  "classes/DatabaseFactory.php";
-DatabaseFactory::logVariable("Hit The auth.php page");
+// include  "classes/DatabaseFactory.php";
 
 class ProxyController
 
@@ -10,10 +9,28 @@ class ProxyController
      * Construct this object by extending the basic Controller class
      */
     private static $debug = true; 
-    private static $throwerror = false;
-    private static $passthrough = true;
+    private static $throwerror = true;
+    private static $passthrough = false;
+    private static $validhosts;
+
     public function __construct()
+    
     {
+        $this->validhosts = [];
+        $this->validhosts[] = array(
+        
+            "HTTP_AUTHORIZATION" => "Bearer CURLTOKEN",
+            "HTTP_TOKEN" => "wxwzisme",
+            "HTTP_ORIGIN" => "medical.ky",
+            "HTTP_ORIG_IP" => "0.0.0.0",
+        );
+        $this->validhosts[] = array(
+        
+            "HTTP_AUTHORIZATION" => "Bearer CURLTOKEN",
+            "HTTP_TOKEN" => "wxwzisme",
+            "HTTP_ORIGIN" => "medical.ky",
+            "HTTP_ORIG_IP" => "0.0.0.0",
+        );
 
     }
     
@@ -66,9 +83,9 @@ class ProxyController
 
 */
 
-    public static function auth()
+    public function auth()
 
-    {
+    {   
 		self::logVariable($_SERVER);
 		
 		if (self::$passthrough == true) {
@@ -80,20 +97,26 @@ class ProxyController
 			exit();
 		}
 
-		else if (($_SERVER['HTTP_AUTHORIZATION'] == "Bearer AJAXDEV" || $_SERVER['HTTP_AUTHORIZATION'] == "Bearer CURLTOKEN") && $_SERVER['HTTP_TOKEN'] == 'wxwzisme') {
-		
-			self::logVariable("Passed Auth Headers");
-			header("HTTP/1.1 200 OK");
-			self::logVariable('SUCCESS!: APIurl/CURL');
-		}
 		else {
 		
-			header("HTTP/1.1 401 Unauthorized");
+		    foreach($this->validhosts as $host) {
+		    
+		        if ($_SERVER['HTTP_AUTHORIZATION'] == $host['HTTP_AUTHORIZATION'] && $_SERVER['HTTP_TOKEN'] == $host['HTTP_TOKEN']) {
+		            header("HTTP/1.1 200 OK");
+		            self::logVariable("Passed Auth Headers");
+		            exit();		            
+		        }
+		    }
+		
+		
+		}
+		header("HTTP/1.1 401 Unauthorized");
 
 		}
 
     }
     
 }
-ProxyController::auth();
+//$me = new ProxyController()->auth();
+error_log($_SERVER);
 ?>
