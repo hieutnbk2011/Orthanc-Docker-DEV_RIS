@@ -10,7 +10,7 @@ class ProxyController
      */
     private static $debug = true; 
     private static $throwerror = false;
-    private static $passthrough = false;
+    private static $passthrough = true;
     private static $validhosts;
 
     public function __construct()

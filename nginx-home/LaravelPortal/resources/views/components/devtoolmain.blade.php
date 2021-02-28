@@ -4,8 +4,8 @@ use App\MyModels\Widgets;
 use App\Actions\Orthanc\OrthancAPI;
 $pacs = new OrthancAPI();
 ?>
-<meta name="csrf-token" content="{{ csrf_token() }}">
-<link rel="stylesheet" href="/bower/font-awesome/css/all.min.css" type="text/css">
+<!-- This is supplemental component for CSS and JS for the RIS migration pages -->
+<x-ris_css_js/>
 <style>
 body * {
 font-family:courier !important;
@@ -200,7 +200,7 @@ height:30px;
 </style>
 <!-- For the Viewer and upload pic overlay -->
 
-<div id="myNav" class="vieweroverlay"><a href="" class="closebtn"><i class="fas fa-window-close"></i></a><div id="dynamiciframe"></div></div>
+<div id="myNav" class="vieweroverlay"><a href="" style = "color:red;font-size:2em;" class="closebtn">X</a><div id="dynamiciframe"></div></div>
 <!-- The Modal -->
 <div class="modal fade hide" id="devModal" data-keyboard="true" data-backdrop="true" tabindex='-1'>
 

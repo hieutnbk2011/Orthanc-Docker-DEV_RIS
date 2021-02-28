@@ -1,3 +1,4 @@
+<!--
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha512-rO2SXEKBSICa/AfyhEK5ZqWFCOok1rcgPYfGOqtX35OyiraBg6Xa4NnBJwXgpIRoXeWjcAmcQniMhp22htDc6g==" crossorigin="anonymous" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/themes/dark-hive/jquery-ui.min.css" type="text/css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css" integrity="sha512-1PKOgIY59xJ8Co8+NE6FZ+LOAZKjy+KY8iq0G4B3CyeY6wYHN3yt9PW0XpSriVlkMXe40PTKnXrLnZ9+fkDaog==" crossorigin="anonymous" />
@@ -11,7 +12,9 @@
 <script src="/bower/jquery-timepicker-jt/jquery.timepicker.min.js"></script>
 <script src="/bower/moment/min/moment.min.js"></script>
 <script src="/bower/moment-timezone/builds/moment-timezone-with-data-1970-2030.min.js"></script>
-
+ -->
+<!-- This is supplemental component for CSS and JS for the RIS migration pages -->
+<x-ris_css_js/>
 <!-- For the Viewer and upload pic overlay -->
 
 <div id="myNav" class="vieweroverlay"><a href="" class="closebtn"><i class="fas fa-window-close"></i></a><div id="dynamiciframe"></div></div>
@@ -159,7 +162,8 @@ $selectlist .= '</select>
         </div> <!-- end of studies -->
 <div id="toolstab"></div> <!-- end of tools -->
 <div id="contactinfo">
-	<?php // $this->renderWithoutHeaderAndFooter("contactinfo/contactinfo");?>
+	<?php // $this->renderWithoutHeaderAndFooter("contactinfo/contactinfo");
+	?>
 </div> <!-- end of contactinfo -->
 
 </div>
@@ -199,7 +203,8 @@ $.ajaxSetup({
 	},
 	complete: function(xhr, textStatus) {
 
-		$("#spinner").css("display", "none");
+		$("#spinner").css("display", "none");   // old from RIS
+		$("body").removeClass("loading"); // new spinner
 		console.log(xhr.hasOwnProperty('responseJSON'));
 		if (xhr.hasOwnProperty('responseJSON') && xhr.responseJSON.hasOwnProperty('AJAXRedirect')) {
 			showMessage("",xhr.responseJSON.error);

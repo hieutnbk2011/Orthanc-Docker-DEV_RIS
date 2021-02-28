@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use App\Actions\Orthanc\OrthancAPI;  // could change this for other PACS Interface or add others and capture that below
+use App\Actions\Orthanc\PACSUploadStudies;
 use App\MyModels\Reports;
 use App\Providers\RouteServiceProvider;
 
@@ -380,6 +381,7 @@ Route::middleware(['auth:sanctum', 'verified'])->post('OrthancDev/downloadStudyU
 
 })->name('downloadStudyUUID');
 
+// Partially Working, loads the uploader view (self-contained with the passed in data)
 Route::middleware(['auth:sanctum', 'verified'])->get('/Studies/upload_study', function(Request $request) {
     $orthanc = new OrthancAPI();
     $uploaderdata = array(
@@ -392,34 +394,66 @@ Route::middleware(['auth:sanctum', 'verified'])->get('/Studies/upload_study', fu
                 "anon_normal" => false
         )
     );
-    echo '{"status","Migrating:"' . json_encode($uploaderdata). '"}';
-   // echo $orthanc->upload_study($request->input('mrn'));
+    // echo '{"status","Migrating":' . json_encode($uploaderdata). '}';
+    return view('dicomuploader/uploader')->with('data', $uploaderdata);;
 })->name('upload_study');
 
+// Partially Working, UploadZipPreProcess
+Route::middleware(['auth:sanctum', 'verified'])->post('/PACSUploadStudies/UploadZipPreProcess', function(Request $request) {
+    $PACSUpload = new PACSUploadStudies($request,'UploadZipPreProcess');
+    echo $PACSUpload->json_response;
+})->name('UploadZipPreProcess');
+
+// Partially Working, UploadZipToPACS
+Route::middleware(['auth:sanctum', 'verified'])->post('/PACSUploadStudies/UploadZipToPACS', function(Request $request) {
+    $PACSUpload = new PACSUploadStudies($request,'UploadZipToPACS');
+    echo $PACSUpload->json_response;
+})->name('UploadZipToPACS');
 
 
 // RADIOLOGY REPORTING ROUTES, REORGANIZE LATER
 
+// Partially Working, gets a list of available template for reporting.
 Route::middleware(['auth:sanctum', 'verified'])->post('/Reports/radreport_templates_list', function(Request $request) {
     $list = (new Reports($request))->templateslist();
     echo $list;
 })->name('radreport_templates_list');
 
+// Partially Working, get all of the existing reports for an accession number and returns the data so old reports can be show in the editor
 Route::middleware(['auth:sanctum', 'verified'])->post('/HL7/getallhl7_reports', function(Request $request) {
    $list = Reports::getallhl7_reports($request->input('accession_number'), );
     echo $list;
 })->name('getallhl7_reports');
 
+// Partially Working, loads a template into the report editor
 Route::middleware(['auth:sanctum', 'verified'])->post('/Reports/choose_template', function(Request $request) {
     $template = Reports::choose_template($request->input('uuid'), $request->input('templateid'));
 })->name('choose_template');
 
+// Partially Working, sends html or base64 to orthanc plugin and processes it there.
 Route::middleware(['auth:sanctum', 'verified'])->post('/OrthancDev/addPDF', function(Request $request) {
+    // Kind of had to 'hack' this.
     $orthanc = new OrthancAPI();
     parse_str($request->getContent(), $output);
     Debugbar::error($output);
-    // for demo post "html", "rawhtml", null, author, tittle, uuid, 0, 1, readerid"
     echo $orthanc->addPDF($output); //addPDF($method, $html, $base64, $author, $title, $studyuuid, $return, $attach, $id)
     // curl -k http://localhost:8042/pdfkit/htmltopdf -d '{"method":"base64","title":"BASE64 TO PDF","studyuuid":"e6596260-fdf91aa9-0257a3c2-4778ebda-f2d56d1b","base64":"JVBERi . . .","return":1,"attach":1}'
+    /*
+	Response is generally like this.
+	{
+   "attachresponse": {
+      "status": {
+         "ID": "5f2940a9-08c702ac-7f59bf2e-f5c33ae4-f4a66e6b",
+         "ParentPatient": "6816cb19-844d5aee-85245eba-28e841e6-2414fae2",
+         "ParentSeries": "cd86a7b0-4e41c903-021e3533-815c009f-2b62e502",
+         "ParentStudy": "b9c08539-26f93bde-c81ab0d7-bffaf2cb-a4d0bdd0",
+         "Path": "/instances/5f2940a9-08c702ac-7f59bf2e-f5c33ae4-f4a66e6b",
+         "Status": "Success"
+      },
+      "error": "false"
+   },
+   "base64"
+
+*/
 
 })->name('addPDF');

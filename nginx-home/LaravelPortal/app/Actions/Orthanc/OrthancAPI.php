@@ -609,18 +609,16 @@ Used for downloadDCMStudyUUID, downloadZipStudyUUID
     }
 
     public function addPDF($request) {
-        $request = (object)$request;
 
+        $request = (object)$request;
 	    if ($request->method == "html") {
  	    $html = json_encode($request->html);
 	    }
 	    $jsonquery = '{"method":"' .$request->method.  '","html":' .$html . ',"base64":"' .$request->base64. '","title":"' .$request->title. '","studyuuid":"' .$request->studyuuid. '","return":' .$request->return. ',"attach":' .$request->attach. ',"author":"' .$request->author.  '"}';
 	    $this->executeCURLPOSTJSON($jsonquery,'pdfkit/htmltopdf');
-	    //$query = 'UPDATE reports SET json_request_orthanc_add_pdf = ? WHERE id = ?';
 	    Debugbar::error('pdfkit/htmltopdf');
 	    Debugbar::error($jsonquery);
 	    return $this->result;
-
 	}
 
 	public function getViewerLink($request) {

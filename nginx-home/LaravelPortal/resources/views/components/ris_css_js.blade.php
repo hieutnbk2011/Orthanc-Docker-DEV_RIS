@@ -1,5 +1,20 @@
+<!--
+Cross Site Request Forgery (CSRF) TOKEN genereated by Laravel, USAGE
+'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') in ajax
+<form method="POST" action="/profile">
+    @csrf
+    YIELDS
+    <input type="hidden" name="_token" value="{{ csrf_token() }}" />
+
+</form>
+COOKIE:  X-XSRF-TOKEN , set that header if you want to read the COOKIE
+-->
+
+<link rel="stylesheet" href="/bower/font-awesome/css/fontawesome.min.css">
 <link rel="stylesheet" href="/bower/bootstrap/dist/css/bootstrap.min.css"/>
 <link rel="stylesheet" href="/bower/jquery-ui/themes/dark-hive/jquery-ui.min.css" type="text/css">
+<link rel="stylesheet" href="/bower/jquery-timepicker-jt/jquery.timepicker.min.css" />
+
 <script src="/bower/jquery/dist/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-migrate/3.0.1/jquery-migrate.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
@@ -8,8 +23,55 @@
 <script src="/bower/jquery-timepicker-jt/jquery.timepicker.min.js"></script>
 <script src="/bower/moment/min/moment.min.js"></script>
 <script src="/bower/moment-timezone/builds/moment-timezone-with-data-1970-2030.min.js"></script>
+<script src="/bower/jquery-validation/dist/jquery.validate.min.js"></script>
+<script src="/bower/jquery-validation/dist/additional-methods.min.js"></script>
+
+
+<!-- AJAX SPINNER BEGIN -->
+<div class="spinner_overlay"></div>
 <style>
-/* FOR syntaxHighlight */
+
+.spinner_overlay {
+	display: none;
+	position: fixed;
+	width: 60px;
+	height: 60px;
+	top: 0;
+	left: 0;
+	z-index: 999;
+	background: rgba(255,255,255,0.8) url("images/Methods-David-Kinross.gif") center no-repeat;
+	background-size: contain;
+	right: 0;
+	margin: auto;
+}
+/* Turn off scrollbar when body element has the loading class */
+body.loading{
+    overflow: hidden;
+}
+/* Make spinner image visible when body element has the loading class */
+body.loading .spinner_overlay{
+    display: block;
+}
+</style>
+
+<script>
+// Add remove loading class on body element based on Ajax request status
+$(document).on({
+    ajaxStart: function(){
+        $("body").addClass("loading");
+    },
+    ajaxComplete: function(){
+         $("body").removeClass("loading");
+    }
+});
+</script>
+<!-- AJAX SPINNER END -->
+
+
+
+<style>
+/* FOR syntaxHighlight. STUFF AFTER THAT IS JUST A DUMP OF CSS, WILL HAVE TO BE CLEANED UP. */
+
 .syntaxHighlighted {
     background-color:whitesmoke !important;
 }
@@ -19,29 +81,11 @@
 .syntaxHighlighted .null { color: magenta !important; }
 .syntaxHighlighted .key { color: #0158ff !important; }
 
-body {
-font-size: 14px;
-}
-
-
+/* jQueryUI Tabs */
 .centertabs {
-
-font-size: 12px;
-width: max-content;
-margin: auto !important;
-}
-</style>
-<style>
-body {  /* load page before showing */
-
-/*
-height:0px;
-width:0px;
- */
-visibility:hidden;
-padding:0 !important;
-margin:0 !important;
-
+    font-size: 10px;
+    width: max-content;
+    margin: auto !important;
 }
 
 #webcamwrapper, #cropperimage, #results {
