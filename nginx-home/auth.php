@@ -9,7 +9,7 @@ class ProxyController
      * Construct this object by extending the basic Controller class
      */
     private static $debug = true; 
-    private static $throwerror = true;
+    private static $throwerror = false;
     private static $passthrough = false;
     private static $validhosts;
 
@@ -114,7 +114,6 @@ class ProxyController
 
 		}
 }
-    
+
 $me = new ProxyController()->auth();
-error_log($_SERVER);
 ?>

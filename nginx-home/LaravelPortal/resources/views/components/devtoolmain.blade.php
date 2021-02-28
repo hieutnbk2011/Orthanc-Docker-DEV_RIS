@@ -11,6 +11,7 @@ body * {
 font-family:courier !important;
 
 }
+
 .btn {
     color:white !important;
 
@@ -222,6 +223,29 @@ height:30px;
         <button type="button" class="btn btn-info btn-sm" data-dismiss="modal">Close</button>
       </div>
 
+    </div>
+  </div>
+</div>
+
+<!-- The Modal -->
+<div class="modal fade hide" id="pdfModal" data-keyboard="true" data-backdrop="true" tabindex='-1'>
+
+  <div class="modal-dialog" style = "margin:0px auto;width:unset;">
+    <div class="modal-content">
+
+      <!-- Modal Header -->
+      <div class="modal-header">
+        <h4 class="modal-title"></h4>
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+      </div>
+
+      <!-- Modal body -->
+      <div class="modal-body" style="height:100vh;"></div>
+
+      <!-- Modal footer -->
+      <div class="modal-footer">
+        <button type="button" class="btn btn-info btn-sm" data-dismiss="modal">Close</button>
+      </div>
     </div>
   </div>
 </div>
@@ -895,10 +919,13 @@ $APIURL = $pacs->getAPIURL();
 		.done(function(data, textStatus, jqXHR) {
 
 		        if (title == "addPDF") {
+
 		            data = JSON.parse(data);
 				    let url = "data:application/pdf;base64," + data.base64;
 				    message = '<embed id = "frame" src="' + url+ '" style = "width:100%;height:100%;" type="application/pdf"> </embed><button id="closeresults" style="width:100%;">Close Results</button>';
-				    showMessage("PDF Report", message );
+				    showPDF("PDF Report", message );
+				    showResults("Orthanc", data.attachresponse);
+
 				    // openViewerByUUID(data.status.ID);
 
 				}
@@ -1310,6 +1337,14 @@ $APIURL = $pacs->getAPIURL();
 
 	}
 
+	function showPDF (title, body) {  // for later
+
+		$("#pdfModal .modal-body").html(body);
+		$("#pdfModal .modal-title").html(title);
+		$('#pdfModal').modal('show');
+
+	}
+
 	function showResults(title, json) {
 
 	json = syntaxHighlight(json);
@@ -1500,7 +1535,7 @@ function openViewerByUUID(uuid) {
 		else {
 
 		$.post("/" + controllerfunction, params, function(result){
-			//alert(isJsonString(result));
+
 			if (command == "getClaim") {
 				let url = "data:application/pdf;base64," + result;
 				$("#delegator").html('<embed id = "frame" src="" style = "width:100%;height:100%;" type="application/pdf"> </embed><button id="closeresults" style="width:100%;">Close Results</button>');
@@ -1511,9 +1546,10 @@ function openViewerByUUID(uuid) {
 			}
 
 			else if (isJsonString(result)) {
+
 				decoded = parseMessages(result, true);
 				if (decoded.url) {
-				window.location.href = decoded.url;
+				    window.location.href = decoded.url;
 				}
 				else {
 				context.before('<pre class = "tempresult">' + JSON.stringify(result) + '</pre>');
