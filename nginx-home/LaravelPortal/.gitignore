@@ -5,7 +5,7 @@
 Thumbs.db
 .env
 .env.backup
-
+/TMPUPLOADS
 /vendor
 /node_modules
 /public/hot

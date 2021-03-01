@@ -15,32 +15,40 @@ class PACSUploadStudies
 {
 	// Trying to make this self-contained class so it could be somewhat portable.
 
-	private static $OrthancURL;
+
 	private static $dcmtk_path;
-	private static $server;
 	private static $Authorization;
     private static $Token;
     private static $origin;
+
+    private static $server;
+    private static $OrthancURL;
     private $logfilepath;
     private $logfiletext = "";
-    private static $anonymize;
-    private static $altertags;
-    private static $PatientID;
-    private static $AccessionNumber;
-    private static $InstitutionName;
-    private static $globalerror;
-    private static $setMetaTags = true;
-    private static $user_id;
-    private static $user_name;
+    private $anonymize;
+    private $altertags;
+    private $PatientID;
+    private $AccessionNumber;
+    private $InstitutionName;
+    private $globalerror;
+    private $setMetaTags = true;
+    private $user_id;
+    private $user_name;
+
     private static $dcmdumpargs;
     private static $tagmap;
     private static $deleteAferAnonymization;
+
     public $json_response;
+    public $curlerror;
+    public $curl_error_text;
+    public $result;
+    public $responsecode;
 
 	public function __construct($request, $method)
 
 	{
-        Debugbar::error("Constructor for app/Actions/PACSUploadStudies:  SessionHost:  " . session("orthanc_host"));
+//         Debugbar::error("Constructor for app/Actions/PACSUploadStudies:  SessionHost:  " . session("orthanc_host"));
 
     	if(session("orthanc_host") == null ) {
     		echo "Setting server to Default.";
@@ -66,15 +74,16 @@ class PACSUploadStudies
 		self::$Authorization = config('API_Authorization');
 		self::$Token = config('API_Token');
 		self::$origin = self::my_server_url();
-		self::$anonymize = $request->input('anonymize'); // passed as false or true
-		self::$altertags = $request->input('altertags');// passed as false or true
-		self::$PatientID = $request->input('PatientID'); // If to be modified
-		self::$AccessionNumber = $request->input('AccessionNumber'); // If to be modified
-		self::$InstitutionName = $request->input('InstitutionName'); // If to be modified
-		self::$user_id = Auth::user()->id; // If to be modified
-		self::$user_name = Auth::user()->name; // If to be modified
-		self::$globalerror = [];
 		self::$deleteAferAnonymization = true;
+		$this->anonymize = $request->input('anonymize'); // passed as false or true
+		$this->altertags = $request->input('altertags');// passed as false or true
+		$this->PatientID = $request->input('PatientID'); // If to be modified
+		$this->AccessionNumber = $request->input('AccessionNumber'); // If to be modified
+		$this->InstitutionName = $request->input('InstitutionName'); // If to be modified
+		$this->user_id = Auth::user()->id; // If to be modified
+		$this->user_name = Auth::user()->name; // If to be modified
+		$this->globalerror = [];
+
 
 // 	Content-Disposition: form-data; name="anonymize"
 //
@@ -146,13 +155,16 @@ class PACSUploadStudies
             case 'UploadZipToPACS':
                  $this->UploadZipToPACS();
                 break;
-            case 'UploadZipPreProcess':
-                 $this->UploadZipPreProcess();
+            case 'PACSupload':
+                 $this->PACSupload($request);
                 break;
-
             default:
                 //
         }
+	}
+
+	public function get_json_response() {
+	    return $this->json_response;
 	}
 
 	private static function logVariable($var) {
@@ -197,7 +209,27 @@ class PACSUploadStudies
 		return $output;
 	}
 
-	private static function executeCURL($CURLOPT_URL) {
+	private function processCURLResults(&$ch) {
+
+		$this->result = curl_exec($ch);
+		$this->responsecode =  curl_getinfo($ch,CURLINFO_HTTP_CODE);
+		if (curl_errno($ch) || curl_getinfo($ch,CURLINFO_HTTP_CODE) != "200") {
+			$this->curlerror = true;
+			$this->curl_error_text = "Status:  " . curl_getinfo($ch,CURLINFO_HTTP_CODE) . ', Error: ' . curl_error($ch);
+			curl_close($ch);
+			return $this->result;
+		}
+		else {
+
+			$this->curlerror = false;
+			$this->curl_error_text = "No Errors";
+			curl_close($ch);
+			return $this->result;
+		}
+
+	}
+
+	private function executeCURL($CURLOPT_URL) {
 
 
 		$ch = curl_init();
@@ -205,7 +237,6 @@ class PACSUploadStudies
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 		curl_setopt($ch,CURLOPT_ENCODING , "gzip");
-		self::logVariable("executeCURL:	 " . self::$OrthancURL . $CURLOPT_URL);
 		$headers = array();
 		//$headers[] = 'Content-Type: application/x-www-form-urlencoded';
 		$headers[] = 'Authorization:' . self::$Authorization;
@@ -214,19 +245,27 @@ class PACSUploadStudies
 		//$headers[] = 'Accept-Encoding:gzip';
 
 		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-		$result = curl_exec($ch);
-		self::logVariable($result);
-		if (curl_errno($ch)) {
-			$error = curl_error($ch);
-			curl_close($ch);
-			return '{"error":"' . $error . '"}';
-		}
-		curl_close($ch);
-		return $result;
+        return $this->processCURLResults($ch);
 
 	}
 
-	private static function sendImageToOrthancWithExpect ($filePath, $type)	 {
+	private function executeCURLPOSTJSON($JSONQuery, $url) {
+
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_URL, self::$OrthancURL . $url);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+		curl_setopt($ch, CURLOPT_POST, 1);
+		curl_setopt($ch, CURLOPT_POSTFIELDS, $JSONQuery);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+		$headers = array();
+		$headers[] = 'Authorization:' . self::$Authorization;
+		$headers[] = 'Token:' . self::$Token;
+		$headers[] = 'Origin:' . self::$origin;
+		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        return $this->processCURLResults($ch);
+	}
+
+	private function sendImageToOrthancWithExpect ($filePath, $type)	 {
 
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_URL, self::$OrthancURL .'instances');
@@ -234,7 +273,6 @@ class PACSUploadStudies
 		curl_setopt($ch, CURLOPT_POST, 1);
 		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 		curl_setopt($ch, CURLOPT_POSTFIELDS, file_get_contents($filePath));
-		self::logVariable(self::$OrthancURL .'instances' . $filePath);
 		$headers = array();
 		$headers[] = 'Authorization:' . self::$Authorization;
 		$headers[] = 'Token:' . self::$Token;
@@ -243,7 +281,6 @@ class PACSUploadStudies
 		$headers[] = 'Content-Type: ' . $type;
 		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 		$result = curl_exec($ch);
-		self::logVariable($result);
 		if (curl_errno($ch)) {
 			$error = curl_error($ch);
 			curl_close($ch);
@@ -252,33 +289,6 @@ class PACSUploadStudies
 		curl_close($ch);
 		return $result;
 
-	}
-
-	private static function executeCURLPOSTJSON($JSONQuery, $url) {
-
-		$ch = curl_init();
-		curl_setopt($ch, CURLOPT_URL, self::$OrthancURL . $url);
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-		curl_setopt($ch, CURLOPT_POST, 1);
-		curl_setopt($ch, CURLOPT_POSTFIELDS, $JSONQuery);
-		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-		self::logVariable("self::executeCURLPOSTJSON:	 " . self::$OrthancURL . $url);
-		self::logVariable("self::executeCURLPOSTJSON_Args:	" . $JSONQuery);
-		$headers = array();
-		$headers[] = 'Authorization:' . self::$Authorization;
-		$headers[] = 'Token:' . self::$Token;
-		$headers[] = 'Origin:' . self::$origin;
-		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-		$result = curl_exec($ch);
-		// self::logVariable($result);
-		if (curl_errno($ch)) {
-			$error = curl_error($ch);
-			curl_close($ch);
-			return '{"curl_error":"' . $error .	 '"}';
-
-		}
-		curl_close($ch);
-		return $result;
 	}
 
 	private static function setUserMetaDataTag($Level,$uuid, $tagindex, $tagvalue)	{
@@ -290,7 +300,6 @@ class PACSUploadStudies
 		curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
 		curl_setopt($ch, CURLOPT_POSTFIELDS, $tagvalue);
 		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-		//self::logVariable("PACSUploadStudiesController->setUserMetaDataTag:	 " . self::$OrthancURL . $Level . '/' . $uuid .'/metadata/' . $tagindex . '/' . $tagvalue);
 		$headers = array();
 		$headers[] = 'Authorization:' . self::$Authorization;
 		$headers[] = 'Token:' . self::$Token;
@@ -298,7 +307,6 @@ class PACSUploadStudies
 		$headers[] = 'Content-Type: application/x-www-form-urlencoded';
 		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 		$result = curl_exec($ch);
-		//self::logVariable($result);
 		if (curl_errno($ch)) {
 			$error = curl_error($ch);
 			curl_close($ch);
@@ -326,12 +334,65 @@ class PACSUploadStudies
 		self::setUserMetaDataTag("studies",$orthanc_uuid,1026, "Accessionumber");
 		self::setUserMetaDataTag("studies",$orthanc_uuid,1027, "HL7s");
 		self::setUserMetaDataTag("studies",$orthanc_uuid,1028, "HighestReportStatus");
-		self::logVariable(self::getFullMetaTags("studies", $orthanc_uuid));
+// 		self::logVariable(self::getFullMetaTags("studies", $orthanc_uuid));
 	}
 
-	private static function writeStudySummaryToDatabase($orthanc_uuid, $modality, $count, $user_id, $user_name) {
+    // function to add the Modalitie(s) and the Instance count to the Standard result for a Study Query.
+	private function Studies_Data_With_Modalities_Count($study_uuid) {
 
-			$studydata = json_decode(self::executeCURL('studies/' . $orthanc_uuid));
+	    $studydata = json_decode($this->executeCURL("studies/"  . $study_uuid));
+	    $instancecount = 0;
+	    $modalities = [];
+	    $series =  $studydata->Series;
+        foreach ($series as $seriesuuid) {
+             $seriesdata = json_decode($this->executeCURL("series/"  . $seriesuuid));
+             $instancecount = $instancecount + count($seriesdata->Instances);
+             if (!in_array($seriesdata->MainDicomTags->Modality,$modalities)) $modalities[] = $seriesdata->MainDicomTags->Modality;
+        }
+	    $studydata->Modality = implode(",",$modalities);
+	    $studydata->ImagesInAcquisition = $instancecount;
+	    return $studydata;
+	}
+    // Not currently really used, but good reference for the studes/page query.
+	private function Studies_Page_Query($Query) {
+
+	    // Short form to just get detailed data by a simple query using that plug-in so that modalities and instance count comes back also.
+	    // $Query, what to search for:  {"StudyDate":"20110303-20210228"}
+	    // $Level, for now has to be Study
+	    // $Expand, also set to true, although could change that.
+	    // $Normalize, not really sure what that does, but false for now, see https://book.orthanc-server.com/users/rest.html#performing-queries-on-modalities for C-finds
+	    // $pagenumber, int 1 to the end, defaults to 1 if not in query
+	    // $itemsperpage int
+	    // $sortparam, what to sort by, has to be in the indexed set of tags, defaults to StudyDate if left out.
+	    // $reverse, int, 1 or 0.
+	    // $widget, the selected widget, defaults to the only one for now, 1
+	    // $Local, an object, does not apply to the CURL
+	    // $MetaData, an object
+	    // $Tags, also an object of deeper DICOM tags to search for, not fully implement.
+	    // $Limit defaults to 200 if not specified.
+
+
+	    $fullquery = new \stdClass();
+	    $fullquery->Level = "Study";
+		$fullquery->Expand = true;
+		$fullquery->Normalize = false;
+		$fullquery->pagenumber = 1;
+		$fullquery->itemsperpage = 5;
+		$fullquery->sortparam = 'StudyDate';
+		$fullquery->reverse = 0;
+		$fullquery->widget = 1;
+		$fullquery->Query = $Query;
+		$fullquery->Local =  new \stdClass();
+		$fullquery->MetaData =  new \stdClass();
+		$fullquery->Tags =  new \stdClass();
+		$postfields = json_encode($fullquery);
+		return $this->executeCURLPOSTJSON($postfields, 'studies/page');
+
+	}
+
+	private function writeStudySummaryToDatabase($orthanc_uuid) {
+
+            $studydata = $this->Studies_Data_With_Modalities_Count($orthanc_uuid);
 			// Verify Date Format for DB
 			// $uniquestudies[$key]["Modality"],  need to be fixed or just omitted.
 			$test = \DateTime::createFromFormat('Ymd', $studydata->MainDicomTags->StudyDate);
@@ -340,13 +401,13 @@ class PACSUploadStudies
 			if (!$test) $studydata->PatientMainDicomTags->PatientBirthDate = "19700101";
             $data = [
 
-                "uploader_id" => $user_id,
-                "uploader_name" => $user_name,
+                "uploader_id" => $this->user_id,
+                "uploader_name" =>$this->user_name,
                 "orthanc_uuid" => $studydata->ID,
                 "StudyInstanceUID" => $studydata->MainDicomTags->StudyInstanceUID,
                 "StudyDate" => $studydata->MainDicomTags->StudyDate,
                 "StudyTime" => isset($studydata->MainDicomTags->StudyTime)?$studydata->MainDicomTags->StudyTime:"",
-                "Modality" => $modality,
+                "Modality" => $studydata->Modality,
                 "ReferringPhysicianName" => isset($studydata->MainDicomTags->ReferringPhysicianName)?$studydata->MainDicomTags->ReferringPhysicianName:"",
                 "InstitutionName" => isset($studydata->MainDicomTags->InstitutionName)?$studydata->MainDicomTags->InstitutionName:"",
                 "StudyDescription" => isset($studydata->MainDicomTags->StudyDescription)?$studydata->MainDicomTags->StudyDescription:"",
@@ -356,7 +417,7 @@ class PACSUploadStudies
                 "PatientName" => isset($studydata->PatientMainDicomTags->PatientName)?$studydata->PatientMainDicomTags->PatientName:"",
                 "PatientBirthDate" => $studydata->PatientMainDicomTags->PatientBirthDate,
                 "PatientSex" => isset($studydata->PatientMainDicomTags->PatientSex)?$studydata->PatientMainDicomTags->PatientSex:"",
-                "ImagesInAcquisition" => $count,
+                "ImagesInAcquisition" => $studydata->ImagesInAcquisition,
                 "upload_datetime" => date("Y-m-d H:i:s", time())
 		    ];
 
@@ -370,18 +431,18 @@ class PACSUploadStudies
 		// Keep the original initially.
 		// See http://dicom.nema.org/medical/dicom/current/output/html/part15.html#chapter_E for standard per NEMA
 
-		$newdata = self::executeCURLPOSTJSON ('{"Replace": {"StudyDate":"19700101","StudyTime":"000000"},"Keep": ["StudyDescription","SeriesDescription"],"KeepPrivateTags": true,"DicomVersion" : "2017c"}', 'studies/' . $study_uuid . '/anonymize');;
+		$newdata = $this->executeCURLPOSTJSON ('{"Replace": {"StudyDate":"19700101","StudyTime":"000000"},"Keep": ["StudyDescription","SeriesDescription"],"KeepPrivateTags": true,"DicomVersion" : "2017c"}', 'studies/' . $study_uuid . '/anonymize');;
 		$newdata = json_decode($newdata);
-		self::logVariable($newdata);
+// 		self::logVariable($newdata);
 		$new_uuid = $newdata->ID;
 		//Below is to delete, if necessary
 		//self::DeleteStudy($new_uuid);
 
-		return self::writeStudySummaryToDatabase($new_uuid, "", "", self::$user_id, self::$user_name);
+		return $this->writeStudySummaryToDatabase($new_uuid);
 
 	}
 
-	public function PACSupload () {
+	public function PACSupload ($request) {
 
 		// $_SESSION['DICOMUPLOAD'] set in the Class to collect the StudyInstanceUID's for the folder, as an array of values.
 		// unless there are uploads at exactly the same second.	 Could add the ID in from of the timestapm also but it is for the user's session anyways.
@@ -393,15 +454,25 @@ class PACSUploadStudies
 		// [IPaddress] => 192.168.0.108
 		// [passfor] => upload
 		// [data] => Array ( [userid] => 1 [user_name] => sscotti [mrn] => DEV0000005 [anonymize] => normal ) )
-		//$_SESSION['uploaddata']['data']['anonymize']
-		if (!isset($_SESSION['DICOMUPLOAD'][$_POST['timestamp']])) {
-		$_SESSION['DICOMUPLOAD'][$_POST['timestamp']] = [];
-		$_SESSION['DICOMUPLOAD'][$_POST['timestamp']]["type"] = $_POST['type'];
-		$_SESSION['DICOMUPLOAD'][$_POST['timestamp']]["images"] = [];
-		$_SESSION['DICOMUPLOAD'][$_POST['timestamp']]["counter"] = 0;
-		$_SESSION['DICOMUPLOAD'][$_POST['timestamp']]["anonymize"] = $_POST['anonymize'];
+		//$_SESSION['uploaddata']['data']['anonymize']if(session("orthanc_host") == null )
+
+		$KEY = 'DICOMUPLOAD'. $request->input('timestamp');
+		$KEYTYPE = $KEY.'type';
+		$KEYIMAGES = $KEY.'images';
+		$KEYCOUNTER = $KEY.'counter';
+		$KEYANON = $KEY.'anon';
+		$ABORTKEY = 'ABORT'. $request->input('timestamp');
+
+		if (!$request->session()->has($KEY)) {
+
+		    $request->session()->put($KEY,$KEY);
+		    $request->session()->put($KEYTYPE,$request->input('type'));
+		    $request->session()->put($KEYIMAGES,[]);
+		    $request->session()->put($KEYCOUNTER,0);
+		    $request->session()->put($KEYANON,$request->input('anonymize'));
 		}
-		$_SESSION['DICOMUPLOAD'][$_POST['timestamp']]["counter"] = $_SESSION['DICOMUPLOAD'][$_POST['timestamp']]["counter"] + 1;
+
+        $request->session()->put($KEYCOUNTER,$request->session()->get($KEYCOUNTER) + 1);
 
 		// Extract file's data
 
@@ -437,16 +508,16 @@ class PACSUploadStudies
 
 		$webkitpath = $_POST['webkitpath'];
 
-		$curdir = Config::get('PATH_DICOM_TMP_PARENT');
-		$upload_root	= $curdir	 . DIRECTORY_SEPARATOR . $_SESSION['uploaddata']['data']['mrn'] . DIRECTORY_SEPARATOR . $_POST['timestamp'];
+		$curdir = config('myconfigs.PATH_DICOM_TMP_PARENT');
+		$upload_root	= $curdir	 . DIRECTORY_SEPARATOR . $this->PatientID  . DIRECTORY_SEPARATOR . $request->input('timestamp');
 		$upload_path = $upload_root . DIRECTORY_SEPARATOR . $webkitpath;
 		$upload_dir = dirname($upload_path);
 		$upload_path = $upload_dir . DIRECTORY_SEPARATOR . $file_name;
 		$this->logfilepath =  $upload_dir . DIRECTORY_SEPARATOR . 'UploadFolder.log';
-		self::logVariable($curdir);
+// 		self::logVariable($curdir);
 		if (!is_dir($upload_dir)) mkdir($upload_dir, 0755, true);
 
-		if (!isset($_SESSION['ABORTUPLOAD-' . $_POST['timestamp']])) {
+		if (!$request->session()->has($ABORTKEY)) {
 
 			$orthanc_uuid_array = [];  // contains unique uuid's for the upload
 			// Checks to make sure the actual mime type, not just the extension, match one in the allowed list.
@@ -454,7 +525,7 @@ class PACSUploadStudies
 			if (!array_key_exists($file_type, $allowed_mimetypes)) {
 				$file_object->status = "Skipping . .";
 				$log_string .= "That Mime Type: ($file_type) is not allowed.\n";
-				echo '{"file":' . json_encode($file_object) . ',"counter":"'	. $_POST['counter'] .'"}';
+				echo '{"file":' . json_encode($file_object) . ',"counter":"'	. $request->input('counter') .'"}';
 
 				$log_string .= "That Mime Type: ($file_type) is not allowed.\n";
 				//$error = true;
@@ -488,31 +559,31 @@ class PACSUploadStudies
 				// failed to move the file to the directory for some reason.
 
 					$this->logfiletext .= "Upload error for file: " . basename($file_name) . ".\n";
-					self::$globalerror[] = "Upload error for file: " . basename($file_name) . ".\n";
+					$this->globalerror[] = "Upload error for file: " . basename($file_name) . ".\n";
 				}
 			}
 
 			// Above just checks to make sure the file got uploaded and logs the results, error if there is some sort of upload error
 
-			if (count(self::$globalerror) > 0) {
+			if (count($this->globalerror) > 0) {
 
-				$_SESSION['ABORTUPLOAD-' . $_POST['timestamp']] = true;
+				$request->session()->put($ABORTKEY,true);
 				$file_object->status = "Aborting due to:	" . $file_name;
 				// unset the upload
-				unset($_SESSION['DICOMUPLOAD'][$_POST['timestamp']]);
-				$this->logfiletext .= "There were " . count(self::$globalerror) . "server errors.";
+				$request->session()->forget($KEY);
+				$this->logfiletext .= "There were " . count($this->globalerror) . "server errors.";
 			}
 
 			// Get here when all of the files have been uploaded and partially processed.
 
-			else if ($_SESSION['DICOMUPLOAD'][$_POST['timestamp']]["counter"] == $_POST['total']) {
+			else if ($request->session()->get($KEYCOUNTER) == $request->input('total')) {
 
 
 				$html = "";
 
 				foreach ($orthanc_uuid_array as $orthanc_uuid) {
 
-					$studydata = self::writeStudySummaryToDatabase($orthanc_uuid, "", "", self::$user_id, self::$user_name);
+					$studydata = $this->writeStudySummaryToDatabase($orthanc_uuid);
 					$html .= '<div style = "border: 1px solid black;">';
 
 					foreach ($studydata as $name => $value) {
@@ -523,7 +594,7 @@ class PACSUploadStudies
 
 					// Anonymized Study
 
-					if ($_SESSION['DICOMUPLOAD'][$_POST['timestamp']]["anonymize"] == "true") {
+					if ($this->anonymize === true) {
 
 						$studydata = self::_Anonymize($orthanc_uuid);
 
@@ -536,15 +607,14 @@ class PACSUploadStudies
 				}
 
 				$file_object->status = "Done";
-
-				unset($_SESSION['DICOMUPLOAD'][$_POST['timestamp']]);
-				echo '{"file":' . json_encode($file_object) . ',"results":' . json_encode($html) .'}';
+                $request->session()->forget($KEY);
+				$this->json_response = '{"file":' . json_encode($file_object) . ',"results":' . json_encode($html) .'}';
 			}
 
 			else {
 
 				$file_object->status = "Uploaded";
-				echo '{"file":' . json_encode($file_object) . ',"counter":"'	. $_POST['counter'] .'"}';
+				$this->json_response = '{"file":' . json_encode($file_object) . ',"counter":"'	. $_POST['counter'] .'","sessioncount":"' . $request->session()->get($KEYCOUNTER) . '"}';
 			}
 		}
 
@@ -552,8 +622,9 @@ class PACSUploadStudies
 
 			$file_object->status = "Already Aborted";
 			$this->logfiletext .= "Bypassing " . $file_name . ", already aborted";
-			echo '{"file":' . json_encode($file_object) . ',"counter":"'	. $_POST['counter'] .'"}';
+			$this->json_response = '{"file":' . json_encode($file_object) . ',"counter":"'	. $_POST['counter'] .'"}';
 		}
+
 		file_put_contents($this->logfilepath , $this->logfiletext, FILE_APPEND );
 	}
 
@@ -561,13 +632,13 @@ class PACSUploadStudies
 
 		// Below is for just sending a raw zip
 		// No logging to local file here, just to Debug Log
-		if (self::$altertags == "true") {
+		if ($this->altertags == "true") {
 			echo '{"status":"Not implemented, Orthanc does not really allow."}';
 			die();
 		}
 
 
-		$result = self::sendImageToOrthancWithExpect ($_FILES['file']['tmp_name'], "application/zip");
+		$result = $this->sendImageToOrthancWithExpect ($_FILES['file']['tmp_name'], "application/zip");
 		// Orthanc returns an array of results, depending upon how many images were in the study
 		$result = json_decode($result);
 		$studies = [];
@@ -603,7 +674,7 @@ class PACSUploadStudies
 // php-fpm_1            | }
 
 
-		$resultsummary = self::_PostProcessUpload ($studies);
+		$resultsummary = $this->_PostProcessUpload ($studies);
 
 
 		$this->json_response = '{"status":".zip uploaded to PACS.  Errors:  ' . $errors. '.  AlreadyStored:  ' . $AlreadyStored . '","results":' . json_encode($resultsummary) . '}';
@@ -615,7 +686,7 @@ class PACSUploadStudies
 		// Simply unzips the archive to the working directory in the config, using mrn and data/time as subdirectory
 		$zip = new \ZipArchive;
 		$iszip = $zip->open($_FILES['file']['tmp_name']);
-		$target = config('myconfigs.PATH_DICOM_TMP_PARENT') . '/' . self::$PatientID . '/' . Date("Y-m-d-H-i-s") . '/';
+		$target = config('myconfigs.PATH_DICOM_TMP_PARENT') . '/' . $this->PatientID . '/' . Date("Y-m-d-H-i-s") . '/';
 		$this->logfilepath = $target . "UploadZip.log";
 
 		if ($iszip !== TRUE) {
@@ -629,14 +700,13 @@ class PACSUploadStudies
 
 	}
 
-
 	private function _Process_Directory($target) {
 
 
 		// iterate through the unzipped directory recursively.
 		$fileSystemIterator = new \RecursiveDirectoryIterator($target);
 		// these are the tagas that we want to extract from the instances if we are processing a directory as opposed to just sending to Orthanc
-		$instances =[];
+		$UUIDArray =[]; // group into unique studies.
 
 		foreach (new \RecursiveIteratorIterator($fileSystemIterator) as $fileinfo) {
             /*
@@ -662,7 +732,7 @@ class PACSUploadStudies
 
 				$result = self::_Process_and_Send($filename, $upload_path, $target);
 
-				if ($result != false) $instances[] = $result->ParentStudy;
+				if ($result != false && !in_array($result->ParentStudy, $UUIDArray)) $UUIDArray[] = $result->ParentStudy;
 
 			}
 
@@ -671,12 +741,12 @@ class PACSUploadStudies
 				$this->logfiletext .=  "Should not get here, must be a " . $file_type . "\n";
 			}
 		}
-		$this->logfiletext .= "Finished Preprocessing, writing to database." . "\n" .  "There were " . count(self::$globalerror) .  " error(s).\n" ;
+		$this->logfiletext .= "Finished Preprocessing, writing to database." . "\n" .  "There were " . count($this->globalerror) .  " error(s).\nClick Upload Summary for details." ;
 
 		// OK to create and write to the file now because no more reading and unlinking
 		file_put_contents($this->logfilepath, $this->logfiletext , FILE_APPEND );
-		$resultsummary = $this->_PostProcessUpload ($instances);
-		$this->json_response = '{"status":"Zip uploaded & processed.  ' . "There were " . count(self::$globalerror) .  " error(s).\\n" . '","results":' . json_encode($resultsummary) .'}';
+		$resultsummary = $this->_PostProcessUpload ($UUIDArray);
+		$this->json_response = '{"status":"Zip uploaded & processed.  ' . "There were " . count($this->globalerror) .  " error(s).<br><br>Click Upload Summary for details." . '","results":' . json_encode($resultsummary) .'}';
 
 		}
 
@@ -722,12 +792,12 @@ class PACSUploadStudies
 			// Change the MRN to the Internal MRN, Change the Accession to "OutsideStudy", and set (0010,1000), RETIRED_OtherPatientIDs to $PatientID . "|" . $AccessionNumber;
 			// These can all apparently be done in one call, which is nice.
 			// Always Backup the existing triplet, PatientID/AccessionNumber/InstitutionName in the RETIRED_OtherPatientIDs tag
-			// If self::$altertags is true, then also alter the triplet, otherwise, just backup.
-			if (self::$altertags == "false") {
+			// If $this->altertags is true, then also alter the triplet, otherwise, just backup.
+			if ($this->altertags == "false") {
 				$args = self::$dcmtk_path . 'dcmodify -nb -i "(0010,1000)=' . $RETIRED_OtherPatientIDs . '" "' . $upload_path . '"';
 			}
 			else {
-				$args = self::$dcmtk_path . 'dcmodify -nb -i "(0010,0020)=' .	self::$PatientID . '" -nb -i "(0008,0050)=' . self::$AccessionNumber . '" -nb -i "(0008,0080)=' . self::$InstitutionName . '" -nb -i "(0010,1000)=' . $RETIRED_OtherPatientIDs . '" "' . $upload_path . '"';
+				$args = self::$dcmtk_path . 'dcmodify -nb -i "(0010,0020)=' .	$this->PatientID . '" -nb -i "(0008,0050)=' . $this->AccessionNumber . '" -nb -i "(0008,0080)=' . $this->InstitutionName . '" -nb -i "(0010,1000)=' . $RETIRED_OtherPatientIDs . '" "' . $upload_path . '"';
 			}
 			$proc = proc_open($args,[
 
@@ -745,7 +815,7 @@ class PACSUploadStudies
 			if ($exitcode != 0) {
 
 				$this->logfiletext .=  "Error Changing PatientID:  " . $filename . ".\n";
-				self::$globalerror[] = "Error Changing PatientID:  " . $filename;
+				$this->globalerror[] = "Error Changing PatientID:  " . $filename;
 				return false;
 
 			}
@@ -777,26 +847,26 @@ class PACSUploadStudies
 	// PROCEESSES AN ARRAY OF STUDY ID'S(uuids), writes to Database and handles the anonymization
 	// _Anonymize creates the anonymized study, writes it to the database and returns the study data as the array that was inserted into the database.
 
-	private function _PostProcessUpload ($instances) {
+	private function _PostProcessUpload ($UUIDArray) {
 
 		$html = "";
 
-		foreach ($instances as $orthanc_uuid) {
+		foreach ($UUIDArray as $orthanc_uuid) {
 
-			if (self::$anonymize == "true") {
+			if ($this->anonymize === true) {
 
 				$html .= self::_Get_HTMLSummary_From_Array(self::_Anonymize($orthanc_uuid));
 				if(self::$deleteAferAnonymization == true) {
 				 	self::_DeleteStudy($orthanc_uuid);
 				}
 				else {
-					$studydata = self::writeStudySummaryToDatabase($orthanc_uuid, "", "", self::$user_id, self::$user_name);
+					$studydata = $this->writeStudySummaryToDatabase($orthanc_uuid);
 					$html .= self::_Get_HTMLSummary_From_Array($studydata);
 				}
 			}
 
 			else {
-			$studydata = self::writeStudySummaryToDatabase($orthanc_uuid, "", "", self::$user_id, self::$user_name);
+			$studydata = $this->writeStudySummaryToDatabase($orthanc_uuid);
 			$html .= self::_Get_HTMLSummary_From_Array($studydata);
 			}
 
@@ -814,13 +884,13 @@ class PACSUploadStudies
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 		curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
-		self::logVariable("DeleteStudy:	 " . self::$OrthancURL . 'studies/' . $uuid);
+// 		self::logVariable("DeleteStudy:	 " . self::$OrthancURL . 'studies/' . $uuid);
 		$headers[] = 'Authorization:' . self::$Authorization;
 		$headers[] = 'Token:' . self::$Token;
 		$headers[] = 'Origin:' . self::$origin;
 		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 		$result = curl_exec($ch);
-		self::logVariable($result);
+// 		self::logVariable($result);
 		if (curl_errno($ch)) {
 			$error = curl_error($ch);
 			curl_close($ch);
@@ -834,7 +904,7 @@ class PACSUploadStudies
 
 }
 
-  /*
+  /*  studies/page route results example.
 
    {
       "widget": "<div data-url = \"/studies/page \" class = \"paginator\"><a data-page = \"1\" class = \"pageactive\" href=\"\">1</a> ... <a data-page = \"1\" class = \"pageactive\" href=\"\">1</a><span class = \"totalperpage\"> Total per page:  10</span></div>",

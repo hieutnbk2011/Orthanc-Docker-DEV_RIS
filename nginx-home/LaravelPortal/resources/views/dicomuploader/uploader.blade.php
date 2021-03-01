@@ -123,7 +123,7 @@ print_r($data);
 
 </head>
 <body>
-	<link rel="stylesheet" href="/uploader/style.css" type="text/css">
+	<link rel="stylesheet" href="/orthanc_upload_support/style.css" type="text/css">
 	<h4 class = "pageheader">
 		Dicom Study Uploader (.zip files or entire folder)
 	</h4>
@@ -224,7 +224,7 @@ print_r($data);
 			</div>
 			<h5 id = "displayafterinit">
 				Sending File . . <span id = "progress_text"></span>
-				<div><img id="loader" src="/uploader/loader.gif"></div>
+				<div><img id="loader" src="/orthanc_upload_support/loader.gif"></div>
 			</h5>
 			<h3>
 				Files Uploaded
@@ -427,6 +427,6 @@ document.querySelector("#clearzip").onclick = function() {
 
 };
 </script>
-<script src="/uploader/main.js"></script>
+<script src="/orthanc_upload_support/main.js"></script>
 </body>
 </html>

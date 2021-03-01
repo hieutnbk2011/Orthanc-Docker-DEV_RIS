@@ -410,6 +410,14 @@ Route::middleware(['auth:sanctum', 'verified'])->post('/PACSUploadStudies/Upload
     echo $PACSUpload->json_response;
 })->name('UploadZipToPACS');
 
+// Partially Working, PACSupload
+Route::middleware(['auth:sanctum', 'verified'])->post('/PACSUploadStudies/PACSupload', function(Request $request) {
+    $PACSUpload = new PACSUploadStudies($request,'PACSupload');
+    echo $PACSUpload->get_json_response();
+})->name('PACSupload');
+
+
+
 
 // RADIOLOGY REPORTING ROUTES, REORGANIZE LATER
 
