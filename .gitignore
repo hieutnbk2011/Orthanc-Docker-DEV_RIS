@@ -2,6 +2,7 @@
 /MySQL_DB/
 /OrthancIndex/
 /OrthancStorage/
+/pacs-1/dicomFiles/Archive.zip
 php-error.log
 .DS_Store
 composer.lock

@@ -19,7 +19,7 @@ services:
       build: pacs-1
       depends_on: [postgres_index-db]
       restart: unless-stopped
-      ports: ["4242:4242"]
+      ports: ["4444:4242"]
       volumes: ["./OrthancStorage:/var/lib/orthanc/db","./MWLFiles:/var/lib/orthanc/worklists","./pacs-1/dicomFiles:/etc/orthanc/dicomFiles"]
       environment:
 
