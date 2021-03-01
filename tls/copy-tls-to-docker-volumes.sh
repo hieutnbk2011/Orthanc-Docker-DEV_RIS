@@ -3,7 +3,7 @@
 function writeFileToDockerVolume {
 	echo "Writing $2 to $1"
 	docker run --rm "--volume=$1:/mnt" --interactive \
-		alpine dd "of=/mnt/$2"
+		nginx:alpine dd "of=/mnt/$2"
 }
 # copy server certs and private keys to volumes used by nginx to implement the TLS layer in front of Orthanc
 

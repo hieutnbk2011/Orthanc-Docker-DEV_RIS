@@ -397,6 +397,7 @@ class PACSUploadStudies
 			// $uniquestudies[$key]["Modality"],  need to be fixed or just omitted.
 			$test = \DateTime::createFromFormat('Ymd', $studydata->MainDicomTags->StudyDate);
 			if (!$test) $studydata->MainDicomTags->StudyDate = "19700101";
+			if (!isset($studydata->PatientMainDicomTags->PatientBirthDate)) $studydata->PatientMainDicomTags->PatientBirthDate = "19700101";
 			$test = \DateTime::createFromFormat('Ymd', $studydata->PatientMainDicomTags->PatientBirthDate);
 			if (!$test) $studydata->PatientMainDicomTags->PatientBirthDate = "19700101";
             $data = [
@@ -457,22 +458,19 @@ class PACSUploadStudies
 		//$_SESSION['uploaddata']['data']['anonymize']if(session("orthanc_host") == null )
 
 		$KEY = 'DICOMUPLOAD'. $request->input('timestamp');
-		$KEYTYPE = $KEY.'type';
-		$KEYIMAGES = $KEY.'images';
-		$KEYCOUNTER = $KEY.'counter';
-		$KEYANON = $KEY.'anon';
+		$UUIDS = 'UUIDS'. $request->input('timestamp');
 		$ABORTKEY = 'ABORT'. $request->input('timestamp');
 
-		if (!$request->session()->has($KEY)) {
+		if ($request->session()->has($KEY) !== true) {
 
-		    $request->session()->put($KEY,$KEY);
-		    $request->session()->put($KEYTYPE,$request->input('type'));
-		    $request->session()->put($KEYIMAGES,[]);
-		    $request->session()->put($KEYCOUNTER,0);
-		    $request->session()->put($KEYANON,$request->input('anonymize'));
+            $request->session()->push($KEY,microtime(TRUE));
+            $request->session()->put($UUIDS,[]);
+		    $request->session()->put($ABORTKEY,false);
 		}
+        else {
 
-        $request->session()->put($KEYCOUNTER,$request->session()->get($KEYCOUNTER) + 1);
+            $request->session()->push($KEY,microtime(TRUE)); // basically a page visit, count of this is the number of hits to the page.
+        }
 
 		// Extract file's data
 
@@ -517,9 +515,9 @@ class PACSUploadStudies
 // 		self::logVariable($curdir);
 		if (!is_dir($upload_dir)) mkdir($upload_dir, 0755, true);
 
-		if (!$request->session()->has($ABORTKEY)) {
+		if ($request->session()->get($ABORTKEY) !== true) {
 
-			$orthanc_uuid_array = [];  // contains unique uuid's for the upload
+			//$orthanc_uuid_array = [];  // contains unique uuid's for the upload
 			// Checks to make sure the actual mime type, not just the extension, match one in the allowed list.
 
 			if (!array_key_exists($file_type, $allowed_mimetypes)) {
@@ -541,7 +539,8 @@ class PACSUploadStudies
 
 					if ($file_ext == "dcm" && basename($file_name) != "DICOMDIR.dcm" ) {
 						$result = self::_Process_and_Send(basename($file_name), $upload_path, $upload_dir);
-						if ($result) $orthanc_uuid_array[] = $result->ParentStudy;
+						//if ($result) $orthanc_uuid_array[] = $result->ParentStudy;
+						$request->session()->push($UUIDS,$result->ParentStudy);
 					}
 					else if (basename($file_name) == "DICOMDIR.dcm") {
 
@@ -576,11 +575,11 @@ class PACSUploadStudies
 
 			// Get here when all of the files have been uploaded and partially processed.
 
-			else if ($request->session()->get($KEYCOUNTER) == $request->input('total')) {
+			else if (count($request->session()->get($UUIDS)) == $request->input('total')) {
 
 
 				$html = "";
-
+                $orthanc_uuid_array = $request->session()->get($UUIDS);
 				foreach ($orthanc_uuid_array as $orthanc_uuid) {
 
 					$studydata = $this->writeStudySummaryToDatabase($orthanc_uuid);
@@ -614,7 +613,7 @@ class PACSUploadStudies
 			else {
 
 				$file_object->status = "Uploaded";
-				$this->json_response = '{"file":' . json_encode($file_object) . ',"counter":"'	. $_POST['counter'] .'","sessioncount":"' . $request->session()->get($KEYCOUNTER) . '"}';
+				$this->json_response = '{"file":' . json_encode($file_object) . ',"counter":"'	. $_POST['counter'] .'","UUIDs":"' . json_encode($request->session()->get($UUIDS)). '"}';
 			}
 		}
 

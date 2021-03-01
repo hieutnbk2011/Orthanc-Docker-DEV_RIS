@@ -22,33 +22,38 @@ function checkDicomMime(file) {
 
   const fileReader = new FileReader();
   return new Promise((resolve, reject) => {
-	var blob = file.slice(0, 132); //read the first few bytes to get the header
-	fileReader.readAsArrayBuffer(blob);
-    //fileReader.readAsArrayBuffer(file);
-    fileReader.onload = function(event) {
+    try {
+        var blob = file.slice(0, 132); //read the first few bytes to get the header
+        fileReader.readAsArrayBuffer(blob);
+        //fileReader.readAsArrayBuffer(file);
+        fileReader.onload = function(event) {
 
-      const target = event.target;
-      const array = new Uint8Array(target.result);
-      const start = 128
-      const end = 132;
-      const str = [...array.slice(128, 132)].map(value => String.fromCharCode(value)).join('');
+          const target = event.target;
+          const array = new Uint8Array(target.result);
+          const start = 128
+          const end = 132;
+          const str = [...array.slice(128, 132)].map(value => String.fromCharCode(value)).join('');
 
-      const result = {
-        file,
-        fileName: file.name,
-        isBadFile: true
-      }
+          const result = {
+            file,
+            fileName: file.name,
+            isBadFile: true
+          }
 
-      if (str == "DICM") {
-        result.isBadFile = false;
-        counts.process++;
-      }
-      else {
-      	counts.omit++;
-      }
+          if (str == "DICM") {
+            result.isBadFile = false;
+            counts.process++;
+          }
+          else {
+            counts.omit++;
+          }
 
-      fileReader.onload = null;
-      resolve(result);
+          fileReader.onload = null;
+          resolve(result);
+        }
+    }
+    catch(err) {
+        console.log(err.message);
     }
   });
 }
