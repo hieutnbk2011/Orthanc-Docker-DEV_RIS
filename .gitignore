@@ -5,7 +5,14 @@
 /pacs-1/dicomFiles/Archive.zip
 php-error.log
 .DS_Store
+
 composer.lock
+nginx-home/LaravelPortal/composer.lock
 
 # Commit your application's lock file https://getcomposer.org/doc/01-basic-usage.md#commit-your-composer-lock-file-to-version-control
 # You may choose to ignore a library lock file http://getcomposer.org/doc/02-libraries.md#lock-file
+
+*.lock
+nginx-home/LaravelPortal/package-lock.json
+nginx-home/auth.log
+*.lock

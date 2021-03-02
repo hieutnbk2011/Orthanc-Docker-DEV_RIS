@@ -9,6 +9,7 @@ use App\MyModels\DatabaseFactory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Log;
 
 class PACSUploadStudies
 
@@ -461,8 +462,24 @@ class PACSUploadStudies
 		$UUIDS = 'UUIDS'. $request->input('timestamp');
 		$ABORTKEY = 'ABORT'. $request->input('timestamp');
 		$COUNTER = 'COUNTER'. $request->input('timestamp');
-
+        $result = DB::connection('mysql')->select('select DISTINCT date_time_key from dicom_uploads_temp where date_time_key = ?', [$KEY]);
+        foreach( $result as $row) {
+            self::logVariable($row->date_time_key);
+        }
+        self::logVariable($result);
+        //Log::info(json_encode($results[0]->date_time_key));
 		if ($request->session()->has($KEY) !== true) {
+
+		    DB::connection('mysql')->table('dicom_uploads_temp')->insertGetId([
+
+                'uploader_id' => Auth::user()->id,
+                'uploader_name' => Auth::user()->name,
+                'date_time_key' => $KEY,
+                'counter_index' => 0,
+                'aborted_flag' => 0,
+                'utc_hit_json' => '[]',
+                'study_uuid_json' => '[]'
+            ]);
 
             $request->session()->push($KEY,microtime(TRUE));
             $request->session()->put($UUIDS,[]);

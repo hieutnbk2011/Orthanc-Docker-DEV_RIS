@@ -98,10 +98,12 @@ Route::middleware(['auth:sanctum', 'verified'])->post('/readers', function (Requ
 
 // DEVTOOL PORTAL PAGE
 //  Route::match(['get', 'post']
-Route::middleware(['auth:sanctum', 'verified'])->get('/devtool', function () {
+Route::middleware(['auth:sanctum', 'verified'])->get('/devtool', function (Request $request) {
 
     $user = Auth::user();
     Debugbar::error($user);
+    $request->session()->flash('flash.banner', 'Yay it works!');
+$request->session()->flash('flash.bannerStyle', 'success');
     return view('devtool');
 
 })->name('devtool');

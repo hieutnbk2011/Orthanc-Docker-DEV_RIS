@@ -3,6 +3,7 @@
 .editorconfig
 .DS_Store
 Thumbs.db
+
 .env
 .env.backup
 /TMPUPLOADS
@@ -12,13 +13,6 @@ Thumbs.db
 /public/storage
 /storage/*.key
 
-composer.phar
-composer.lock
-
-.phpunit.result.cache
-docker-compose.override.yml
-Homestead.json
-Homestead.yaml
 npm-debug.log
 yarn-error.log
 /phpunit.xml
