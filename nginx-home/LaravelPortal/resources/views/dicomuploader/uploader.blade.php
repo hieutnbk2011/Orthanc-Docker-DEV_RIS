@@ -118,6 +118,9 @@ print_r($data);
 		.ui-tabs-panel {
 			/* 		height:100vh; */
 		}
+		.picker {
+		    color:black;
+		}
 
 	</style>
 
