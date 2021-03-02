@@ -10,7 +10,7 @@ Cross Site Request Forgery (CSRF) TOKEN genereated by Laravel, USAGE
 COOKIE:  X-XSRF-TOKEN , set that header if you want to read the COOKIE
 -->
 
-<link rel="stylesheet" href="/bower/font-awesome/css/fontawesome.min.css">
+<link rel="stylesheet" href="/bower/font-awesome/css/all.css">
 <link rel="stylesheet" href="/bower/bootstrap/dist/css/bootstrap.min.css"/>
 <link rel="stylesheet" href="/bower/jquery-ui/themes/dark-hive/jquery-ui.min.css" type="text/css">
 <link rel="stylesheet" href="/bower/jquery-timepicker-jt/jquery.timepicker.min.css" />
