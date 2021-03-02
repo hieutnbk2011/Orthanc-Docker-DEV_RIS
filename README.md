@@ -1,5 +1,9 @@
 # Purpose
 
+THERE IS A DEMO RUNNING (ON AND OFF) AT:
+
+https://dockerlaravel.medical.ky, USER:  testuser@fakedomain.com PASS:  TESTING!1
+
 This is a Orthanc Development project based upon the Osimis configuration located here:
 
 https://bitbucket.org/osimis/orthanc-setup-samples/src/master/docker/tls-with-nginx/
@@ -71,10 +75,10 @@ If you get it all started up:
 5.  Old RIS:  e.g.  
 6.  https://myris.medical.ky/ (not in the repo currently)
 
-The Laravel dev project does have a study browser with a PACS selector and other tools.
+The Laravel dev project does have a study browser with a PACS selector and other tools, including the beginnings of a radiology report creator and editor, see images below.  It will take some time to migrate the reporting tool, but it is partially funcitonal.
 
 https://github.com/sscotti/Orthanc-Docker-DEV_RIS/blob/main/docs/browser.png
 
 https://github.com/sscotti/Orthanc-Docker-DEV_RIS/blob/main/docs/devtool.png
 
-More details to be added as the project evolves.  Will soon put up a demo on a VPS so that you can check it out without going through the process of setting it up.
+https://github.com/sscotti/Orthanc-Docker-DEV_RIS/blob/main/docs/reporteditor.png

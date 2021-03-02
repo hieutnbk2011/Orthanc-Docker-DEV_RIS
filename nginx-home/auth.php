@@ -114,6 +114,6 @@ class ProxyController
 
 		}
 }
-
-$me = new ProxyController()->auth();
+// Need parenthesis around the'new' to call method in line like that.
+$me = (new ProxyController())->auth();
 ?>

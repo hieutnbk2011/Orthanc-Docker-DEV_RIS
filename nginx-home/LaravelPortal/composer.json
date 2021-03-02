@@ -76,18 +76,21 @@
         }
     },
     "autoload": {
-        "psr-4": {
-            "App\\": "app/",
-            "Database\\Factories\\": "database/factories/",
-            "Database\\Seeders\\": "database/seeders/",
-            "exclude-from-classmap": [
+
+        "__comment": "These are useful in the autoloader for excluding a class from a composer package and/or overriding a class from a composer package.  This is an example for the HL7 library that is used with the package.",
+
+        "exclude-from-classmap": [
         	    "vendor/aranyasen/hl7/src/HL7/Segments/PID.php"
-        	],
-            "files": [
+        ],
+        "files": [
         	    "vendoroverrides/aranyasen/hl7/src/HL7/Segments/PID.php",
         	    "vendoroverrides/aranyasen/hl7/src/HL7/Segments/IPC.php",
         	    "vendoroverrides/aranyasen/hl7/src/HL7/Segments/TXA.php"
-        	]
+        ],
+        "psr-4": {
+            "App\\": "app/",
+            "Database\\Factories\\": "database/factories/",
+            "Database\\Seeders\\": "database/seeders/"
         }
     },
     "autoload-dev": {

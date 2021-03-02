@@ -99,7 +99,6 @@ class Reports {
 
              $user = $row[0]->user;
              $responsearray["user"] = $user;
-             $responsearray["user"] = "Another User Has that Locked:  " . $user;
 
         }
 

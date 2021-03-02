@@ -20,8 +20,9 @@ class RedirectIfAuthenticated
     {
 
         if (!isset($_COOKIE['laravel_cookie_consent'])) {
-        echo '{"error":"No Cookie"}';
-        return redirect('/');
+
+            echo '{"error":"No Cookie"}';
+            return redirect('/');
 
         }
         $guards = empty($guards) ? [null] : $guards;

@@ -713,39 +713,37 @@ $(document).on("click, contextmenu", '.viewstudy', function(event) {
                 success: function(data, textStatus, xhr) {
 
                     response = parseMessages(data, true);
-                    if(!response.error) {
-                    if (data.user == "none" ) {  // not locked
 
-                    data = data.report;
+                    if(!response.error || (response.error && data.user.isInteger)) {
 
-					$('#markupform').html('<div class="htmlmarkup" name="htmlmarkup">' +  data + '</div>');
-					$(".reportdiv input").off();
-					$(".reportdiv input").keyup(function(event) {
-						if ($(".input1").is(":focus") && event.key == "Enter") {
-							event.preventDefault();
-							event.stopPropagation();
-						}
-					});
-					$(".reportdiv input").on("mouseleave", function() {$(this).parent().find("label").css({"background-color" : "transparent"})});
-					$(".reportdiv input").on("mouseenter",function() {$(this).parent().find("label").css({"background-color" : "#555"})});
+                        if (data.user.isInteger) showMessage("Notice", "Study is locked by user:  " + data.user);
 
-                    $('textarea').each( function() {  // set the text area to grow to content on load, applies to both.
-                        $(this).outerHeight( 'auto' ).outerHeight( this.scrollHeight );
-                    });
+                        data = data.report;
 
-                    setButtons(buttonstatus.loaded);
-                    $("#clinical_information").val($(".headerindication").html());
+                        $('#markupform').html('<div class="htmlmarkup" name="htmlmarkup">' +  data + '</div>');
+                        $(".reportdiv input").off();
+                        $(".reportdiv input").keyup(function(event) {
+                            if ($(".input1").is(":focus") && event.key == "Enter") {
+                                event.preventDefault();
+                                event.stopPropagation();
+                            }
+                        });
+                        $(".reportdiv input").on("mouseleave", function() {$(this).parent().find("label").css({"background-color" : "transparent"})});
+                        $(".reportdiv input").on("mouseenter",function() {$(this).parent().find("label").css({"background-color" : "#555"})});
+
+                        $('textarea').each( function() {  // set the text area to grow to content on load, applies to both.
+                            $(this).outerHeight( 'auto' ).outerHeight( this.scrollHeight );
+                        });
+
+                        setButtons(buttonstatus.loaded);
+                        $("#clinical_information").val($(".headerindication").html());
+
 
                     }
 
-                    else {
-                        var userid = data.user;
-                        showMessage("Study Locked", "Study Locked by User:  " + userid);
-                        }
-                        }
-                        else {
+                    else {  // some other type of error
                         setTimeout(function () {location.href = "/"}, 2000); // redirect home
-                        }
+                    }
                 }
             });
     }
