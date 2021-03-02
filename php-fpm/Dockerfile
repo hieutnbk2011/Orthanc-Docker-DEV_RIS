@@ -35,4 +35,10 @@ RUN docker-php-ext-install pdo_mysql zip exif pcntl gd
 #  && sed -E -i -e 's/post_max_size = 8M/post_max_size = 64M/' /etc/php.ini \
 #  && sed -E -i -e 's/upload_max_filesize = 2M/upload_max_filesize = 64M/' /etc/php.ini
 
+# php artisan storage:link 
+# THAT NEEDS TO BE RUN FROM THE nginx-home/LaravelPortal/ directory to symlink the storage directory.  NEED to figure out how to do that.
+# RUN cd /nginx-home/LaravelPortal/
+# RUN php artisan storage:link
+
 ENTRYPOINT ["php-fpm"]
+
