@@ -460,17 +460,20 @@ class PACSUploadStudies
 		$KEY = 'DICOMUPLOAD'. $request->input('timestamp');
 		$UUIDS = 'UUIDS'. $request->input('timestamp');
 		$ABORTKEY = 'ABORT'. $request->input('timestamp');
+		$COUNTER = 'COUNTER'. $request->input('timestamp');
 
 		if ($request->session()->has($KEY) !== true) {
 
             $request->session()->push($KEY,microtime(TRUE));
             $request->session()->put($UUIDS,[]);
 		    $request->session()->put($ABORTKEY,false);
+		    $request->session()->put($COUNTER,0);
 		}
         else {
 
             $request->session()->push($KEY,microtime(TRUE)); // basically a page visit, count of this is the number of hits to the page.
         }
+        $request->session()->put($COUNTER,intval($request->session()->get($COUNTER)) + 1);
 
 		// Extract file's data
 
@@ -613,7 +616,7 @@ class PACSUploadStudies
 			else {
 
 				$file_object->status = "Uploaded";
-				$this->json_response = '{"file":' . json_encode($file_object) . ',"counter":"'	. $_POST['counter'] .'","UUIDs":"' . json_encode($request->session()->get($UUIDS)). '"}';
+				$this->json_response = '{"file":' . json_encode($file_object) . ',"counter":"'	. $_POST['counter'] .'","UUIDs":' . json_encode($request->session()->get($UUIDS)). ',"DICOMUPLOAD":' . json_encode($request->session()->get($KEY)) . ',"COUNTER":' . $request->session()->get($COUNTER) . '}';
 			}
 		}
 
