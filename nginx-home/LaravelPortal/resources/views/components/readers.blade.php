@@ -58,7 +58,7 @@
 <div><span>Indication:</span><span class="headerindication"></span></div>
 </div>
 <div class="reportheader col-sm-6">
-<ol style ="margin: 0px 0px 0px -40px;">
+<ol>
 <li>Choose a report template, or load an old report into the editor.</li>
 <li>If a template, fill out the fields and selects, and then click "Preview" to review before submitting.</li>
 <li>If from a prior, you can load the old report, and then edit the old report inline using the mouse and keyboard.</li>
@@ -716,7 +716,7 @@ $(document).on("click, contextmenu", '.viewstudy', function(event) {
 
                     if(!response.error || (response.error && data.user.isInteger)) {
 
-                        if (data.user.isInteger) showMessage("Notice", "Study is locked by user:  " + data.user);
+                        if (data.user.isInteger) alert("Notice", "Study is locked by user:  " + data.user);
 
                         data = data.report;
 
@@ -2347,13 +2347,23 @@ padding-bottom:30px;
 
 .reportheader {
 
+font-family: Helvetica, "Trebuchet MS", Verdana, sans-serif;
+
 background:black !important;
 color:white !important;
-font-size:10px;
+font-size:12px;
+font-weight: bold;
 border:1px solid white;
 border-radius:5px;
 }
 
+.reportheader ol {
+list-style:disc;
+}
+.reportheader div:nth-child(even) {
+
+    background-color:#666;
+}
 .reportheader div span:first-child {
   padding:0px 5px 0px 0px;
 }
