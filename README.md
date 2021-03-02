@@ -75,10 +75,12 @@ If you get it all started up:
 5.  Old RIS:  e.g.  
 6.  https://myris.medical.ky/ (not in the repo currently)
 
-The Laravel dev project does have a study browser with a PACS selector and other tools, including the beginnings of a radiology report creator and editor, see images below.  It will take some time to migrate the reporting tool, but it is partially funcitonal.
+The Laravel dev project does have a study browser with a PACS selector and other tools, including the beginnings of a radiology report creator and editor, see images below.  It will take some time to migrate the reporting tool, but it is partially funcitonal.  There is also another DICOM filer uploader that can upload a .zip via 2 methods or upload an entire folder.
 
 https://github.com/sscotti/Orthanc-Docker-DEV_RIS/blob/main/docs/browser.png
 
 https://github.com/sscotti/Orthanc-Docker-DEV_RIS/blob/main/docs/devtool.png
 
 https://github.com/sscotti/Orthanc-Docker-DEV_RIS/blob/main/docs/reporteditor.png
+
+https://github.com/sscotti/Orthanc-Docker-DEV_RIS/blob/main/docs/uploader.png
