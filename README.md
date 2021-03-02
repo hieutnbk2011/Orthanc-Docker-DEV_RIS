@@ -2,7 +2,7 @@
 
 THERE IS A DEMO RUNNING (ON AND OFF) AT:
 
-https://dockerlaravel.medical.ky, USER:  testuser@fakedomain.com PASS:  TESTING!1
+https://dockerlaravel.medical.ky, USER:  testuser@fakedomain.com PASS:  Testing!1
 
 This is a Orthanc Development project based upon the Osimis configuration located here:
 
