@@ -449,7 +449,7 @@ class PACSUploadStudies
 		// $_SESSION['DICOMUPLOAD'] set in the Class to collect the StudyInstanceUID's for the folder, as an array of values.
 		// unless there are uploads at exactly the same second.	 Could add the ID in from of the timestapm also but it is for the user's session anyways.
 
-		set_time_limit (60);
+		// set_time_limit (60);
 
 		// initialize the session stuff for this upload.
 		// do not implement anonymize, allow after upload, or just call when done, just to keep separate from this script.
