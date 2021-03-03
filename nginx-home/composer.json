@@ -1,0 +1,35 @@
+{
+    "name": "cayman/medical",
+    "type": "project",
+    "description": "A Bare Bone RIS project integrated with Orthanc Open Source PACS, API residing on Orthanc Server",
+    "keywords": ["RIS", "Radiology", "Orthanc", "Dicom", "HL7"],
+    "homepage": "https://idiots-are-savants.com",
+    "license": "MIT",
+    "require-dev": {
+        "phpunit/phpunit": "^8"
+    },
+    "autoload": {
+        "psr-4": {
+            "": ["classes" ]
+        },
+        
+        "classmap": [
+			
+        ],
+        
+        "files": [
+            "classes/DatabaseFactory.php"
+        ]
+    },
+    
+    "require": {
+        "rbdwllr/reallysimplejwt": "^4.0"
+    },
+    
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "https://asset-packagist.org"
+        }
+    ]
+}

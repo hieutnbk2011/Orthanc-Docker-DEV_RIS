@@ -55,29 +55,32 @@ class Reports extends Model {
 
   	public static function parseHL7($message) {
 
-	$parsemessage = [];
-	$segments = explode("\r", $message);  // may have to adjust EDITOS
+        Log::info(" parseHL7");
+        Log::info($message);
+        $parsemessage = [];
+        $segments = explode("\r", $message);  // may have to adjust EDITOS
 
-	foreach ($segments as $segment) {
+        foreach ($segments as $segment) {
 
-		$fields = explode("|", $segment);
-		$segmentname = $fields[0];
-		if ($segmentname == "MSH") $offset = -1;
-		else $offset = 0;
+            $fields = explode("|", $segment);
+            $segmentname = $fields[0];
+            if ($segmentname == "MSH") $offset = -1;
+            else $offset = 0;
 
-		foreach ($fields as $fieldindex => $field) {
-			if ($segmentname != "MSH" || $fieldindex != 1) {
-			$components = explode("^", $field);
-			}
-			else {
-			$components = [$field];
-			}
+            foreach ($fields as $fieldindex => $field) {
+                if ($segmentname != "MSH" || $fieldindex != 1) {
+                $components = explode("^", $field);
+                }
+                else {
+                $components = [$field];
+                }
 
-			foreach ($components as $componentindex => $component) {
-				$parsemessage[$segmentname][$fieldindex + $offset][$componentindex] = $component;
-			}
-		}
-	}
+                foreach ($components as $componentindex => $component) {
+                    $parsemessage[$segmentname][$fieldindex + $offset][$componentindex] = $component;
+                }
+            }
+        }
+        return $parsemessage;
 
 	}
 
@@ -112,8 +115,8 @@ class Reports extends Model {
 
         //$conn = DatabaseFactory::getFactory()->getConnection();
 
-        $query = "SELECT uuid, user from study_locks WHERE uuid = ? AND user != ? LIMIT 1";
-        $params = [$studyuuid, Auth::user()->reader_id];
+        $query = "SELECT uuid, user from study_locks WHERE uuid = ? LIMIT 1";
+        $params = [$studyuuid];
         $row = DB::connection('mysql2')->select($query,$params);
 
         if (count($row) > 0) {
@@ -123,30 +126,21 @@ class Reports extends Model {
 
         }
 
-        else {
-
-        $responsearray["user"] = "none";
         $markup = self::getReportById($templateid);
         $responsearray["report"] = $markup;
         //$query="INSERT INTO  study_locks (uuid, user) VALUES (?, ?) ON DUPLICATE KEY UPDATE uuid = uuid";  // adds to table if it doesn't exist.
         //$parameters = [$_POST["uuid"], Session::get('user_id')];
-        $query = "SELECT uuid, user from study_locks WHERE uuid = ? AND user = ? LIMIT 1";
-        $params = [$studyuuid, Auth::user()->reader_id];
-        $row = DB::connection('mysql2')->select($query,$params);
-        if (count($row) == 0) {
-        DB::connection('mysql2')->table('study_locks')->insert([
-            'uuid' => $studyuuid,
-            'user' => Auth::user()->reader_id
-        ]);
-        }
-        else {
-            // already locked by this user.
-        }
-        //$stmt = $conn->prepare($querry);
-        //$stmt->execute($parameters);
+        //$query = "SELECT uuid, user from study_locks WHERE uuid = ? AND user = ? LIMIT 1";
+        //$params = [$studyuuid, Auth::user()->reader_id];
+        //$row = DB::connection('mysql2')->select($query,$params);
+        if (!isset($responsearray["user"])) {
 
+            DB::connection('mysql2')->table('study_locks')->insert([
+                'uuid' => $studyuuid,
+                'user' => Auth::user()->reader_id
+            ]);
+            $responsearray["user"] = Auth::user()->reader_id;
         }
-
         echo json_encode($responsearray);
 
     }
@@ -206,7 +200,7 @@ class Reports extends Model {
 
   		$query = "SELECT * FROM reports WHERE accession_number = ? ORDER BY datetime DESC";
   		$params = [$accession_number];
-  		// $result = DatabaseFactory::selectByQuery($query, $params)->fetchAll(PDO::FETCH_OBJ);
+  		// Log::info("getAllReportsByAccession");
   		$result = DB::connection('mysql2')->select($query,$params);
   		return $result;
   	}
@@ -228,13 +222,13 @@ class Reports extends Model {
 
 
 		$reports = self::getAllReportsByAccession($accession_number);
+		// Log::info(json_encode($reports));
 		$hl7 = [];
 		$json = array("user_email" => Auth::user()->email);
 		foreach ($reports as $report) {
-			Log::error(var_dump($report->get()->HL7_message));
-			$hl7[] = self::parseHL7($report->get()->HL7_message);
+			$hl7[] = self::parseHL7($report->HL7_message);
 		}
-		die();
+		// Log::info(json_encode($hl7));
 		$json['hl7'] = $hl7;
 		//DatabaseFactory::logVariable($hl7);
 		foreach ($hl7 as $key => $value) {
@@ -275,16 +269,37 @@ class Reports extends Model {
 		$dob = \DateTime::createFromFormat('Ymd', $PID[7][0]);
 		(!$dob)?$dob = "Not available":$dob = $dob->format('M-d-Y');
 
-		$studydate = \DateTime::createFromFormat('YmdHis', $OBR[36][0]);
-		(!$studydate)?$studydate = "Not available":$studydate = $studydate->format('M-d-Y H:i:s');
+		// $studydate = \DateTime::createFromFormat('YmdHis', $OBR[36][0]);
+		if (strlen($OBR[36][0]) == 8) {
+		    $studydate = \DateTime::createFromFormat('Ymd', $OBR[36][0]);
+		    (!$studydate)?$studydate = "Not available":$studydate = $studydate->format('M-d-Y');
+		}
+		else if (strlen($OBR[36][0]) == 14) {
+		    $studydate = \DateTime::createFromFormat('YmdHis', $OBR[36][0]);
+		    (!$studydate)?$studydate = "Not available":$studydate = $studydate->format('M-d-Y H:i:s');
+		}
+// 		$studydate = \DateTime::createFromFormat('YmdHis', $OBR[36][0]);
+// 		(!$studydate)?$studydate = "Not available":$studydate = $studydate->format('M-d-Y H:i:s');
 
 		$reportdate = \DateTime::createFromFormat('YmdHis', $OBX[14][0]);
 		(!$reportdate)?$reportdate = "Not available":$reportdate = $reportdate->format('M-d-Y H:i:s');
 		$reportheadercss = self::renderComponent("includes.reportheader"); // Config::get("REPORT_CSS")
 		$facility = ""; // FacilityModel::letterHeader(Config::get("DEFAULT_FACILITY_ID"), true);
+
+		Log::info("getHeaderFooterFromHL7");
+		Log::info($referringphysician);
+		Log::info($referringphysicianid);
+		Log::info($dob);
+		Log::info($studydate);
+		Log::info($reportdate);
+		Log::info($reportheadercss);
+		Log::info("OBR");
+		Log::info(json_encode($OBR, JSON_PRETTY_PRINT));
+		$patientname = (!empty($PID[5][0] )?$PID[5][0] :"") . ', ' . (!empty($PID[5][1] )?$PID[5][1] :"");
+
 		$header = $reportheadercss . $facility .  '<div id = "reportnoheader"><table id = "header_info">
 		<tr>
-			<td id="report_name"> Patient Name: ' . $PID[5][0] . ', ' . $PID[5][1] . '</td>
+			<td id="report_name"> Patient Name: ' . $patientname . '</td>
 			<td id="report_mrn"> Med Rec Number:  ' . $PID[3][0] . '</td>
 			<td rowspan = "6" style="vertical-align:text-top;white-space:break-spaces;width:200px">Indication:  ' . $OBR[13][0]  . '</td>
 		</tr>
@@ -314,7 +329,7 @@ class Reports extends Model {
 	'<br>Electronically signed:<br><br>Reader Profile:  '  . $OBX[16][0] .  '<br>'  . $OBX[16][2] . (!empty($OBX[16][3])?" " . $OBX[16][3]:"") . " " . $OBX[16][1] . " " . $OBX[16][5] . '<br>'  . $datetime . '</div>';
 		$markup['header'] = $header;
 		$markup['footer'] = $footer;
-		$markup['footer'] .= '<div id = "disclaimer">' . Config::get('DISCLAIMER') . '</div></div>';
+		$markup['footer'] .= '<div id = "disclaimer">' . self::renderComponent("includes.reportdisclaimer") . '</div></div>';
 		$markup['body'] = '<div class = "htmlmarkup" name="htmlmarkup">' . str_replace("\\.br\\", "<br>", $OBX[5][0]) . '</div>';
 		$markup['readername'] = $OBX[16][2] . (!empty($OBX[16][3])?" " . $OBX[16][3]:"") . " " . $OBX[16][1] . " " . $OBX[16][5];
 		$markup['readerid'] = $OBX[15][0];
@@ -322,7 +337,5 @@ class Reports extends Model {
 
 		return $markup;
 	}
-
-
 
 }  // end of class

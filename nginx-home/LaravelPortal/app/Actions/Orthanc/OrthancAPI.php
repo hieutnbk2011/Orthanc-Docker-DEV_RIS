@@ -8,6 +8,7 @@ use ReallySimpleJWT\Token;
 use App\MyModels\DatabaseFactory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Log;
 
 class OrthancAPI  {
 
@@ -264,7 +265,7 @@ Used for downloadDCMStudyUUID, downloadZipStudyUUID
 		$fullquery->Query = $query;
 		$postfields = json_encode($fullquery);
 		$this->executeCURLPOSTJSON($postfields, 'tools/find');
-		Debugbar::error("tools/find:  " .$postfields);
+		Log::info("tools/find:  " .$postfields);
 		return $this->result;
 
 	}
@@ -655,6 +656,13 @@ Used for downloadDCMStudyUUID, downloadZipStudyUUID
     public function logViewStudy($study) {  // $study is the $_POST or $_Request
 
 		$study_exists = $this->performQuery ("Studies", '{"StudyInstanceUID":"' . $study['StudyInstanceUID'] . '"}', true, $limit = 1);
+		Log::info($this->curlerror);
+		Log::info($this->curl_error_text);
+		if ($this->curlerror != 0 && !empty($this->curl_error_text)) {
+		    echo '[{"error":"' .$this->curl_error_text . '"}]';
+		    die();
+		}
+
 		$study_exists = count(json_decode($study_exists)) != 0;
 
 		if ($study_exists) {

@@ -194,7 +194,7 @@ var sendFile = function(file, timestamp, total, type) {
                     xhr.responseType = 'json';
                     xhr.open("POST", '/PACSUploadStudies/PACSupload');
                     xhr.setRequestHeader('Content-Type', 'Content-Type: multipart/form-data');
-                    //xhr.setRequestHeader('Accept', 'application/json');
+                    xhr.setRequestHeader('Accept', 'application/json');
                     const formData = new FormData();
 
                     formData.set('method', "UploadFolder"); // One object file

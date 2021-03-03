@@ -25,59 +25,43 @@ import mysql.connector #  sudo python3 -m pip install mysql-connector-python  ht
 import datetime
 from datetime import datetime
 import requests # for sending CURL to Orthanc endpoint, https://www.w3schools.com/python/module_requests.asp, https://www.w3schools.com/python/ref_requests_post.asp, sudo python3 -m pip install requests
-import aiorun # https://pypi.org/project/aiorun/ # sudo python3 -m pip install aiorun
+import aiorun # https://pypi.org/project/aiorun/ # sudo python3 -m pip install aiorun, these are for HL7 for later possibly, run as a subprocess.
 import asyncio # https://pypi.org/project/asyncio/ # sudo python3 -m pip install asyncio
-import pprint # pretty printer 
-# from http.server import HTTPServer, BaseHTTPRequestHandler
+import pprint # pretty printer
 
-#Authorization setup
+#Authorization setup , ? do not think you can redirect using something like Flask.
 
-# class Redirect(BaseHTTPRequestHandler):
+# from flask import Flask, redirect, request
+# app = Flask(__name__)
+# FROM_DOMAIN = "yourusername.pythonanywhere.com"
+# TO_DOMAIN = "docker.medical.ky/phpinfo.php"
+# app.run(host="localhost", port=9999)
 # 
-#     def do_GET(self):
-#         self.send_response(302)
-#         self.send_header('Location','https://nginx-tls.medical.ky/error_pages/python_redirect.php')
-#         self.send_header('data','test')
-#         self.end_headers()
-       
+# def redirect_to_front_end():
+#     return flask.redirect(TO_DOMAIN)
+
+
+#  This works as a method to use an "AUTH Server" via this Python Plug-in.  The Auth server run on the NGINX server in the Docker container.
+#  It uses an encrypted JWT that is created, encrypted, etc. by the composer package on the PHP server.  Here:  https://github.com/RobDWaller/ReallySimpleJWT
+#
+
 def Filter(uri, **request):
 
     print('User trying to access URI: %s' % uri)
     pprint.pprint(request)
-#     authorization = ""
-#     token = ""
-#     method = ""
-#     userprofileJWT = {}
-#     response = dict()
-#     if 'authorization' in request['headers']:
-#         authorization = request['headers']['authorization']
-#     if 'token' in request['headers']:
-#         token = request['headers']['token']
-#     if 'method' in request['headers']:
-#         method = request['headers']['method']
-#     if 'userprofileJWT' in request['headers']:
-#         userprofileJWT = request['headers']['userprofileJWT']
-#     print("auth  :" + authorization + "  token:  " + token + "  method:  " + method )
-#     print(userprofileJWT)
-#     # pprint.pprint(request['method'])
-#     url = 'https://nginx-tls.medical.ky/error_pages/python_redirect.php'
-#     response = dict()
-#     response['authorization'] = authorization
-#     response['token'] = token
-#     response['method'] = method
-#     response['userprofileJWT'] = userprofileJWT   
-#     headers = {'content-type': 'application/json'}
-#     payload = json.dumps(response, indent = 3)
-#     handler = Redirect
-#     myServer = HTTPServer(("127.0.0.1", 8099), handler)  
-#     #Redirect(request, address,server)
-#     #r = requests.post(url, data=payload, headers=headers)
-#     if (authorization != "Bearer CURLTOKEN"):
-#         return True
-#         #return False
-#     else:
-#         return True  # False to forbid access
-    return True   
+    authserverurl = "https://nginx/JWTauth.php"
+    sampleJWT = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJPcnRoYW5jIFBBQ1MiLCJzdWIiOiJWaWV3ZXIgVG9rZW4iLCJpYXQiOjE2MTQ3OTY1NDAsInVpZCI6MSwiZXhwIjoxNjE0Nzk2ODQwLCJkYXRhIjoidGVzdCJ9.27Y6A-Ka6jdpt1zU14LTF284klVMz_FEfF_SUnvTuD0"
+    samplePass = "Hello&MikeFooBar123"
+    samplestudyuuid = "test"
+    print('Request send to Auth Server at:' + authserverurl)
+    print('Response from Auth Server, Status Code and Headers')
+    authserver = requests.post(authserverurl, data = {'JWT':sampleJWT, "REQUEST": json.dumps(request)}, verify = False) # Should set to True with certificate, although it is all in the DOCKER.
+    print (authserver.status_code)
+    if (authserver.status_code == 401):
+        # redirect_to_front_end() ????
+        return False
+    else:
+        return True
 
 orthanc.RegisterIncomingHttpRequestFilter(Filter)
 
@@ -139,20 +123,20 @@ orthanc.RegisterRestCallback('/pydicom/(.*)', DecodeInstance)  # (*)
 
 def OnRest(output, uri, **request):
 
-	try:
-		config = json.loads(orthanc.GetConfiguration())
-		param = request['groups'][0]
-		if (param != "ALL"):
-			value = config[param]
-		else:
-			value = config
-		print(json.dumps(value, indent = 3))
-		output.AnswerBuffer(json.dumps(value, indent = 3), 'application/json')
+    try:
+        config = json.loads(orthanc.GetConfiguration())
+        param = request['groups'][0]
+        if (param != "ALL"):
+            value = config[param]
+        else:
+            value = config
+        print(json.dumps(value, indent = 3))
+        output.AnswerBuffer(json.dumps(value, indent = 3), 'application/json')
 
-	except Exception as e:
-		response = dict()
-		response['error'] = str(e)
-		output.AnswerBuffer(json.dumps(response, indent = 3), 'application/json')
+    except Exception as e:
+        response = dict()
+        response['error'] = str(e)
+        output.AnswerBuffer(json.dumps(response, indent = 3), 'application/json')
 
 orthanc.RegisterRestCallback('/get-configs/(.*)', OnRest)
 
@@ -162,30 +146,30 @@ orthanc.RegisterRestCallback('/get-configs/(.*)', OnRest)
 
 def SendNotification(subject, body):
 
-	msg = MIMEText(body)
-	msg['Subject'] = subject
-	msg['From'] = "sscotti@sscotti.org"
-	msg['To'] = "sscotti@sscotti.org"
-	context = ssl.create_default_context()
-	server = smtplib.SMTP_SSL('sscotti.org', 465, context)
-	server.login("sscotti@sscotti.org", '?ek.Z,]oB-yc=d53')
-	server.sendmail("sscotti@sscotti.org", "sscotti@sscotti.org", msg.as_string())
-	server.quit()
+    msg = MIMEText(body)
+    msg['Subject'] = subject
+    msg['From'] = "sscotti@sscotti.org"
+    msg['To'] = "sscotti@sscotti.org"
+    context = ssl.create_default_context()
+    server = smtplib.SMTP_SSL('sscotti.org', 465, context)
+    server.login("sscotti@sscotti.org", '?ek.Z,]oB-yc=d53')
+    server.sendmail("sscotti@sscotti.org", "sscotti@sscotti.org", msg.as_string())
+    server.quit()
 
 def SendEmail(output, uri, **request):
 
-	if request['method'] != 'POST':
-		output.SendMethodNotAllowed('POST')
-	response = dict()
-	payload = json.loads(request['body'])
-	subject = payload['subject']
-	body = payload['body']
-	try:
-		SendNotification(subject, body)
-		response['status'] = "SUCCESS"
-	except Exception as e:
-		response['status'] = str(e)
-	output.AnswerBuffer(json.dumps(response, indent = 3), 'application/json')
+    if request['method'] != 'POST':
+        output.SendMethodNotAllowed('POST')
+    response = dict()
+    payload = json.loads(request['body'])
+    subject = payload['subject']
+    body = payload['body']
+    try:
+        SendNotification(subject, body)
+        response['status'] = "SUCCESS"
+    except Exception as e:
+        response['status'] = str(e)
+    output.AnswerBuffer(json.dumps(response, indent = 3), 'application/json')
 orthanc.RegisterRestCallback('/sendemail', SendEmail)
 
 # BEGINNING OF STUDIES/PAGE, TAGROUP IS NICE TO HAVE JUST GENERALLY.
@@ -242,29 +226,29 @@ orthanc.RegisterRestCallback('/sendemail', SendEmail)
 
 def GetTagGroupFromKey(key):
 
-	lookup =	{
+    lookup =    {
 
-	"AccessionNumber": "MainDicomTags",
-	"StudyDate": "MainDicomTags",
-	"AccessionNumber": "MainDicomTags",
-	"StudyDescription": "MainDicomTags",
-	"InstitutionName": "MainDicomTags",
-	"ReferringPhysicianName": "MainDicomTags",
-	"RequestingPhysician": "MainDicomTags",
-	"StudyTime": "MainDicomTags",
-	"StudyID": "MainDicomTags",
-	"StudyInstanceUID": "MainDicomTags",
-	"PatientBirthDate": "PatientMainDicomTags",
-	"PatientSex": "PatientMainDicomTags",
-	"PatientID": "PatientMainDicomTags",
-	"PatientName": "PatientMainDicomTags"
-	}
-	return lookup[key]
+    "AccessionNumber": "MainDicomTags",
+    "StudyDate": "MainDicomTags",
+    "AccessionNumber": "MainDicomTags",
+    "StudyDescription": "MainDicomTags",
+    "InstitutionName": "MainDicomTags",
+    "ReferringPhysicianName": "MainDicomTags",
+    "RequestingPhysician": "MainDicomTags",
+    "StudyTime": "MainDicomTags",
+    "StudyID": "MainDicomTags",
+    "StudyInstanceUID": "MainDicomTags",
+    "PatientBirthDate": "PatientMainDicomTags",
+    "PatientSex": "PatientMainDicomTags",
+    "PatientID": "PatientMainDicomTags",
+    "PatientName": "PatientMainDicomTags"
+    }
+    return lookup[key]
 
 # returns the path for a study from the answers loop, used to construct and path for the metadata query.
 
 def GetPath(resource):
-	return '/studies/%s' % resource['ID']
+    return '/studies/%s' % resource['ID']
 
 # Function to recursively search down tag hierarchy to find matches from the query['Tags'] passed in to studies/find
 # Skip the modality tag because that takes too long for a common search, handled further down  in code when modalities
@@ -272,191 +256,191 @@ def GetPath(resource):
 # Not currently used.
 def CheckTagLevel(tags,dictlist):
 
-		print(tags)
-		print(dictlist)
-		for tagitem, value in dictlist:
+        print(tags)
+        print(dictlist)
+        for tagitem, value in dictlist:
 
-			if (isinstance(value, str)):
-				if tagitem in tags:
-					print(tags[tagitem] + ' ' + value)
-					if (tags[tagitem] != value):
-						return False
-					else:
-						continue
-				else:
-					return False
-			elif (tagitem in tags.keys()):  #must be a dict
-				if (CheckTagLevel(tags[tagitem][0],value.items()) == True):
-					continue
-				else:
-					return False
-			else:
-				return False
-		return True
+            if (isinstance(value, str)):
+                if tagitem in tags:
+                    print(tags[tagitem] + ' ' + value)
+                    if (tags[tagitem] != value):
+                        return False
+                    else:
+                        continue
+                else:
+                    return False
+            elif (tagitem in tags.keys()):  #must be a dict
+                if (CheckTagLevel(tags[tagitem][0],value.items()) == True):
+                    continue
+                else:
+                    return False
+            else:
+                return False
+        return True
 
 
 def FindWithMetadata(output, uri, **request):
 
-	# The "/tools/find" route expects a POST method
-	if request['method'] != 'POST':
-		output.SendMethodNotAllowed('POST')
-	else:
-		response = dict();
-		# Check the Level and Generate an error response if not a Study
-		# Parse the query provided by the user, and backup the "Expand" field
-		query = json.loads(request['body'])
-		if query['Level'] != "Study":
-			response["error"] = "Can only Query Studies"
-			output.AnswerBuffer(json.dumps(response, indent = 3), 'application/json')
-		elif ('pagenumber' not in query) or ('itemsperpage' not in query) or not (isinstance(query['pagenumber'], int)) or not (isinstance(query['itemsperpage'], int)):
-			response["error"] = "Page Number and/or Items Per Page Error"
-			output.AnswerBuffer(json.dumps(response, indent = 3), 'application/json')
-		else:
-			modality = False
-			if 'Tags' in query and "0008,0060" in query['Tags']:
-				modality  = query['Tags']["0008,0060"]
-				del query['Tags']["0008,0060"]
-			if 'Expand' in query:
-				originalExpand = query['Expand']
-			else:
-				originalExpand = False
+    # The "/tools/find" route expects a POST method
+    if request['method'] != 'POST':
+        output.SendMethodNotAllowed('POST')
+    else:
+        response = dict();
+        # Check the Level and Generate an error response if not a Study
+        # Parse the query provided by the user, and backup the "Expand" field
+        query = json.loads(request['body'])
+        if query['Level'] != "Study":
+            response["error"] = "Can only Query Studies"
+            output.AnswerBuffer(json.dumps(response, indent = 3), 'application/json')
+        elif ('pagenumber' not in query) or ('itemsperpage' not in query) or not (isinstance(query['pagenumber'], int)) or not (isinstance(query['itemsperpage'], int)):
+            response["error"] = "Page Number and/or Items Per Page Error"
+            output.AnswerBuffer(json.dumps(response, indent = 3), 'application/json')
+        else:
+            modality = False
+            if 'Tags' in query and "0008,0060" in query['Tags']:
+                modality  = query['Tags']["0008,0060"]
+                del query['Tags']["0008,0060"]
+            if 'Expand' in query:
+                originalExpand = query['Expand']
+            else:
+                originalExpand = False
 
-			# Call the core "/tools/find" route
-			query['Expand'] = True
-			answers = orthanc.RestApiPost('/tools/find', json.dumps(query))
+            # Call the core "/tools/find" route
+            query['Expand'] = True
+            answers = orthanc.RestApiPost('/tools/find', json.dumps(query))
 
-			# Loop over the matching resources, bypass the Metadata filtering if there are no params specified (i.e. len)
+            # Loop over the matching resources, bypass the Metadata filtering if there are no params specified (i.e. len)
 
-			filteredAnswers = []
+            filteredAnswers = []
 
-			if 'MetaData' in query and len(query['MetaData']) > 0:
+            if 'MetaData' in query and len(query['MetaData']) > 0:
 
-				for answer in json.loads(answers):
+                for answer in json.loads(answers):
 
-					try:
-						# Read the metadata that is associated with the resource
-						# Check whether the metadata matches the regular expressions
-						# that were provided in the "Metadata" field of the user request
-						metadata = json.loads(orthanc.RestApiGet('%s/metadata?expand' % GetPath(answer)))
-						for (name, pattern) in query['MetaData'].items():
-							print("name" + name + "  pattern" + pattern)
-							if name in metadata:
-								value = metadata[name]
-							else:
-								value = ''
-							if re.match(pattern, value) == None:
-								break
+                    try:
+                        # Read the metadata that is associated with the resource
+                        # Check whether the metadata matches the regular expressions
+                        # that were provided in the "Metadata" field of the user request
+                        metadata = json.loads(orthanc.RestApiGet('%s/metadata?expand' % GetPath(answer)))
+                        for (name, pattern) in query['MetaData'].items():
+                            print("name" + name + "  pattern" + pattern)
+                            if name in metadata:
+                                value = metadata[name]
+                            else:
+                                value = ''
+                            if re.match(pattern, value) == None:
+                                break
 
-							# If all the metadata matches the provided regular
-							# expressions, add the resource to the filtered answers
+                            # If all the metadata matches the provided regular
+                            # expressions, add the resource to the filtered answers
 
-							if originalExpand:
-								answer['Metadata'] = metadata
-								filteredAnswers.append(answer)
-							else: 
-								filteredAnswers.append(answer['ID'])
-					except:
-						# The resource was deleted since the call to "/tools/find"
-						pass
-			else:
-				filteredAnswers = json.loads(answers)
-			filteredAnswers2 = filteredAnswers
-			#query['Tags']
-			#added section to allow searching on any instance tag at primary or secondary level in hierarchy, for SQ tags
-			if 'Tags' in query and len(query['Tags']) > 0:
-				filteredAnswers2 = []
-				for answer in filteredAnswers:
-					instances = json.loads(orthanc.RestApiGet('/studies/' + answer["ID"] + '/instances'))
-					instance = instances[0]["ID"]
-					tags = json.loads(orthanc.RestApiGet('/instances/'+ instance + '/tags?short'))
+                            if originalExpand:
+                                answer['Metadata'] = metadata
+                                filteredAnswers.append(answer)
+                            else: 
+                                filteredAnswers.append(answer['ID'])
+                    except:
+                        # The resource was deleted since the call to "/tools/find"
+                        pass
+            else:
+                filteredAnswers = json.loads(answers)
+            filteredAnswers2 = filteredAnswers
+            #query['Tags']
+            #added section to allow searching on any instance tag at primary or secondary level in hierarchy, for SQ tags
+            if 'Tags' in query and len(query['Tags']) > 0:
+                filteredAnswers2 = []
+                for answer in filteredAnswers:
+                    instances = json.loads(orthanc.RestApiGet('/studies/' + answer["ID"] + '/instances'))
+                    instance = instances[0]["ID"]
+                    tags = json.loads(orthanc.RestApiGet('/instances/'+ instance + '/tags?short'))
 
-					matchedall = CheckTagLevel(tags, query['Tags'].items())
+                    matchedall = CheckTagLevel(tags, query['Tags'].items())
 
-					if (matchedall == True):
-						answer['matchinginstance'] = instance
-						simplifiedtags = json.loads(orthanc.RestApiGet('/instances/'+ instance + '/simplified-tags'))
-						answer['simplifiedtags'] = simplifiedtags
-						filteredAnswers2.append(answer)
-						
-			studies = []
-			
-			for study in filteredAnswers2:
-				modalities = []
-				imagecount = 0
-				for seriesuuid in study['Series']:
-					series = json.loads(orthanc.RestApiGet('/series/%s' % seriesuuid))
-					# print series
-					imagecount = imagecount + len(series['Instances'])
-					if series['MainDicomTags']['Modality'] not in modalities:
-						modalities.append(series['MainDicomTags']['Modality'])
-				
-				study['imagecount'] = imagecount
-				study['modalities'] = modalities
-				study.pop('Series', None) # Get rid of the Series since not needed in response.
-				print(modality if modality else "Modality Not Searched For")
-				if modality:
-					if modality in study['modalities']:
-						studies.append(study)
-				else:
-					studies.append(study)
-					
-			# Just used the tools/find results if no Metadata
-			#	curl -s https://demo.orthanc-server.com/studies/27f7126f-4f66fb14-03f4081b-f9341db2-53925988/instances | grep '"ID"' | head -n1
-			# The globals are used in the GetSortParam function for the taggroup, sortparam and reverse
-			# sortparam can be omitted, in which case it defaults to StudyDate
-			global param
-			if 'sortparam' in query:
-				param = query['sortparam']
-			else:
-				param = 'StudyDate'
-			global taggroup
-			taggroup = GetTagGroupFromKey(query['sortparam'])
-			global reverse
-			reverse = query['reverse']
-			# Sort the studies according to the "StudyDate" DICOM tag
-			studiessorted = sorted(studies, key = GetSortParam, reverse=reverse)
-			count = len(studiessorted)
-			#default for pagenumber
-			pagenumber = 1
-			if 'pagenumber' in query:
-				pagenumber = query['pagenumber']
-			#default for itemsperpage if not in the query, which it should be
-			itemsperpage = 10
-			if 'itemsperpage' in query:
-				itemsperpage = query['itemsperpage']
-			limit = itemsperpage
-			offset = (pagenumber -1) * itemsperpage
-			#offset = 0
-			#if 'offset' in query:
-			#    offset = query['offset']
-			#limit = 0
-			#if 'limit' in query:
-			#    limit = query['limit']
-			# Truncate the list of studies
-			# Pass in 0 for limit if you want to just want to list all from the offset
-			if limit == 0:
-				studiessorted = studiessorted[offset : ]
-			else:
-				studiessorted = studiessorted[offset : offset + limit]
-				
-			url = '/studies/page'
+                    if (matchedall == True):
+                        answer['matchinginstance'] = instance
+                        simplifiedtags = json.loads(orthanc.RestApiGet('/instances/'+ instance + '/simplified-tags'))
+                        answer['simplifiedtags'] = simplifiedtags
+                        filteredAnswers2.append(answer)
+                        
+            studies = []
+            
+            for study in filteredAnswers2:
+                modalities = []
+                imagecount = 0
+                for seriesuuid in study['Series']:
+                    series = json.loads(orthanc.RestApiGet('/series/%s' % seriesuuid))
+                    # print series
+                    imagecount = imagecount + len(series['Instances'])
+                    if series['MainDicomTags']['Modality'] not in modalities:
+                        modalities.append(series['MainDicomTags']['Modality'])
+                
+                study['imagecount'] = imagecount
+                study['modalities'] = modalities
+                study.pop('Series', None) # Get rid of the Series since not needed in response.
+                print(modality if modality else "Modality Not Searched For")
+                if modality:
+                    if modality in study['modalities']:
+                        studies.append(study)
+                else:
+                    studies.append(study)
+                    
+            # Just used the tools/find results if no Metadata
+            #    curl -s https://demo.orthanc-server.com/studies/27f7126f-4f66fb14-03f4081b-f9341db2-53925988/instances | grep '"ID"' | head -n1
+            # The globals are used in the GetSortParam function for the taggroup, sortparam and reverse
+            # sortparam can be omitted, in which case it defaults to StudyDate
+            global param
+            if 'sortparam' in query:
+                param = query['sortparam']
+            else:
+                param = 'StudyDate'
+            global taggroup
+            taggroup = GetTagGroupFromKey(query['sortparam'])
+            global reverse
+            reverse = query['reverse']
+            # Sort the studies according to the "StudyDate" DICOM tag
+            studiessorted = sorted(studies, key = GetSortParam, reverse=reverse)
+            count = len(studiessorted)
+            #default for pagenumber
+            pagenumber = 1
+            if 'pagenumber' in query:
+                pagenumber = query['pagenumber']
+            #default for itemsperpage if not in the query, which it should be
+            itemsperpage = 10
+            if 'itemsperpage' in query:
+                itemsperpage = query['itemsperpage']
+            limit = itemsperpage
+            offset = (pagenumber -1) * itemsperpage
+            #offset = 0
+            #if 'offset' in query:
+            #    offset = query['offset']
+            #limit = 0
+            #if 'limit' in query:
+            #    limit = query['limit']
+            # Truncate the list of studies
+            # Pass in 0 for limit if you want to just want to list all from the offset
+            if limit == 0:
+                studiessorted = studiessorted[offset : ]
+            else:
+                studiessorted = studiessorted[offset : offset + limit]
+                
+            url = '/studies/page'
 
-			# Return the truncated list of studies
+            # Return the truncated list of studies
 
-			widget = ""
-			if 'widget' in query:
-				widget = CreateWidget(limit, pagenumber, url , count)
-				#studies.insert(0,{"paginationwidget":widget})
-			studiessorted.insert(0, {"widget": widget, "results":len(studiessorted), "limit":limit, "offset":offset, "pagenumber":pagenumber, "count":count})
-			# Return the filtered answers in the JSON format
-			if int(platform.python_version_tuple()[0]) < 3:
-				logging.warning("Suggest using Python 3.x.x, using:  " + platform.python_version())
-			else:
-				print(platform.python_version_tuple()[0])
-				logging.warning("Suggest using Python 3.x.x, using:  " + platform.python_version())
-			print("Query")
-			pprint.pprint(request)
-			output.AnswerBuffer(json.dumps(studiessorted, indent = 3), 'application/json')
+            widget = ""
+            if 'widget' in query:
+                widget = CreateWidget(limit, pagenumber, url , count)
+                #studies.insert(0,{"paginationwidget":widget})
+            studiessorted.insert(0, {"widget": widget, "results":len(studiessorted), "limit":limit, "offset":offset, "pagenumber":pagenumber, "count":count})
+            # Return the filtered answers in the JSON format
+            if int(platform.python_version_tuple()[0]) < 3:
+                logging.warning("Suggest using Python 3.x.x, using:  " + platform.python_version())
+            else:
+                print(platform.python_version_tuple()[0])
+                logging.warning("Suggest using Python 3.x.x, using:  " + platform.python_version())
+            print("Query")
+            pprint.pprint(request)
+            output.AnswerBuffer(json.dumps(studiessorted, indent = 3), 'application/json')
 
 #param is the tag to sortby
 #taggroup is the taggroup for the param
@@ -467,39 +451,39 @@ def ceildiv(a, b):
 # Could extend this such that the passed in widget id/number is a selection of preconfigured widgets for pagination, since it include HTML markup.
 def CreateWidget(limit, pagenumber, url, count):
 
-	total_pages = ceildiv(count, limit);
-	links = '<div data-url = "' + url +' " class = "paginator">'
-	if (total_pages >= 1 and pagenumber <= total_pages):
-		active = "";
-		if pagenumber == 1:
-			active = "pageactive"
-		links += '<a data-page = "1" class = "' + active  + '" href="">1</a>'
-		active = ""
-		i = max(2, pagenumber - 5)
-		if i > 2:
-			links += " ... "
-		for i in range(i, min(pagenumber + 6, total_pages)):
-			if pagenumber == i:
-				active = "pageactive"
-			links += '<a data-page = "' + str(i) + '" class = "' + active  + '"  href="">' + str(i) + '</a>'
-			active = ""
-		if i != total_pages:
-			links += " ... "
-		if pagenumber == total_pages:
-			active = "pageactive"
-		links += '<a data-page = "' + str(total_pages) + '" class = "' + active + '" href="">' + str(total_pages) + '</a>'
+    total_pages = ceildiv(count, limit);
+    links = '<div data-url = "' + url +' " class = "paginator">'
+    if (total_pages >= 1 and pagenumber <= total_pages):
+        active = "";
+        if pagenumber == 1:
+            active = "pageactive"
+        links += '<a data-page = "1" class = "' + active  + '" href="">1</a>'
+        active = ""
+        i = max(2, pagenumber - 5)
+        if i > 2:
+            links += " ... "
+        for i in range(i, min(pagenumber + 6, total_pages)):
+            if pagenumber == i:
+                active = "pageactive"
+            links += '<a data-page = "' + str(i) + '" class = "' + active  + '"  href="">' + str(i) + '</a>'
+            active = ""
+        if i != total_pages:
+            links += " ... "
+        if pagenumber == total_pages:
+            active = "pageactive"
+        links += '<a data-page = "' + str(total_pages) + '" class = "' + active + '" href="">' + str(total_pages) + '</a>'
 
-	links += '<span class = "totalperpage"> Total per page:  ' + str(limit) + '</span>'
-	links += '</div>'
-	# Sends an e-mail
-	# SendNotification("/studies/find request", "Just an notification")
-	return links
+    links += '<span class = "totalperpage"> Total per page:  ' + str(limit) + '</span>'
+    links += '</div>'
+    # Sends an e-mail
+    # SendNotification("/studies/find request", "Just an notification")
+    return links
 
 def GetSortParam(study):
-	if param in study[taggroup]:
-		return study[taggroup][param]
-	else:
-		return ''
+    if param in study[taggroup]:
+        return study[taggroup][param]
+    else:
+        return ''
 
 orthanc.RegisterRestCallback('/studies/page', FindWithMetadata)
 
@@ -509,33 +493,33 @@ orthanc.RegisterRestCallback('/studies/page', FindWithMetadata)
 # curl -k -X POST -d '["AccessionNumber"]' http://localhost:8042/mwl/file/delete
 
 def  DeleteMWLByAccession(output, uri, **request):
-	if request['method'] != 'POST':
-		output.SendMethodNotAllowed('POST')
-	else:
-		response = dict();
-		try:
-			data = json.loads(request['body'])
-			# the accession_number to delete, for the filename
-			accession = data[0]
-			pathtoworklist = json.loads(orthanc.GetConfiguration())['Worklists']['Database'] + '/'
-			filenametxt = pathtoworklist + accession + '.txt'
-			filenamewl = pathtoworklist + accession + '.wl'
-			if os.path.exists(filenametxt):
-				os.remove(filenametxt)
-				response['filenametxt'] = "true"
-			else:
-				response['filenametxt'] = "false"
-			if os.path.exists(filenamewl):
-				os.remove(filenamewl)
-				response['filenamewl'] = "true"
-			else:
-				response['filenamewl'] = "false"
-			output.AnswerBuffer(json.dumps(response, indent = 3), 'application/json')
+    if request['method'] != 'POST':
+        output.SendMethodNotAllowed('POST')
+    else:
+        response = dict();
+        try:
+            data = json.loads(request['body'])
+            # the accession_number to delete, for the filename
+            accession = data[0]
+            pathtoworklist = json.loads(orthanc.GetConfiguration())['Worklists']['Database'] + '/'
+            filenametxt = pathtoworklist + accession + '.txt'
+            filenamewl = pathtoworklist + accession + '.wl'
+            if os.path.exists(filenametxt):
+                os.remove(filenametxt)
+                response['filenametxt'] = "true"
+            else:
+                response['filenametxt'] = "false"
+            if os.path.exists(filenamewl):
+                os.remove(filenamewl)
+                response['filenamewl'] = "true"
+            else:
+                response['filenamewl'] = "false"
+            output.AnswerBuffer(json.dumps(response, indent = 3), 'application/json')
 
-		except Exception as e:
+        except Exception as e:
 
-			response['error'] = str(e)
-			output.AnswerBuffer(json.dumps(response, indent = 3), 'application/json')
+            response['error'] = str(e)
+            output.AnswerBuffer(json.dumps(response, indent = 3), 'application/json')
 
 orthanc.RegisterRestCallback('/mwl/file/delete(.*)', DeleteMWLByAccession)
 
@@ -556,32 +540,32 @@ orthanc.RegisterRestCallback('/mwl/file/delete(.*)', DeleteMWLByAccession)
 #returns
 
 #{
-#	"mwlfilename": "AccessionNumber.wl",
-#	"message": "MWL File Written:  AccessionNumber",
-#	"errors": 0,
-#	"txtfilename": "AccessionNumber.txt",
-#	"txtfile": ""
+#    "mwlfilename": "AccessionNumber.wl",
+#    "message": "MWL File Written:  AccessionNumber",
+#    "errors": 0,
+#    "txtfilename": "AccessionNumber.txt",
+#    "txtfile": ""
 #}
 
 def CreateAndSave(output, uri, **request):
 
-	if request['method'] != 'POST':
-		output.SendMethodNotAllowed('POST')
-	else:
-	
-		query = json.loads(request['body'])
-		pathtodump2dcm = shutil.which("dump2dcm")
-		pathtoworklist = json.loads(orthanc.GetConfiguration())['Worklists']['Database']
-		
-		if not os.path.exists(pathtoworklist):
-			os.makedirs(pathtoworklist)
+    if request['method'] != 'POST':
+        output.SendMethodNotAllowed('POST')
+    else:
+    
+        query = json.loads(request['body'])
+        pathtodump2dcm = shutil.which("dump2dcm")
+        pathtoworklist = json.loads(orthanc.GetConfiguration())['Worklists']['Database']
+        
+        if not os.path.exists(pathtoworklist):
+            os.makedirs(pathtoworklist)
 
-		charset = "ISO_IR 100"
+        charset = "ISO_IR 100"
 
-		if "HL7" in query:
-			message = hl7.parse(query['HL7'])
-			# The hl7 PIP module is a parser and MLLP server.  Read the Docs about parsing.
-			# e.g. message.segment('PID')[2][0][0][0] (note segment, not segments), field2, repetition 0, 
+        if "HL7" in query:
+            message = hl7.parse(query['HL7'])
+            # The hl7 PIP module is a parser and MLLP server.  Read the Docs about parsing.
+            # e.g. message.segment('PID')[2][0][0][0] (note segment, not segments), field2, repetition 0, 
 #MSH|^~\&|CAYMANRIS|CAYMANMED|ORTHANC|ORTHANC|20210101173210||ORM^O01^ORM_O01|2021010117321042999|P|2.5|1||AL|AL|US|UTF-8|en|
 #PID|1|DEV0000005^^^CAYMANMED^^CAYMANMED|DEV0000005^^^CAYMANMED^^CAYMANMED|DEV0000005^^^CAYMANMED^^CAYMANMED|Mouse^Minnie^||20200117|F|alias||1211 Mouse lane^^Georgetown^OS^ky1-1001^KY|KY|KY-1-345-111-1111^PRS^^admin@sias.dev|-^PRS^^|Language|M||DEV0000005|
 #PV1|1|O|||||0001Scotti^Stephen^MIDDELE^SUFFIX^PREFIX^DEGREE|0001Scotti^Stephen^MIDDELE^SUFFIX^PREFIX^DEGREE|||||||||||||||||||||||||||||||Cayman Medical Ltd.|||||20201230070000|
@@ -592,145 +576,145 @@ def CreateAndSave(output, uri, **request):
 # h['PID.F2.R1.C1.S1'], for reading values, vs. using segments and segments, F, R, C, S
 # "ID^LAST^FIRST^MIDDELE^SUFFIX^PREFIX^DEGREE"
 # family name complex, given name complex, middle name, name prefix, name suffix. in dicom
-			query = dict()
-			print(message['PID1.F2.R1.C1'])
-			query['AccessionNumber'] = str(message.segments('OBR')[0][3]); #field 3 of first obr
-			query['Modality'] = str(message.segments('IPC')[0][5]);  #field 4 of first IPC
-			query['InstitutionName'] = str(message.segment('PV1')[39]); #field 39 of first PV!
-			query['ReferringPhysiciansName'] = str(message.segment('PV1')[8][0][0]) + ':' + str(message.segment('PV1')[8][0][1]) + '^' + str(message.segment('PV1')[8][0][2]) + '^' + str(message.segment('PV1')[8][0][3]) + '^' + str(message.segment('PV1')[8][0][5]) + '^' + str(message.segment('PV1')[8][0][4]) + ',' + str(message.segment('PV1')[8][0][6]) # ReferringPhysiciansName
-			query['PatientName'] = str(message.segment('PID')[5]); #field 5
-			query['PatientID'] = str(message.segment('PID')[2][0][0]); #field 2, first R, component 0
-			query['PatientBirthDate'] = str(message.segment('PID')[7]);
-			query['PatientSex'] = str(message.segment('PID')[8]);
-			query['PatientAddress'] = str(message.segment('PID')[11]);
-			query['PatientTelephoneNumbers'] = str(message.segment('PID')[13]);
-			query['PatientTelecomInformation'] = str(message.segment('PID')[14]);
-			query['MedicalAlerts'] = "" # message.segments('OBR')[0][8];
-			query['Allergies'] = ""# message.segments('OBR')[0][8];
-			query['AdditionalPatientHistory'] = str(message.segments('OBR')[0][13]) # message.segments('OBR')[0][8];
-			query['StudyInstanceUID'] = str(message.segments('IPC')[0][3]) #
-			query['RequestingPhysician'] = str(message.segment('PV1')[8]) # RequestingPhysician
-			query['RequestedProcedureDescription'] = str(message.segments('OBR')[0][4][0][1])
-			query['ScheduleStationAETitle'] = str(message.segments('IPC')[0][9])
-			query['ScheduledProcedureStepStartDate'] = str(message.segments('OBR')[0][36])[:8]
-			query['ScheduledProcedureStepStartTime'] = str(message.segments('OBR')[0][36])[-6:]
-			query['RequestedProcedureID'] = str(message.segments('OBR')[0][4][0][0])
-			query['RequestedProcedurePriority'] =str(message.segments('OBR')[0][5])
-			query['MediaStorageSOPClassUID'] = "NONE" # might need this
-			query['PhysicianIDforSequence'] =str(message.segment('PV1')[8][0][0])
-			query['PersonTelephoneNumbers'] =str(message.segments('OBR')[0][17])
-			query['PersonTelecomInformation'] = str(message.segments('OBR')[0][17])
+            query = dict()
+            print(message['PID1.F2.R1.C1'])
+            query['AccessionNumber'] = str(message.segments('OBR')[0][3]); #field 3 of first obr
+            query['Modality'] = str(message.segments('IPC')[0][5]);  #field 4 of first IPC
+            query['InstitutionName'] = str(message.segment('PV1')[39]); #field 39 of first PV!
+            query['ReferringPhysiciansName'] = str(message.segment('PV1')[8][0][0]) + ':' + str(message.segment('PV1')[8][0][1]) + '^' + str(message.segment('PV1')[8][0][2]) + '^' + str(message.segment('PV1')[8][0][3]) + '^' + str(message.segment('PV1')[8][0][5]) + '^' + str(message.segment('PV1')[8][0][4]) + ',' + str(message.segment('PV1')[8][0][6]) # ReferringPhysiciansName
+            query['PatientName'] = str(message.segment('PID')[5]); #field 5
+            query['PatientID'] = str(message.segment('PID')[2][0][0]); #field 2, first R, component 0
+            query['PatientBirthDate'] = str(message.segment('PID')[7]);
+            query['PatientSex'] = str(message.segment('PID')[8]);
+            query['PatientAddress'] = str(message.segment('PID')[11]);
+            query['PatientTelephoneNumbers'] = str(message.segment('PID')[13]);
+            query['PatientTelecomInformation'] = str(message.segment('PID')[14]);
+            query['MedicalAlerts'] = "" # message.segments('OBR')[0][8];
+            query['Allergies'] = ""# message.segments('OBR')[0][8];
+            query['AdditionalPatientHistory'] = str(message.segments('OBR')[0][13]) # message.segments('OBR')[0][8];
+            query['StudyInstanceUID'] = str(message.segments('IPC')[0][3]) #
+            query['RequestingPhysician'] = str(message.segment('PV1')[8]) # RequestingPhysician
+            query['RequestedProcedureDescription'] = str(message.segments('OBR')[0][4][0][1])
+            query['ScheduleStationAETitle'] = str(message.segments('IPC')[0][9])
+            query['ScheduledProcedureStepStartDate'] = str(message.segments('OBR')[0][36])[:8]
+            query['ScheduledProcedureStepStartTime'] = str(message.segments('OBR')[0][36])[-6:]
+            query['RequestedProcedureID'] = str(message.segments('OBR')[0][4][0][0])
+            query['RequestedProcedurePriority'] =str(message.segments('OBR')[0][5])
+            query['MediaStorageSOPClassUID'] = "NONE" # might need this
+            query['PhysicianIDforSequence'] =str(message.segment('PV1')[8][0][0])
+            query['PersonTelephoneNumbers'] =str(message.segments('OBR')[0][17])
+            query['PersonTelecomInformation'] = str(message.segments('OBR')[0][17])
 
-		mwl = [];
-		mwl.append("# Dicom-File-Format")
-		mwl.append("")
-		mwl.append("# Dicom-Meta-Information-Header")
-		mwl.append("(0002,0000) UL 202                                        # FileMetaInformationGroupLength")
-		mwl.append("(0002,0001) OB 00\\01                                     # FileMetaInformationVersion")
-		mwl.append("(0002,0002) UI [" + query['MediaStorageSOPClassUID'] + "] # MediaStorageSOPClassUID")
-		mwl.append("(0002,0003) UI [1.2.276.0.7230010.3.1.4.2831176407.11154.1448031138.805061] # MediaStorageSOPInstanceUID")
-		mwl.append("(0002,0010) UI [LittleEndianExplicit]                     # TransferSyntaxUID")
-		mwl.append("(0002,0012) UI [1.2.276.0.7230010.3.0.3.6.0]             # ImplementationClassUID")
-		mwl.append("(0002,0013) SH [OFFIS_DCMTK_360]                         # ImplementationVersionName")
-		mwl.append("")
-		mwl.append("# Dicom-Data-Set")
-		mwl.append("(0008,0005) CS [" +charset + "]                  # SpecificCharacterSet")
-		mwl.append("(0008,0050) SH [" + query['AccessionNumber'] + "]          # AccessionNumber")
-		mwl.append("(0008,0060) CS [" + query['Modality'] + "]                 # Modality")
-		mwl.append("(0008,0080) LO [" + query['InstitutionName'] + "]          # InstitutionName")
-		# PN format is last,first,middle,prefix,suffix, HL7 format is "ID^LAST^FIRST^MIDDLE^SUFFIX^PREFIX^DEGREE"
-		# Want this to be ID:Last^First^Middle^Prefix^Suffix for DICOM
-		mwl.append("(0008,0090) PN [" + query['ReferringPhysiciansName'] + "]      # ReferringPhysiciansName")
-		mwl.append("(0008,1030) LO  [" + query['RequestedProcedureDescription'] + "]      # RequestedProcedureDescription")
-		
-		mwl.append("(0010,0010) PN [" + query['PatientName'] + "]              # PatientName")
-		mwl.append("(0010,0020) LO [" + query['PatientID'] + "]                # PatientID")
-		mwl.append("(0010,0030) DA [" + query['PatientBirthDate'] + "]         # PatientBirthDate")
-		mwl.append("(0010,0040) CS [" + query['PatientSex'] + "]               # PatientSex")
-		
-		mwl.append("(0010,1040) LO [" + query['PatientAddress'] + "]               # PatientAddress")
-		mwl.append("(0010,2154) SH [" + query['PatientTelephoneNumbers'] + "]               # PatientTelephoneNumbers")
-		mwl.append("(0010,2155) LT [" + query['PatientTelecomInformation'] + "]               # PatientTelecomInformation")
-		
-		mwl.append("(0010,2000) LO [" + query['MedicalAlerts'] + "]            # MedicalAlerts")
-		mwl.append("(0010,2110) LO [" + query['Allergies'] + "]                # Allergies")
-		mwl.append("(0010,21B0) LT [" + query['AdditionalPatientHistory'] + "] # AdditionalPatientHistory")
-		mwl.append("(0020,000d) UI [" + query['StudyInstanceUID'] + "]         # StudyInstanceUID")
-		mwl.append("(0020,0010) SH [" + query['RequestedProcedureID'] + "]         # StudyID")
-		mwl.append("(0032,1060) LO [" + query['RequestedProcedureDescription'] + "]        #  RequestedProcedureDescription")
-		#mwl.append("(0040,0001) AE [" + query['ScheduleStationAETitle'] + "]               #  ScheduleStationAETitle")
-		#mwl.append("(0040,0002) DA [" + query['ScheduledProcedureStepStartDate'] + "]      #  ScheduledProcedureStepStartDate")
-		#mwl.append("(0040,0003) TM [" + query['ScheduledProcedureStepStartTime'] + "]      #  ScheduledProcedureStepStartTime")
-		mwl.append("(0040,1001) SH [" + query['RequestedProcedureID'] + "]                 # RequestedProcedureID")
-		mwl.append("(0040,1003) SH [" + query['RequestedProcedurePriority'] + "]           # RequestedProcedurePriority")
-		
-		mwl.append("(0040,0100) SQ (Sequence with explicit length #=1)           # ScheduledProcedureStepSequence")
-		mwl.append("(fffe,e000) na (Item with explicit length #=6)           # Item")
-		mwl.append("(0040,0001) AE [" + query['ScheduleStationAETitle'] + "]           # ScheduledStationAETitle")
-		mwl.append("(0040,0002) DA [" + query['ScheduledProcedureStepStartDate'] + "]           # ScheduledProcedureStepStartDate")
-		mwl.append("(0040,0003) TM [" + query['ScheduledProcedureStepStartTime'] + "]           # ScheduledProcedureStepStartTime")
-		mwl.append("(0040,0007) LO [" + query['RequestedProcedureDescription'] + "]           # ScheduledProcedureStepDescription")
-		mwl.append("(0040,0009) SH [" + query['RequestedProcedureID'] + "]           # ScheduledProcedureStepID")
-		mwl.append("(0008,0060) CS [" + query['Modality'] + "]           # Modality")
-		mwl.append("(fffe,e00d) na (ItemDelimitationItem for re-encoding)   #   0, 0 ItemDelimitationItem")
-		mwl.append("(fffe,e0dd) na (SequenceDelimitationItem for re-encod.) #   0, 0 SequenceDelimitationItem")
+        mwl = [];
+        mwl.append("# Dicom-File-Format")
+        mwl.append("")
+        mwl.append("# Dicom-Meta-Information-Header")
+        mwl.append("(0002,0000) UL 202                                        # FileMetaInformationGroupLength")
+        mwl.append("(0002,0001) OB 00\\01                                     # FileMetaInformationVersion")
+        mwl.append("(0002,0002) UI [" + query['MediaStorageSOPClassUID'] + "] # MediaStorageSOPClassUID")
+        mwl.append("(0002,0003) UI [1.2.276.0.7230010.3.1.4.2831176407.11154.1448031138.805061] # MediaStorageSOPInstanceUID")
+        mwl.append("(0002,0010) UI [LittleEndianExplicit]                     # TransferSyntaxUID")
+        mwl.append("(0002,0012) UI [1.2.276.0.7230010.3.0.3.6.0]             # ImplementationClassUID")
+        mwl.append("(0002,0013) SH [OFFIS_DCMTK_360]                         # ImplementationVersionName")
+        mwl.append("")
+        mwl.append("# Dicom-Data-Set")
+        mwl.append("(0008,0005) CS [" +charset + "]                  # SpecificCharacterSet")
+        mwl.append("(0008,0050) SH [" + query['AccessionNumber'] + "]          # AccessionNumber")
+        mwl.append("(0008,0060) CS [" + query['Modality'] + "]                 # Modality")
+        mwl.append("(0008,0080) LO [" + query['InstitutionName'] + "]          # InstitutionName")
+        # PN format is last,first,middle,prefix,suffix, HL7 format is "ID^LAST^FIRST^MIDDLE^SUFFIX^PREFIX^DEGREE"
+        # Want this to be ID:Last^First^Middle^Prefix^Suffix for DICOM
+        mwl.append("(0008,0090) PN [" + query['ReferringPhysiciansName'] + "]      # ReferringPhysiciansName")
+        mwl.append("(0008,1030) LO  [" + query['RequestedProcedureDescription'] + "]      # RequestedProcedureDescription")
+        
+        mwl.append("(0010,0010) PN [" + query['PatientName'] + "]              # PatientName")
+        mwl.append("(0010,0020) LO [" + query['PatientID'] + "]                # PatientID")
+        mwl.append("(0010,0030) DA [" + query['PatientBirthDate'] + "]         # PatientBirthDate")
+        mwl.append("(0010,0040) CS [" + query['PatientSex'] + "]               # PatientSex")
+        
+        mwl.append("(0010,1040) LO [" + query['PatientAddress'] + "]               # PatientAddress")
+        mwl.append("(0010,2154) SH [" + query['PatientTelephoneNumbers'] + "]               # PatientTelephoneNumbers")
+        mwl.append("(0010,2155) LT [" + query['PatientTelecomInformation'] + "]               # PatientTelecomInformation")
+        
+        mwl.append("(0010,2000) LO [" + query['MedicalAlerts'] + "]            # MedicalAlerts")
+        mwl.append("(0010,2110) LO [" + query['Allergies'] + "]                # Allergies")
+        mwl.append("(0010,21B0) LT [" + query['AdditionalPatientHistory'] + "] # AdditionalPatientHistory")
+        mwl.append("(0020,000d) UI [" + query['StudyInstanceUID'] + "]         # StudyInstanceUID")
+        mwl.append("(0020,0010) SH [" + query['RequestedProcedureID'] + "]         # StudyID")
+        mwl.append("(0032,1060) LO [" + query['RequestedProcedureDescription'] + "]        #  RequestedProcedureDescription")
+        #mwl.append("(0040,0001) AE [" + query['ScheduleStationAETitle'] + "]               #  ScheduleStationAETitle")
+        #mwl.append("(0040,0002) DA [" + query['ScheduledProcedureStepStartDate'] + "]      #  ScheduledProcedureStepStartDate")
+        #mwl.append("(0040,0003) TM [" + query['ScheduledProcedureStepStartTime'] + "]      #  ScheduledProcedureStepStartTime")
+        mwl.append("(0040,1001) SH [" + query['RequestedProcedureID'] + "]                 # RequestedProcedureID")
+        mwl.append("(0040,1003) SH [" + query['RequestedProcedurePriority'] + "]           # RequestedProcedurePriority")
+        
+        mwl.append("(0040,0100) SQ (Sequence with explicit length #=1)           # ScheduledProcedureStepSequence")
+        mwl.append("(fffe,e000) na (Item with explicit length #=6)           # Item")
+        mwl.append("(0040,0001) AE [" + query['ScheduleStationAETitle'] + "]           # ScheduledStationAETitle")
+        mwl.append("(0040,0002) DA [" + query['ScheduledProcedureStepStartDate'] + "]           # ScheduledProcedureStepStartDate")
+        mwl.append("(0040,0003) TM [" + query['ScheduledProcedureStepStartTime'] + "]           # ScheduledProcedureStepStartTime")
+        mwl.append("(0040,0007) LO [" + query['RequestedProcedureDescription'] + "]           # ScheduledProcedureStepDescription")
+        mwl.append("(0040,0009) SH [" + query['RequestedProcedureID'] + "]           # ScheduledProcedureStepID")
+        mwl.append("(0008,0060) CS [" + query['Modality'] + "]           # Modality")
+        mwl.append("(fffe,e00d) na (ItemDelimitationItem for re-encoding)   #   0, 0 ItemDelimitationItem")
+        mwl.append("(fffe,e0dd) na (SequenceDelimitationItem for re-encod.) #   0, 0 SequenceDelimitationItem")
 
-		mwl.append("(0008,0096) SQ (Sequence with explicit length #=1)           # ReferringPhysicianIdentificationSequence")
-		mwl.append("(fffe,e000) na (Item with explicit length #=4)           # Item")
-		mwl.append("(0008,0080) LO [" + query['InstitutionName'] + "]           # InstitutionName")
-		mwl.append("(0040,1101) SQ (Sequence with explicit length #=1)           # PersonIdentificationCodeSequence")
-		mwl.append("(fffe,e000) na (Item with explicit length #=3)           # Item")
-		mwl.append("(0008,0100) SH [" + query['PhysicianIDforSequence'] + "]           # CodeValue")
-		mwl.append("(0008,0102) SH [L]           # CodingSchemeDesignator")
-		mwl.append("(0008,0104) LO [Local Code]           # CodeMeaning")
-		mwl.append("(fffe,e00d) na (ItemDelimitationItem for re-encoding)           # ItemDelimitationItem")
-		mwl.append("(fffe,e0dd) na (SequenceDelimitationItem for re-encoding)           # SequenceDelimitationItem")
-		mwl.append("(0040,1103) LO [" + query['PersonTelephoneNumbers'] + "]           # PersonTelephoneNumbers")
-		mwl.append("(0040,1104) LT [" + query['PersonTelecomInformation'] + "]           # PersonTelecomInformation, [Phone^WPN^CP^email]")
-		mwl.append("(fffe,e00d) na (ItemDelimitationItem for re-encoding)           # ItemDelimitationItem")
-		mwl.append("(fffe,e0dd) na (SequenceDelimitationItem for re-encoding.)           # SequenceDelimitationItem")
+        mwl.append("(0008,0096) SQ (Sequence with explicit length #=1)           # ReferringPhysicianIdentificationSequence")
+        mwl.append("(fffe,e000) na (Item with explicit length #=4)           # Item")
+        mwl.append("(0008,0080) LO [" + query['InstitutionName'] + "]           # InstitutionName")
+        mwl.append("(0040,1101) SQ (Sequence with explicit length #=1)           # PersonIdentificationCodeSequence")
+        mwl.append("(fffe,e000) na (Item with explicit length #=3)           # Item")
+        mwl.append("(0008,0100) SH [" + query['PhysicianIDforSequence'] + "]           # CodeValue")
+        mwl.append("(0008,0102) SH [L]           # CodingSchemeDesignator")
+        mwl.append("(0008,0104) LO [Local Code]           # CodeMeaning")
+        mwl.append("(fffe,e00d) na (ItemDelimitationItem for re-encoding)           # ItemDelimitationItem")
+        mwl.append("(fffe,e0dd) na (SequenceDelimitationItem for re-encoding)           # SequenceDelimitationItem")
+        mwl.append("(0040,1103) LO [" + query['PersonTelephoneNumbers'] + "]           # PersonTelephoneNumbers")
+        mwl.append("(0040,1104) LT [" + query['PersonTelecomInformation'] + "]           # PersonTelecomInformation, [Phone^WPN^CP^email]")
+        mwl.append("(fffe,e00d) na (ItemDelimitationItem for re-encoding)           # ItemDelimitationItem")
+        mwl.append("(fffe,e0dd) na (SequenceDelimitationItem for re-encoding.)           # SequenceDelimitationItem")
 
-		try:
-			errorstatus = False
-			response = dict()
-			filename = pathtoworklist + '/' + query['AccessionNumber']
-			returnedtext = ""
-			original = sys.stdout
-			for line in mwl:
-				returnedtext = returnedtext + line + "\n"
+        try:
+            errorstatus = False
+            response = dict()
+            filename = pathtoworklist + '/' + query['AccessionNumber']
+            returnedtext = ""
+            original = sys.stdout
+            for line in mwl:
+                returnedtext = returnedtext + line + "\n"
 
-			with open(filename + ".txt", 'w+') as filehandle:
-				# set the new output channel
-				sys.stdout = filehandle
-				for line in mwl:
-					print(line)
-				# restore the old output channel
-				sys.stdout = original
-				filehandle.close()
-				subprocess.Popen(pathtodump2dcm +' -F +te ' + filename + ".txt " + filename + ".wl", shell = True)
-				# raise Exception("Testing Error.") 
-				
-		except Exception as e:
-		
-			errorstatus = True
-			response['error'] =  str(e)
-			response['status'] = 'Problem with MWL:  ' + query['AccessionNumber']
+            with open(filename + ".txt", 'w+') as filehandle:
+                # set the new output channel
+                sys.stdout = filehandle
+                for line in mwl:
+                    print(line)
+                # restore the old output channel
+                sys.stdout = original
+                filehandle.close()
+                subprocess.Popen(pathtodump2dcm +' -F +te ' + filename + ".txt " + filename + ".wl", shell = True)
+                # raise Exception("Testing Error.") 
+                
+        except Exception as e:
+        
+            errorstatus = True
+            response['error'] =  str(e)
+            response['status'] = 'Problem with MWL:  ' + query['AccessionNumber']
 
-	if errorstatus == False:
-		response['status'] = 'MWL File Written  ' + query['AccessionNumber']
-		response['error'] =  "OK"
-	output.AnswerBuffer(json.dumps(response, indent = 3), 'application/json')
+    if errorstatus == False:
+        response['status'] = 'MWL File Written  ' + query['AccessionNumber']
+        response['error'] =  "OK"
+    output.AnswerBuffer(json.dumps(response, indent = 3), 'application/json')
 
 orthanc.RegisterRestCallback('/mwl/file/make', CreateAndSave)
 
 # Format for Server Error in response
-# HttpError	"Internal Server Error"
-# HttpStatus	500
-# Message	"Error encountered within the plugin engine"
-# Method	"POST"
-# OrthancError	"Error encountered within the plugin engine"
-# OrthancStatus	1
-# Uri	"/pdfkit/htmltopdf"
+# HttpError    "Internal Server Error"
+# HttpStatus    500
+# Message    "Error encountered within the plugin engine"
+# Method    "POST"
+# OrthancError    "Error encountered within the plugin engine"
+# OrthancStatus    1
+# Uri    "/pdfkit/htmltopdf"
 
 # BEGINNING OF PDF FROM HTML
 
@@ -741,66 +725,66 @@ orthanc.RegisterRestCallback('/mwl/file/make', CreateAndSave)
 # 1.2.840.10008.5.1.4.1.1.104.1 is SOP CLASS for Encapsulated PDF IOD /  "SOPClassUID":"1.2.840.10008.5.1.4.1.1.104.1"
 def attachbase64pdftostudy(query):
 
-	attachresponse = dict()
+    attachresponse = dict()
 
-	if query['studyuuid'] != "":
-		print(query)
-		query = '{"Tags" : {"Modality":"SR", "Manufacturer": "REPORT", "OperatorsName":"' + query['author'] + '", "SeriesDescription":"' + query['title'] + '","SOPClassUID":"1.2.840.10008.5.1.4.1.1.104.1"},"Content" : "data:application/pdf;base64,' + query['base64'] + '", "Parent":"' + query['studyuuid']+ '"}'
-		temp = orthanc.RestApiPost('/tools/create-dicom',query)
-		attachresponse['status'] = json.loads(temp)
-		attachresponse['error'] = "false"
-	else:
-		attachresponse['error'] = "Missing UUID for parent study."
-		
-	return attachresponse;
+    if query['studyuuid'] != "":
+        print(query)
+        query = '{"Tags" : {"Modality":"SR", "Manufacturer": "REPORT", "OperatorsName":"' + query['author'] + '", "SeriesDescription":"' + query['title'] + '","SOPClassUID":"1.2.840.10008.5.1.4.1.1.104.1"},"Content" : "data:application/pdf;base64,' + query['base64'] + '", "Parent":"' + query['studyuuid']+ '"}'
+        temp = orthanc.RestApiPost('/tools/create-dicom',query)
+        attachresponse['status'] = json.loads(temp)
+        attachresponse['error'] = "false"
+    else:
+        attachresponse['error'] = "Missing UUID for parent study."
+        
+    return attachresponse;
 
 def getpdf(query, output):
 
-	response = dict()
+    response = dict()
 
-	if query['method'] == "html":
+    if query['method'] == "html":
 
-		try:
-			options = {
-				'page-size': 'Letter',
-				'margin-top': '0.75in',
-				'margin-right': '0.75in',
-				'margin-bottom': '0.75in',
-				'margin-left': '0.75in',
-			}
-			pathtobinary = shutil.which("wkhtmltopdf")
-			config = pdfkit.configuration(wkhtmltopdf=pathtobinary)
-			pdf = pdfkit.from_string(query['html'], False,options=options)
-			encoded = base64.b64encode(pdf).decode()
-			# If attach flag is 1 then attach it to the studyuuid
+        try:
+            options = {
+                'page-size': 'Letter',
+                'margin-top': '0.75in',
+                'margin-right': '0.75in',
+                'margin-bottom': '0.75in',
+                'margin-left': '0.75in',
+            }
+            pathtobinary = shutil.which("wkhtmltopdf")
+            config = pdfkit.configuration(wkhtmltopdf=pathtobinary)
+            pdf = pdfkit.from_string(query['html'], False,options=options)
+            encoded = base64.b64encode(pdf).decode()
+            # If attach flag is 1 then attach it to the studyuuid
 
-			if query['attach'] == 1:
-				query['base64'] = encoded
-				response['attachresponse'] = attachbase64pdftostudy(query)
-			if query['return'] == 1:
-				response['base64'] = encoded
-			output.AnswerBuffer(json.dumps(response, indent = 3), 'application/json')
+            if query['attach'] == 1:
+                query['base64'] = encoded
+                response['attachresponse'] = attachbase64pdftostudy(query)
+            if query['return'] == 1:
+                response['base64'] = encoded
+            output.AnswerBuffer(json.dumps(response, indent = 3), 'application/json')
 
-		except Exception as e:
+        except Exception as e:
 
-			response['error'] = str(e)
-			output.AnswerBuffer(json.dumps(response, indent = 3), 'application/json')
+            response['error'] = str(e)
+            output.AnswerBuffer(json.dumps(response, indent = 3), 'application/json')
 
-	elif query['method'] == "base64":
-		response['attachresponse'] = attachbase64pdftostudy(query)
-		output.AnswerBuffer(json.dumps(response, indent = 3), 'application/json')
-	else:
-		response['error'] = "Invalid Method"
-		output.AnswerBuffer(json.dumps(response, indent = 3), 'application/json')
+    elif query['method'] == "base64":
+        response['attachresponse'] = attachbase64pdftostudy(query)
+        output.AnswerBuffer(json.dumps(response, indent = 3), 'application/json')
+    else:
+        response['error'] = "Invalid Method"
+        output.AnswerBuffer(json.dumps(response, indent = 3), 'application/json')
 
 def HTMLTOPDF(output, uri, **request):
 
-	if request['method'] != 'POST':
-		output.SendMethodNotAllowed('POST')
-	else:
-		#print(request['body'])
-		query = json.loads(request['body']) # allows control characters ?
-		pdf = getpdf(query, output)
+    if request['method'] != 'POST':
+        output.SendMethodNotAllowed('POST')
+    else:
+        #print(request['body'])
+        query = json.loads(request['body']) # allows control characters ?
+        pdf = getpdf(query, output)
 
 orthanc.RegisterRestCallback('/pdfkit/htmltopdf', HTMLTOPDF)
 
@@ -810,24 +794,24 @@ orthanc.RegisterRestCallback('/pdfkit/htmltopdf', HTMLTOPDF)
 
 def getStudiesByIDArray(output, uri, **request):
 
-	if request['method'] != 'POST':
-		output.SendMethodNotAllowed('POST')
-	else:
-		answers = []
-		studies = json.loads(request['body'])
-		for uuid in studies:
-			study = json.loads(orthanc.RestApiGet('/studies/' + uuid))
-			modalities = []
-			imagecount = 0
-			for series in study['Series']:
-				seriesdata = json.loads(orthanc.RestApiGet('/series/%s' % series))
-				imagecount = imagecount + len(seriesdata['Instances'])
-				if seriesdata['MainDicomTags']['Modality'] not in modalities:
-					modalities.append(seriesdata['MainDicomTags']['Modality'])
-			study['imagecount'] = imagecount
-			study['modalities'] = modalities
-			answers.append(study)
-		output.AnswerBuffer(json.dumps(answers, indent = 3), 'application/json')
+    if request['method'] != 'POST':
+        output.SendMethodNotAllowed('POST')
+    else:
+        answers = []
+        studies = json.loads(request['body'])
+        for uuid in studies:
+            study = json.loads(orthanc.RestApiGet('/studies/' + uuid))
+            modalities = []
+            imagecount = 0
+            for series in study['Series']:
+                seriesdata = json.loads(orthanc.RestApiGet('/series/%s' % series))
+                imagecount = imagecount + len(seriesdata['Instances'])
+                if seriesdata['MainDicomTags']['Modality'] not in modalities:
+                    modalities.append(seriesdata['MainDicomTags']['Modality'])
+            study['imagecount'] = imagecount
+            study['modalities'] = modalities
+            answers.append(study)
+        output.AnswerBuffer(json.dumps(answers, indent = 3), 'application/json')
 
 orthanc.RegisterRestCallback('/studies/arrayIDs', getStudiesByIDArray)
 
@@ -838,15 +822,15 @@ orthanc.RegisterRestCallback('/studies/arrayIDs', getStudiesByIDArray)
 
 def getPatientStudyCounts(output, uri, **request):
 
-	if request['method'] != 'POST':
-		output.SendMethodNotAllowed('POST')
-	else:
-		answers = dict();
-		patients = json.loads(request['body'])
-		for patient in patients:
-			query = '{"Level":"Study","Expand":false,"Query":{"PatientID":"' + patient +  '"}}'
-			answers[patient] = len(json.loads(orthanc.RestApiPost('/tools/find',query)))
-		output.AnswerBuffer(json.dumps(answers, indent = 3), 'application/json')
+    if request['method'] != 'POST':
+        output.SendMethodNotAllowed('POST')
+    else:
+        answers = dict();
+        patients = json.loads(request['body'])
+        for patient in patients:
+            query = '{"Level":"Study","Expand":false,"Query":{"PatientID":"' + patient +  '"}}'
+            answers[patient] = len(json.loads(orthanc.RestApiPost('/tools/find',query)))
+        output.AnswerBuffer(json.dumps(answers, indent = 3), 'application/json')
 orthanc.RegisterRestCallback('/patient/studycounts', getPatientStudyCounts)
 
 # inspect the python API of the "orthanc" module
@@ -855,17 +839,17 @@ orthanc.RegisterRestCallback('/patient/studycounts', getPatientStudyCounts)
 # import numbers
 
 for (name, obj) in inspect.getmembers(orthanc):
-	if inspect.isroutine(obj):
-		print('Function %s():\n  Documentation: %s\n' % (name, inspect.getdoc(obj)))
+    if inspect.isroutine(obj):
+        print('Function %s():\n  Documentation: %s\n' % (name, inspect.getdoc(obj)))
 
-	elif inspect.isclass(obj):
-		print('Class %s:\n  Documentation: %s' % (name, inspect.getdoc(obj)))
+    elif inspect.isclass(obj):
+        print('Class %s:\n  Documentation: %s' % (name, inspect.getdoc(obj)))
 
-		# Loop over the members of the class
-		for (subname, subobj) in inspect.getmembers(obj):
-			if isinstance(subobj, numbers.Number):
-				print('  - Enumeration value %s: %s' % (subname, subobj))
-			elif (not subname.startswith('_') and
-				inspect.ismethoddescriptor(subobj)):
-				print('  - Method %s(): %s' % (subname, inspect.getdoc(subobj)))
-		print('')
+        # Loop over the members of the class
+        for (subname, subobj) in inspect.getmembers(obj):
+            if isinstance(subobj, numbers.Number):
+                print('  - Enumeration value %s: %s' % (subname, subobj))
+            elif (not subname.startswith('_') and
+                inspect.ismethoddescriptor(subobj)):
+                print('  - Method %s(): %s' % (subname, inspect.getdoc(subobj)))
+        print('')

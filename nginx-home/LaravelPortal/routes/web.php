@@ -434,7 +434,7 @@ Route::middleware(['auth:sanctum', 'verified'])->post('/Reports/radreport_templa
 
 // Partially Working, get all of the existing reports for an accession number and returns the data so old reports can be show in the editor
 Route::middleware(['auth:sanctum', 'verified'])->post('/HL7/getallhl7_reports', function(Request $request) {
-   $list = Reports::getallhl7_reports($request->input('accession_number'), );
+   $list = Reports::getallhl7_reports($request->input('accession_number'));
     echo $list;
 })->name('getallhl7_reports');
 

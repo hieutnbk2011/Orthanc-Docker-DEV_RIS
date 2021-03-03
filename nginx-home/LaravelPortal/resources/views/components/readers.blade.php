@@ -43,6 +43,7 @@
 	<div id="reporttemplatelist" style="color:black;float:left;display:inline-block;"><form name="templatechooser" id="templatechooser" class="reportapi"><select form="templatechooser" name="templateid" id="templateid" style="display:inline;"></select></form></div>
 	<span id="tools" data-pacs = "ORTHANC" style="float:left;"><input id = "undoreport" type="submit" class="btn-danger btn-sm" value="Undo Preview" disabled="disabled" /><input id="previewreport" type="submit" class="btn-danger btn-sm" value="Preview" disabled="disabled"><input id = "prelimreport" type="submit" class="btn-danger btn-sm" value="PRELIM" disabled="disabled" /><input id = "finalreport" type="submit" class="btn-danger btn-sm" value="FINAL" disabled="disabled" /><input id = "addendumreport" type="submit" class="btn-danger btn-sm" value="ADDENDUM" disabled="disabled" /></span>
 	</div>
+	<div id = "lockedwarning" class="row"></div>
 <div class = "row">
 <div class="reportheader col-sm-6">
 <div><span>Name:</span><span class="headername"></span></div>
@@ -462,8 +463,14 @@ function logViewStudy(study, event) {
     .done(function(data, textStatus, jqXHR) {
 
         response = parseMessages(data,true);
+
         if (response.link == "DOWN") {
             showMessage("", "No Connectivity with Image Server");
+        }
+
+        else if (response.error) {
+
+            showMessage("", response.error);
         }
         else if (event.type == "click") {
 
@@ -633,16 +640,16 @@ $(document).on("click, contextmenu", '.viewstudy', function(event) {
 
                 },
                 success: function(data, textStatus, xhr) {
+
                     AJAX_Finish(xhr)
                     response = parseMessages(data, true);
 
-                    if(!response.error || (response.error && data.user.isInteger)) {
+                    if(!response.error) {
 
-                        if (data.user.isInteger) alert("Notice", "Study is locked by user:  " + data.user);
+                        user = data.user;
+                        report = data.report;
 
-                        data = data.report;
-
-                        $('#markupform').html('<div class="htmlmarkup" name="htmlmarkup">' +  data + '</div>');
+                        $('#markupform').html('<div class="htmlmarkup" name="htmlmarkup">' +  report + '</div>');
                         $(".reportdiv input").off();
                         $(".reportdiv input").keyup(function(event) {
                             if ($(".input1").is(":focus") && event.key == "Enter") {
@@ -659,7 +666,8 @@ $(document).on("click, contextmenu", '.viewstudy', function(event) {
 
                         setButtons(buttonstatus.loaded);
                         $("#clinical_information").val($(".headerindication").html());
-
+                        // if (user != "ME") $("#lockedwarning").html("Study is locked by user:  " + user);
+                        if (user != "ME") showMessage("Warning","Study is locked by user:  " + user);
 
                     }
 
@@ -2928,8 +2936,11 @@ var parent = $(this).closest(".worklist");
 
         parent.after('<div id ="ajaxdiv">' + data + '</div>');
         initLoader();
+        AJAX_Finish(jqXHR);
+
     })
     .fail(function( jqXHR, textStatus, errorThrown) {
+
     });
     }
     else {
@@ -3700,6 +3711,50 @@ return html;
                 $("#undoreport").addClass("btn-danger btn-sm btn-show");
                 $("#undoreport").prop("disabled", true);
             });
+    }
+
+    	function addReport(obxmessage) {  // created, segments, uuid
+
+		reportobjects.push(obxmessage);
+		// Mapping from HL7 obxmessage[11][0], Observation Result Status
+		statuses = {
+		"P":"PRELIM",
+		"F":"FINAL",
+		"C":"ADDENDUM"
+		}
+		displaystatus = statuses[obxmessage[11][0]];
+		reportslistoptions+='<option data-reportobject="" data-reporttype="' + 'hl7' + '" data-reportdate="' + formatHL7date(obxmessage[14][0]) + '">' +  formatHL7date(obxmessage[14][0]) + ", " + displaystatus + ':' + (obxmessage[16][2] != ""?obxmessage[16][2] + " ":"") + (obxmessage[16][3] != ""?obxmessage[16][3] + " ":"") + (obxmessage[16][1] != ""?obxmessage[16][1] + " ":"") + (obxmessage[16][5] != ""?obxmessage[16][5]+ " ":"")   + '</option>';  // need to add reading doctor, 15 and 16, 14 is the date
+	}
+
+	    function formatHL7date(date) {  // convert YYYYMMDDHHMMSS to YYYY-MM=DD HH:MM:SS
+
+		year =date.substring(0,4);
+		month =date.substring(4,6);
+		day  =date.substring(6,8);
+		hours  =date.substring(8,10);
+		minutes  =date.substring(10,12);
+		seconds  =date.substring(12,14);
+		return (year + "-" + month + "-" + day + " " + hours + ":" + minutes + ":" + seconds);
+	}
+
+		// display an existing report in the viewer, relies on the reports for a study to have the report object attached to it, which is done when the reports are loaded, all in JS
+
+    function loadreport(report, email) {
+
+			//console.log(activestudytags);
+            $("#teleRadDivOverlayWrapper").show();
+            $("#APImonitor").css("display","block");
+            $("#apiresults").html(report);
+            $("#viewersend").removeClass();
+            if ( email == "" ) {
+               $("#viewersend").attr("disabled", true);
+               $("#viewersend").addClass("btn-danger btn-sm");
+            }
+            else {
+                $("#viewersend").attr("disabled", false);
+                $("#viewersend").addClass("btn-primary btn-sm");
+            }
+
     }
 
 </script>
