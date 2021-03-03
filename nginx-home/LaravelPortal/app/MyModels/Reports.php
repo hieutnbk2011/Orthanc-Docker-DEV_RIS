@@ -1,17 +1,32 @@
 <?php
 namespace App\MyModels;
+use Illuminate\Database\Eloquent\Model;
 use \DB;
 use \Debugbar;
 use Illuminate\Http\Request;
 use App\MyModels\DatabaseFactory;
+use Illuminate\Support\Facades\Log;
 // use App\Actions\Orthanc\UtilityFunctions;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\View\Component;
 use Exception;
 // use ReallySimpleJWT\Token;
 // use App\MyModels\DatabaseFactory;
 //session_start();  // need to replace that with the session handler.
 
-class Reports {
+class Reports extends Model {
+
+    /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected $table = 'reports';
+
+    /**
+     * @var array
+     */
+    protected $fillable = ['HL7_message', 'orthanc_uuid', 'mrn', 'accession_number', 'telerad_contract', 'reader_id', 'newstatus', 'oldstatus', 'datetime', 'htmlreport', 'request'];
 
 
     public $id;
@@ -30,7 +45,13 @@ class Reports {
     public function __construct(Request $request) {
 
         $this->request = $request;
+
   	}
+
+	private static function renderComponent($path) {
+		// setup mostly for getting css, etc. from <includes.reportheader.blade.php
+		return view($path);
+	}
 
   	public static function parseHL7($message) {
 
@@ -194,7 +215,8 @@ class Reports {
 
   		$query = "SELECT newstatus FROM reports r1 WHERE datetime = (SELECT MAX(datetime) FROM reports r2 WHERE r1.accession_number = r2.accession_number) AND r1.accession_number = ?";
   		$params = [$accession_number];
-  		$result = DatabaseFactory::selectByQuery($query, $params)->fetchAll(PDO::FETCH_OBJ);
+  		// $result = DatabaseFactory::selectByQuery($query, $params)->fetchAll(PDO::FETCH_OBJ);
+		$result = DB::connection('mysql2')->select($query,$params);
   		if (count($result) == 1) return $result[0];
   		if (count($result) == 0 ) return false;
   		if (count($result) > 1 ) return "error";
@@ -208,10 +230,11 @@ class Reports {
 		$reports = self::getAllReportsByAccession($accession_number);
 		$hl7 = [];
 		$json = array("user_email" => Auth::user()->email);
-
 		foreach ($reports as $report) {
-			$hl7[] = self::parseHL7($report->HL7_message);
+			Log::error(var_dump($report->get()->HL7_message));
+			$hl7[] = self::parseHL7($report->get()->HL7_message);
 		}
+		die();
 		$json['hl7'] = $hl7;
 		//DatabaseFactory::logVariable($hl7);
 		foreach ($hl7 as $key => $value) {
@@ -230,7 +253,7 @@ class Reports {
 		}
 		if ($lastreport == null) {
 		$_SESSION["jsonmessages"]["HL7"][] = '{"reports":"getallhl7_reports call"}';
-		 echo json_encode(['{"reports":' .json_encode($json) . '}']);
+			return '{"reports":' .json_encode($json) . '}';
 		}
 		else return $json["hl7"];
 
@@ -249,16 +272,17 @@ class Reports {
 		$referringphysician = $OBR[16][1] . (!empty($OBR[16][2])?" " . $OBR[16][2]:"") . " " . substr($OBR[16][0], strpos($OBR[16][0], ":") + 1) . " " . $OBR[16][4];
 		$referringphysicianid = $OBR[16][0]; // better method to get referrer.
 		// put below into config
-		$dob = DateTime::createFromFormat('Ymd', $PID[7][0]);
+		$dob = \DateTime::createFromFormat('Ymd', $PID[7][0]);
 		(!$dob)?$dob = "Not available":$dob = $dob->format('M-d-Y');
 
-		$studydate = DateTime::createFromFormat('YmdHis', $OBR[36][0]);
+		$studydate = \DateTime::createFromFormat('YmdHis', $OBR[36][0]);
 		(!$studydate)?$studydate = "Not available":$studydate = $studydate->format('M-d-Y H:i:s');
 
-		$reportdate = DateTime::createFromFormat('YmdHis', $OBX[14][0]);
+		$reportdate = \DateTime::createFromFormat('YmdHis', $OBX[14][0]);
 		(!$reportdate)?$reportdate = "Not available":$reportdate = $reportdate->format('M-d-Y H:i:s');
-
-		$header = Config::get("REPORT_CSS") . FacilityModel::letterHeader(Config::get("DEFAULT_FACILITY_ID"), true) .  '<div id = "reportnoheader"><table id = "header_info">
+		$reportheadercss = self::renderComponent("includes.reportheader"); // Config::get("REPORT_CSS")
+		$facility = ""; // FacilityModel::letterHeader(Config::get("DEFAULT_FACILITY_ID"), true);
+		$header = $reportheadercss . $facility .  '<div id = "reportnoheader"><table id = "header_info">
 		<tr>
 			<td id="report_name"> Patient Name: ' . $PID[5][0] . ', ' . $PID[5][1] . '</td>
 			<td id="report_mrn"> Med Rec Number:  ' . $PID[3][0] . '</td>
@@ -284,7 +308,7 @@ class Reports {
 	<td colspan= "2"> Read Status:  '  . $translatestatus[$OBX[11][0]] .  '</td>
 	</tr>
 	</table>';
-		$date = DateTime::createFromFormat('YmdHis', $OBX[14][0]);
+		$date = \DateTime::createFromFormat('YmdHis', $OBX[14][0]);
 		$datetime = $date->format('Y-m-d H:i:s');
 		$footer = '<div id = "sigblock">' . $translatestatus[$OBX[11][0]] .
 	'<br>Electronically signed:<br><br>Reader Profile:  '  . $OBX[16][0] .  '<br>'  . $OBX[16][2] . (!empty($OBX[16][3])?" " . $OBX[16][3]:"") . " " . $OBX[16][1] . " " . $OBX[16][5] . '<br>'  . $datetime . '</div>';

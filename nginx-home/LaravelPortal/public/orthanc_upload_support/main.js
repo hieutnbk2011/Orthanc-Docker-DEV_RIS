@@ -80,7 +80,7 @@ picker.addEventListener('change', async event => {
 	total = 0;
 	skipotherrequests = 0;
 	const parsedepoch = new Date().toISOString().match(/(\d{4}\-\d{2}\-\d{2})T(\d{2}:\d{2}:\d{2})/);
-	const datetimestamp = parsedepoch[1] + "-" + parsedepoch[2].replace(/:/g, "-");
+	datetimestamp = parsedepoch[1] + "-" + parsedepoch[2].replace(/:/g, "-");
 	//alert(datetimestamp);
 	picker.setAttribute('data-timestamp', datetimestamp);
 
@@ -186,16 +186,53 @@ var sendFile = function(file, timestamp, total, type) {
                 elem.style.width = Math.round(responsecounter / total * 100) + "%";
 
                 if (responsecounter >= total) {
-                progress_text.innerHTML = "Sending " + total + " file(s) is done!";
-                loader.style.display = "none";
 
-           		}
-           		 if (request.response.file.status == "Done") {
+                    progress_text.innerHTML = "Sending " + total + " file(s) is done!";
+                    loader.style.display = "none";
 
-					console.log(request.response);
-					$("#uploadresults").html(request.response.results);
-					showuploaderModal("Done","Click on Upload Summary to see Results");
-                }
+                    const xhr = new XMLHttpRequest();
+                    xhr.responseType = 'json';
+                    xhr.open("POST", '/PACSUploadStudies/PACSupload');
+                    xhr.setRequestHeader('Content-Type', 'Content-Type: multipart/form-data');
+                    //xhr.setRequestHeader('Accept', 'application/json');
+                    const formData = new FormData();
+
+                    formData.set('method', "UploadFolder"); // One object file
+                    formData.set('timestamp', datetimestamp); // One object file
+                    formData.set('counter', total);
+                    formData.set('total', total);
+                    formData.set('anonymize', $("#anonymize").is(":checked")); // One object file
+                    formData.set('altertags', $("#altertags").is(":checked")); // One object file
+                    formData.set('getreport', "TRUE");
+	                $('#edited_tag_inputs [name = "taglistname[]"]').each(function( index ) {
+		                formData.set($( this ).val(), $('#edited_tag_inputs [name = "taglistvalue[]"]')[index].value); // One object file
+	                });
+
+                    xhr.send(formData);
+
+                    xhr.onload = function() {
+
+                        if (this.readyState != 4) return;
+
+                        if (this.readyState === this.DONE) {
+
+                            if (xhr.status === 200) {
+                                alert("Thank You");
+           		            }
+           		         }
+           		         else {
+           		            // still waiting
+           		        }
+           		     };
+
+           		 }
+
+//                  if (request.response.file.status == "Done") {
+//
+//                     console.log(request.response);
+//                     $("#uploadresults").html(request.response.results);
+//                     showuploaderModal("Done","Click on Upload Summary to see Results");
+//                  }
 
             }
             else {
@@ -208,7 +245,7 @@ var sendFile = function(file, timestamp, total, type) {
     // Do request, Sent off to the PHP Controller for processing
 
     request.open("POST", '/PACSUploadStudies/PACSupload');
-    request.setRequestHeader('Accept', 'application/json');  // needed to add this because the debugbar in Laravel injects the DebugBar into the response if json not specified.
+    //request.setRequestHeader('Accept', 'application/json');  // needed to add this because the debugbar in Laravel injects the DebugBar into the response if json not specified.
     request.send(formData);
     }
     else {

@@ -36,7 +36,7 @@
         "nesbot/carbon": "^2.42",
         "oomphinc/composer-installers-extender": "2.0",
         "phpmailer/phpmailer": "^6.1",
-        "rbdwllr/reallysimplejwt": "^3.1",
+        "rbdwllr/reallysimplejwt": "^4.0",
         "rennokki/rating": "^2.3",
         "spatie/laravel-cookie-consent": "^2.12"
     },

@@ -39,6 +39,7 @@ RUN docker-php-ext-install pdo_mysql zip exif pcntl gd
 # THAT NEEDS TO BE RUN FROM THE nginx-home/LaravelPortal/ directory to symlink the storage directory.  NEED to figure out how to do that.
 # RUN cd /nginx-home/LaravelPortal/
 # RUN php artisan storage:link
+# sudo docker exec -it  orthanc-docker-dev_ris_php-fpm_1 /bin/bash
 
 ENTRYPOINT ["php-fpm"]
 

@@ -413,9 +413,12 @@ Route::middleware(['auth:sanctum', 'verified'])->post('/PACSUploadStudies/Upload
 })->name('UploadZipToPACS');
 
 // Partially Working, PACSupload
+
 Route::middleware(['auth:sanctum', 'verified'])->post('/PACSUploadStudies/PACSupload', function(Request $request) {
+
     $PACSUpload = new PACSUploadStudies($request,'PACSupload');
     echo $PACSUpload->get_json_response();
+
 })->name('PACSupload');
 
 

@@ -47,7 +47,19 @@ class Users extends Model
      *
      * @var array
      */
-    protected $fillable = [
+
+    /**
+     * Indicates if the model's ID is auto-incrementing.
+     *
+     * @var bool
+     */
+    public $incrementing = true;
+
+    public $timestamps = false;
+
+    protected $connection = 'mysql2';
+
+    protected $attributes = [
         'name', 'fname', 'lname', 'mname', 'email', 'dob', 'patientid', 'doctor_id', 'reader_id', 'user_active', 'user_roles', 'email_verified_at', 'password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token', 'current_team_id', 'profile_photo_path', 'created_at', 'updated_at'
     ];
 

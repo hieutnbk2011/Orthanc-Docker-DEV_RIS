@@ -52,24 +52,11 @@ body.loading{
 body.loading .spinner_overlay{
     display: block;
 }
+
 </style>
 
-<script>
-// Add remove loading class on body element based on Ajax request status
-$(document).on({
-    ajaxStart: function(){
-        $("body").addClass("loading");
-    },
-    ajaxComplete: function(){
-         $("body").removeClass("loading");
-    }
-});
-</script>
-<!-- AJAX SPINNER END -->
-
-
-
 <style>
+
 /* FOR syntaxHighlight. STUFF AFTER THAT IS JUST A DUMP OF CSS, WILL HAVE TO BE CLEANED UP. */
 
 .syntaxHighlighted {
@@ -81,7 +68,10 @@ $(document).on({
 .syntaxHighlighted .null { color: magenta !important; }
 .syntaxHighlighted .key { color: #0158ff !important; }
 
+body {overflow-y:scroll !important;}
+
 /* jQueryUI Tabs */
+
 .centertabs {
     font-size: 10px;
     width: max-content;
@@ -1702,3 +1692,36 @@ background: transparent;
 	color:red !important;
 }
 </style>
+
+<!-- AJAX SPINNER BEGIN -->
+
+<script>
+
+function AJAX_Finish(xhr) {
+
+    $("body").removeClass("loading");
+    console.log(xhr);
+}
+// NODE.JS
+// const axios = require('axios');
+//
+// axios.post('/user', {
+//
+//     firstName: 'Fred',
+//     lastName: 'Flintstone'
+// })
+// .then(function (response) {
+//     console.log(response);
+// })
+// .catch(function (error) {
+//     console.log(error);
+// });
+//
+// function AJAX_Finish(xhr) {
+//     $("body").removeClass("loading");
+//     console.log(xhr);
+// }
+
+</script>
+
+<!-- AJAX SPINNER END -->

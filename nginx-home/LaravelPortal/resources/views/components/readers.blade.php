@@ -196,30 +196,6 @@ $selectlist .= '</select>
 
 <script nonce = "<?php // echo $_SESSION['nonce'] ?>">
 
-$.ajaxSetup({
-
-	headers: {
-	'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-	},
-	complete: function(xhr, textStatus) {
-
-		$("#spinner").css("display", "none");   // old from RIS
-		$("body").removeClass("loading"); // new spinner
-		console.log(xhr.hasOwnProperty('responseJSON'));
-		if (xhr.hasOwnProperty('responseJSON') && xhr.responseJSON.hasOwnProperty('AJAXRedirect')) {
-			showMessage("",xhr.responseJSON.error);
-			location.href = "/";
-		}
-	},
-	error: function(xhr, textStatus, errorThrown) {
-	console.log(xhr);
-	console.log(textStatus);
-	console.log(errorThrown);
-	if (xhr.status != 0 ) {
-	alert( "error: See Console");
-	}
-	}
-});
 
 $("#togglelegend").on("click", function(e) {
 	$('#studieslegend').toggle();
@@ -351,13 +327,16 @@ var wrapper = form.parent().find(".listwrapper");
 
     $.ajax({
 
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        },
         type: "POST",
         url: form.data('action'),
         dataType: "json",
         data: $(this).closest("form").serialize(),
         context: $(this),
         beforeSend: function(e) {
-            $("#spinner").css("display", "block");
+            $("body").addClass("loading");
         },
 
     })
@@ -466,6 +445,13 @@ function logViewStudy(study, event) {
 
 
     $.ajax({
+
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        },
+        beforeSend: function(e) {
+            $("body").addClass("loading");
+        },
     	async: false,
         type: "POST",
         url: '/PACS/logViewStudy',
@@ -475,27 +461,27 @@ function logViewStudy(study, event) {
     })
     .done(function(data, textStatus, jqXHR) {
 
-		response = parseMessages(data,true);
-		if (response.link == "DOWN") {
-			showMessage("", "No Connectivity with Image Server");
-		}
-		else if (event.type == "click") {
+        response = parseMessages(data,true);
+        if (response.link == "DOWN") {
+            showMessage("", "No Connectivity with Image Server");
+        }
+        else if (event.type == "click") {
 
-			$("#dynamiciframe").append($('<iframe style="width:100%;border:none;margin:0px;overflow:scroll;background-color:transparent;height: 100vh;" class="vieweroverlay-content" id="viewerframe" name ="viewerframe" src="' + response.link + '"></iframe>'));
-			//postToViewer(response.link,JWT,"viewerframe");
-     		document.getElementById("myNav").style.width = "100%";
-     		$("body").css("overflow", "hidden");
+            $("#dynamiciframe").append($('<iframe style="width:100%;border:none;margin:0px;overflow:scroll;background-color:transparent;height: 100vh;" class="vieweroverlay-content" id="viewerframe" name ="viewerframe" src="' + response.link + '"></iframe>'));
+            //postToViewer(response.link,JWT,"viewerframe");
+            document.getElementById("myNav").style.width = "100%";
+            $("body").css("overflow", "hidden");
 
-		}
-		else if (response.success == "true" && event.type == "contextmenu") {
-			//postToViewer(response.link,JWT,"_blank");
-		    window.open(response.link);
+        }
+        else if (response.success == "true" && event.type == "contextmenu") {
+            //postToViewer(response.link,JWT,"_blank");
+            window.open(response.link);
 
-		}
-		else {
-			showMessage("", "Unknown Error");
-		}
-
+        }
+        else {
+            showMessage("", "Unknown Error");
+        }
+        AJAX_Finish(jqXHR);
     });
 
 }
@@ -513,76 +499,8 @@ $(document).on("click, contextmenu", '.viewstudy', function(event) {
     // Animation complete
     });
 
-    $("body").on("click", ".login", function (e) {  // loads the login form
 
-        e.preventDefault();
-        e.stopPropagation();
-
-    $.ajax({
-        url: '/Login/index',
-        type: 'post',
-        dataType: 'html',
-        data: {},
-        complete: function(xhr, textStatus) {
-
-        },
-        success: function(data, textStatus, xhr) {
-
-        	data = parseMessages(data,true);
-            $("#logregforms").html(data);
-            $("#submitlogin").validate({});
-        }
-    });
-
-    });
-
-    $("body").on("click", ".register", function (e) {
-
-        e.preventDefault();
-        e.stopPropagation();
-
-    $.ajax({
-        url: '/Register/index',
-        type: 'post',
-        dataType: 'html',
-        data: {},
-        complete: function(xhr, textStatus) {
-
-        },
-        success: function(data, textStatus, xhr) {
-        	data = parseMessages(data,true);
-            $("#logregforms").html(data);
-            $("#registration_form").validate({});
-        }
-    });
-    });
-
-    $("#logregforms").on("submit", ".resetpassword",  function (e) {
-
-        e.preventDefault();
-
-		$.ajax({
-
-			url: '/Login/requestPasswordReset_action',
-			type: 'post',
-			dataType: 'html',
-			data: $(this).serialize(),
-			beforeSend: function(e1) {
-			$("#spinner").css("display", "block");
-			},
-			success: function(data, textStatus, xhr) {
-				$("#logregforms").html(data);
-			}
-		});
-
-    });
-
-    $(".logregforms, .loginform").on("click", ".logregformsclose", function () {
-      $(".logregforms").html("");
-      $(".loginform").hide("");
-
-    });
-
+    // DO NOT REMOVE !!
 
     (function($){
     var $newTag = null;
@@ -703,6 +621,10 @@ $(document).on("click, contextmenu", '.viewstudy', function(event) {
             formdata += "&modality=" + activestudytags["modality"] + "&description=" + activestudytags["description"] + "&option=loadreport" + "&uuid=" + activestudytags["uuid"];
 
             $.ajax({
+
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
                 url: '/Reports/choose_template',
                 type: 'POST',
                 data: formdata,
@@ -711,7 +633,7 @@ $(document).on("click, contextmenu", '.viewstudy', function(event) {
 
                 },
                 success: function(data, textStatus, xhr) {
-
+                    AJAX_Finish(xhr)
                     response = parseMessages(data, true);
 
                     if(!response.error || (response.error && data.user.isInteger)) {
@@ -785,6 +707,10 @@ $(document).on("click, contextmenu", '.viewstudy', function(event) {
         data = {"markup": markup, "email": email};
         }
         $.ajax({
+
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
             url: '/Email/emailreport',
             type: 'post',
             dataType: 'json',
@@ -840,6 +766,9 @@ $(document).on("click, contextmenu", '.viewstudy', function(event) {
             }
 			let PACS = $(this).closest("#tools").data("pacs");
 			$.ajax({
+			    headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
           		url: '/HL7/submit_report',
           		type: 'post',
           		dataType: 'json',
@@ -848,6 +777,7 @@ $(document).on("click, contextmenu", '.viewstudy', function(event) {
 
           		},
           		success: function(data, textStatus, xhr) {
+          		 AJAX_Finish(xhr)
           		 response = parseMessages(data, true);
 //           		 alert(response.HL7Message);
 //                 data=response.reports;
@@ -1024,12 +954,16 @@ $("#delegator").on ("click", ".showorders", function(e) {
     if (element.attr("id") != "patientdiv") {
     e.preventDefault(e);
     $.ajax({
+
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        },
     	url: '/Orders/order_list',
     	type: 'POST',
     	dataType: 'json',
     	data: {"id" : activepatient.data('id'), "mrn" : activepatient.data('mrn'), "data-mrn" : activepatient.data('mrn')}, // for later maybe, one will be set for existing patient.
     	beforeSend: function(e) {
-        $("#spinner").css("display", "block");
+            $("body").addClass("loading");
         },
     	success: function(data, textStatus, xhr) {
 			data = parseMessages(data, true);
@@ -1053,6 +987,10 @@ $("#delegator").on ("click", ".showorders", function(e) {
 window.replaceOrderRow = function (accession) {
 
     $.ajax({
+
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        },
     	url: '/Orders/order_row_getByAccession',
     	type: 'POST',
     	dataType: 'json',
@@ -1147,6 +1085,10 @@ $("#studieswrapper").css("display", "block");
     var formData = new FormData(this);
 
     $.ajax({
+
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        },
     	url: $(this).data("target"),
     	type: 'POST',
     	dataType: 'html',
@@ -1171,6 +1113,10 @@ $("#studieswrapper").css("display", "block");
         e.preventDefault();
         e.stopPropagation();  // event was firing twice for some reason.
         $.ajax({
+
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
             url: '/Register/register_action',
             type: 'post',
             dataType: 'html',
@@ -1243,12 +1189,16 @@ $("#studieswrapper").css("display", "block");
         let uuid = studyrow.data("uuid");
         let accession_number = studyrow.data("accession");
         $.ajax({
+
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        },
         type: "POST",
         url: "/Utilities/sharelist",
         dataType: "html",
         data: {},
         beforeSend: function(e) {
-            $("#spinner").css("display", "block");
+            $("body").addClass("loading");
         },
         })
         .done(function(data, textStatus, jqXHR) {
@@ -1260,13 +1210,17 @@ $("#studieswrapper").css("display", "block");
             form.on("submit", function(e) {
             if (form.valid()) {
             e.preventDefault();
+
                $.ajax({
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
                 type: "POST",
                 url: "/Referrers/share",
                 dataType: "json",
                 data: $(this).serialize(),
                 beforeSend: function(e) {
-                    $("#spinner").css("display", "block");
+                    $("body").addClass("loading");
                 },
                 })
                 .done(function(data, textStatus, jqXHR) {
@@ -2960,14 +2914,14 @@ var parent = $(this).closest(".worklist");
 
     $.ajax({
     headers: {
-
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
     },
     url: '/PACS/create_dicom',
     type: 'POST',
     dataType: 'html',
     data: {parent:parent.data("uuid")},
     beforeSend: function(e) {
-        $("#spinner").css("display", "block");
+        $("body").addClass("loading");
     },
     })
     .done(function(data, textStatus, jqXHR) {
@@ -3099,17 +3053,21 @@ function renderData(data) {
 function searchOrthanc() {
 
 $.ajax({
+headers: {
+    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+},
 url: '/studies/page',
 type: 'POST',
 dataType: 'json',
 contentType: 'application/json; charset=utf-8',  // post JSON
 data: JSON.stringify(query),
 beforeSend: function(e) {
-	$("#spinner").css("display", "block");
+	$("body").addClass("loading");
 },
 })
 .done(function(data, textStatus, jqXHR) {
 
+    AJAX_Finish(jqXHR);
     if (data == null) {
     alert("Emtpy Response from Server");
     }
@@ -3204,17 +3162,19 @@ function loadAllPatientDiv(worklist,page) {
 
 	let mrn = worklist.data("mrn");
 	$.ajax({
-
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        },
 		//let mrn = worklist.data("mrn");
     	url: '/OrthancDev/load_all_studies',
     	type: 'POST',
     	dataType: 'json',
     	data: {"data-mrn" : mrn, "page": page}, // for later maybe, one will be set for existing patient.
     	beforeSend: function(e) {
-        $("#spinner").css("display", "block");
+            $("body").addClass("loading");
         },
     	success: function(data, textStatus, xhr) {
-
+            $("body").removeClass("loading");
             if (data == null) {
             alert("Emtpy Response from Server");
             }
@@ -3254,12 +3214,15 @@ function loadAllPatientDiv(worklist,page) {
 function fetchstudy(uuid, id) {
 
     $.ajax({
+    headers: {
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        },
     url: '/Studies/fetch_study',
     type: 'POST',
     dataType: 'json',
     data: {"uuid":uuid, "id":id},
     complete: function(xhr, textStatus) {
-
+        $("body").removeClass("loading");
     },
     success: function(data, textStatus, xhr) {
         showMessage("",data.message);
@@ -3286,17 +3249,21 @@ $("body").on("click", ".showselect", function(e) {
 function get_routes_list(selectlist) {
 
 	$.ajax({
+    headers: {
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+    },
 	url: 'get_modalities',
 	type: 'POST',
 	dataType: 'html',
 	data: {},
 	beforeSend: function(e) {
-		$("#spinner").css("display", "block");
+		$("body").addClass("loading");
 	},
 	success: function(data, textStatus, xhr) {
 
 		selectlist.html(data);
 		selectlist.show();
+		 AJAX_Finish(xhr);
 
 	}
 	});
@@ -3332,7 +3299,7 @@ $("#studylist [name='changestudydate'][value='3650']").trigger("click");
 
 function downloadstudy_orthanc(type, clicked)  {
 
-$("#spinner").css("display", "block");
+$("body").addClass("loading");
 
 fetch('/OrthancDev/downloadStudyUUID', {
 
@@ -3348,7 +3315,6 @@ fetch('/OrthancDev/downloadStudyUUID', {
 .then(response => response.blob())
 .then(response => {
 
-    $("#spinner").css("display", "none");
     const blob = new Blob([response], {type: 'application/zip'});
     const downloadUrl = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -3356,6 +3322,7 @@ fetch('/OrthancDev/downloadStudyUUID', {
     a.download = clicked.data("name") + ".zip";
     document.body.appendChild(a);
     a.click();
+    AJAX_Finish(xhr);
 })
 
 }
@@ -3613,12 +3580,15 @@ return html;
 
           formdata = "modality=" + activestudytags["modality"] + "&description=" + activestudytags["description"] + "&option=getlist";
             $.ajax({
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
             url: '/Reports/radreport_templates_list',  // calls the Reports controller.
             type: 'POST',
             dataType: 'json',
             data: formdata,  // gets all of the hl7 reports encoded as JSON, api gets all hl7 reports for study
             complete: function(xhr, textStatus) {
-
+                 AJAX_Finish(xhr);
             },
             success: function(data, textStatus, xhr) {
                 $("#templateid").html(data.selectlist);
@@ -3648,10 +3618,10 @@ return html;
             dataType: 'json',
             data: {"uuid": uuid,"accession_number": accession_number },  // gets all of the hl7 reports encoded as JSON, api gets all hl7 reports for study
 			beforeSend: function(e) {
-			$("#spinner").css("display", "block");
+			    $("body").addClass("loading");
 			},
             success: function(data, textStatus, xhr) {
-
+                 AJAX_Finish(xhr);
                 // create the select list for existing reports
                 $("#reportselectorwrapper").html('&nbsp;&nbsp;<span style="color:white;">. . . loading reports</span>');
                 response = parseMessages(data, true);

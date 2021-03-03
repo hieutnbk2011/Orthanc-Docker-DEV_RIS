@@ -35,6 +35,7 @@ class PACSUploadStudies
     private $setMetaTags = true;
     private $user_id;
     private $user_name;
+    private $getreport;
 
     private static $dcmdumpargs;
     private static $tagmap;
@@ -46,7 +47,7 @@ class PACSUploadStudies
     public $result;
     public $responsecode;
 
-	public function __construct($request, $method)
+	public function __construct(Request $request, $method)
 
 	{
 //         Debugbar::error("Constructor for app/Actions/PACSUploadStudies:  SessionHost:  " . session("orthanc_host"));
@@ -84,6 +85,9 @@ class PACSUploadStudies
 		$this->user_id = Auth::user()->id; // If to be modified
 		$this->user_name = Auth::user()->name; // If to be modified
 		$this->globalerror = [];
+		$this->getreport = $request->input('getreport');
+
+		Log::info($request->get('getreport'));
 
 
 // 	Content-Disposition: form-data; name="anonymize"
@@ -149,18 +153,26 @@ class PACSUploadStudies
 		foreach (self::$tagmap as $key => $value) {
 			self::$dcmdumpargs.= ' +P ' . $value;
 		}
-        switch ($method) {
-            case 'UploadZipPreProcess':
-                $this->UploadZipPreProcess();
-                break;
-            case 'UploadZipToPACS':
-                 $this->UploadZipToPACS();
-                break;
-            case 'PACSupload':
-                 $this->PACSupload($request);
-                break;
-            default:
-                //
+        Log::info("Get Rerport" . $this->getreport);
+		if ($this->getreport === 'TRUE') {
+		    $this->PACSuploadFinish();
+		}
+
+        else {
+
+            switch ($method) {
+                case 'UploadZipPreProcess':
+                    $this->UploadZipPreProcess();
+                    break;
+                case 'UploadZipToPACS':
+                     $this->UploadZipToPACS();
+                    break;
+                case 'PACSupload':
+                     $this->PACSupload($request);
+                    break;
+                default:
+                    //
+            }
         }
 	}
 
@@ -444,7 +456,13 @@ class PACSUploadStudies
 
 	}
 
-	public function PACSupload ($request) {
+	public function PACSuploadFinish() {
+
+	    echo '{"status":"DONE"}';
+
+	}
+
+	public function PACSupload (Request $request) {
 
 		// $_SESSION['DICOMUPLOAD'] set in the Class to collect the StudyInstanceUID's for the folder, as an array of values.
 		// unless there are uploads at exactly the same second.	 Could add the ID in from of the timestapm also but it is for the user's session anyways.

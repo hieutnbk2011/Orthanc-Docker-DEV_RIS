@@ -29,6 +29,7 @@ return [
     */
 
     'features' => [
+
         Features::profilePhotos(),
         Features::api(),
         Features::teams(),

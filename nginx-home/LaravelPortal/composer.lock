@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "898c0ed7cd2af0cf601a14c00f508420",
+    "content-hash": "877ef3a235a084391020c26654f0c396",
     "packages": [
         {
             "name": "aranyasen/hl7",
@@ -117,16 +117,16 @@
         },
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.173.19",
+            "version": "3.173.20",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "63c6feca49bf4083f33bf250401c0c286759e101"
+                "reference": "3e6143f5c12986d727307d5d19d6aec21575d903"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/63c6feca49bf4083f33bf250401c0c286759e101",
-                "reference": "63c6feca49bf4083f33bf250401c0c286759e101",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/3e6143f5c12986d727307d5d19d6aec21575d903",
+                "reference": "3e6143f5c12986d727307d5d19d6aec21575d903",
                 "shasum": ""
             },
             "require": {
@@ -134,9 +134,9 @@
                 "ext-pcre": "*",
                 "ext-simplexml": "*",
                 "guzzlehttp/guzzle": "^5.3.3|^6.2.1|^7.0",
-                "guzzlehttp/promises": "^1.0",
-                "guzzlehttp/psr7": "^1.4.1",
-                "mtdowling/jmespath.php": "^2.5",
+                "guzzlehttp/promises": "^1.4.0",
+                "guzzlehttp/psr7": "^1.7.0",
+                "mtdowling/jmespath.php": "^2.6",
                 "php": ">=5.5"
             },
             "require-dev": {
@@ -201,9 +201,9 @@
             "support": {
                 "forum": "https://forums.aws.amazon.com/forum.jspa?forumID=80",
                 "issues": "https://github.com/aws/aws-sdk-php/issues",
-                "source": "https://github.com/aws/aws-sdk-php/tree/3.173.19"
+                "source": "https://github.com/aws/aws-sdk-php/tree/3.173.20"
             },
-            "time": "2021-03-01T19:15:59+00:00"
+            "time": "2021-03-02T19:13:50+00:00"
         },
         {
             "name": "bacon/bacon-qr-code",
@@ -263,7 +263,7 @@
             "version": "v4.6.0",
             "source": {
                 "type": "git",
-                "url": "git@github.com:twbs/bootstrap.git",
+                "url": "https://github.com/twbs/bootstrap.git",
                 "reference": "6ffb0b48e455430f8a5359ed689ad64c1143fac2"
             },
             "dist": {
@@ -1885,16 +1885,16 @@
         },
         {
             "name": "laravel/jetstream",
-            "version": "v2.2.2",
+            "version": "v2.2.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/jetstream.git",
-                "reference": "81faacb09334976bab9dc3b02921272ef2a71d25"
+                "reference": "6e6e62ac1743a60296ba7265d0d91adee58b8401"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/jetstream/zipball/81faacb09334976bab9dc3b02921272ef2a71d25",
-                "reference": "81faacb09334976bab9dc3b02921272ef2a71d25",
+                "url": "https://api.github.com/repos/laravel/jetstream/zipball/6e6e62ac1743a60296ba7265d0d91adee58b8401",
+                "reference": "6e6e62ac1743a60296ba7265d0d91adee58b8401",
                 "shasum": ""
             },
             "require": {
@@ -1948,7 +1948,7 @@
                 "issues": "https://github.com/laravel/jetstream/issues",
                 "source": "https://github.com/laravel/jetstream"
             },
-            "time": "2021-02-23T20:40:55+00:00"
+            "time": "2021-03-02T16:30:16+00:00"
         },
         {
             "name": "laravel/sanctum",
@@ -2016,16 +2016,16 @@
         },
         {
             "name": "laravel/tinker",
-            "version": "v2.6.0",
+            "version": "v2.6.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/tinker.git",
-                "reference": "daae1c43f1300fe88c05d83db6f3d8f76677ad88"
+                "reference": "04ad32c1a3328081097a181875733fa51f402083"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/tinker/zipball/daae1c43f1300fe88c05d83db6f3d8f76677ad88",
-                "reference": "daae1c43f1300fe88c05d83db6f3d8f76677ad88",
+                "url": "https://api.github.com/repos/laravel/tinker/zipball/04ad32c1a3328081097a181875733fa51f402083",
+                "reference": "04ad32c1a3328081097a181875733fa51f402083",
                 "shasum": ""
             },
             "require": {
@@ -2078,9 +2078,9 @@
             ],
             "support": {
                 "issues": "https://github.com/laravel/tinker/issues",
-                "source": "https://github.com/laravel/tinker/tree/v2.6.0"
+                "source": "https://github.com/laravel/tinker/tree/v2.6.1"
             },
-            "time": "2021-01-26T20:35:18+00:00"
+            "time": "2021-03-02T16:53:12+00:00"
         },
         {
             "name": "league/commonmark",
@@ -3935,31 +3935,30 @@
         },
         {
             "name": "rbdwllr/reallysimplejwt",
-            "version": "3.1.1",
+            "version": "4.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/RobDWaller/ReallySimpleJWT.git",
-                "reference": "2954e559df545c37763a6295726cded288a02277"
+                "reference": "a8038ff97a59fd567f40f2ac86ee779719008ebb"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/RobDWaller/ReallySimpleJWT/zipball/2954e559df545c37763a6295726cded288a02277",
-                "reference": "2954e559df545c37763a6295726cded288a02277",
+                "url": "https://api.github.com/repos/RobDWaller/ReallySimpleJWT/zipball/a8038ff97a59fd567f40f2ac86ee779719008ebb",
+                "reference": "a8038ff97a59fd567f40f2ac86ee779719008ebb",
                 "shasum": ""
             },
             "require": {
-                "php": ">=7.2.0"
+                "php": ">=7.4.0"
             },
             "require-dev": {
-                "infection/infection": "^0.14",
-                "phpbench/phpbench": "^0.16",
-                "phploc/phploc": "^5.0",
-                "phpmd/phpmd": "^2.7",
-                "phpstan/phpstan": "^0.11",
-                "phpunit/phpunit": "^8.0",
-                "roave/backward-compatibility-check": "^3.0",
-                "sebastian/phpcpd": "^4.1",
-                "squizlabs/php_codesniffer": "^3.0"
+                "infection/infection": "^0.20",
+                "phpbench/phpbench": "^0.17",
+                "phploc/phploc": "^7.0",
+                "phpmd/phpmd": "^2.9",
+                "phpstan/phpstan": "^0.12",
+                "phpunit/phpunit": "^9.5",
+                "sebastian/phpcpd": "^6.0",
+                "squizlabs/php_codesniffer": "^3.5"
             },
             "type": "library",
             "autoload": {
@@ -3988,9 +3987,9 @@
             ],
             "support": {
                 "issues": "https://github.com/RobDWaller/ReallySimpleJWT/issues",
-                "source": "https://github.com/RobDWaller/ReallySimpleJWT/tree/3.1.1"
+                "source": "https://github.com/RobDWaller/ReallySimpleJWT/tree/4.0.0"
             },
-            "time": "2020-10-15T07:24:22+00:00"
+            "time": "2021-02-01T17:29:36+00:00"
         },
         {
             "name": "rennokki/rating",
