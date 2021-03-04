@@ -40,6 +40,8 @@ class PACSUploadStudies
     private static $dcmdumpargs;
     private static $tagmap;
     private static $deleteAferAnonymization;
+    private $request;
+    private $sessionkey;
 
     public $json_response;
     public $curlerror;
@@ -50,6 +52,8 @@ class PACSUploadStudies
 	public function __construct(Request $request, $method)
 
 	{
+        $this->request = $request;
+        Log::info($this->request);
 
     	if(session("orthanc_host") == null ) {
 
@@ -70,6 +74,29 @@ class PACSUploadStudies
 //
 // 		);
 
+// (
+//   'method' => 'UploadFolder',
+//   'timestamp' => '2021-03-04-17-03-55',
+//   'counter' => '5',
+//   'total' => '7',
+//   'type' => 'application/dicom',
+//   'webkitpath' => 'Fall_2/Ct_Abdomen - 11788761116134/COR_ABD_2059/IM-0003-0049.dcm',
+//   '_token' => '6ay9qZdjXkxpb672Th0waqQmyOIwkeFUlbnnbvx1',
+//   'anonymize' => 'false',
+//   'altertags' => 'false',
+//   'PatientID' => 'test',
+//   'AccessionNumber' => 'test',
+//   'InstitutionName' => 'test',
+//   'file' =>
+//   Illuminate\Http\UploadedFile::__set_state(array(
+//      'test' => false,
+//      'originalName' => 'IM-0003-0049.dcm',
+//      'mimeType' => 'application/dicom',
+//      'error' => 0,
+//      'hashName' => NULL,
+//   )),
+// )
+
 		self::$server =  DB::table('orthanc_hosts')->where('id', session("orthanc_host"))->first();
 		self::$OrthancURL = self::$server->api_url;
 		self::$dcmtk_path = config('PATH_DCMTK');
@@ -77,19 +104,17 @@ class PACSUploadStudies
 		self::$Token = config('API_Token');
 		self::$origin = self::my_server_url();
 		self::$deleteAferAnonymization = true;
-		$this->anonymize = $request->input('anonymize'); // passed as false or true
-		$this->altertags = $request->input('altertags');// passed as false or true
-		$this->PatientID = $request->input('PatientID'); // If to be modified
-		$this->AccessionNumber = $request->input('AccessionNumber'); // If to be modified
-		$this->InstitutionName = $request->input('InstitutionName'); // If to be modified
+		$this->anonymize = $this->request->input('anonymize'); // passed as false or true
+		$this->altertags = $this->request->input('altertags');// passed as false or true
+		$this->PatientID = $this->request->input('PatientID'); // If to be modified
+		$this->AccessionNumber = $this->request->input('AccessionNumber'); // If to be modified
+		$this->InstitutionName = $this->request->input('InstitutionName'); // If to be modified
 		$this->user_id = Auth::user()->id; // If to be modified
 		$this->user_name = Auth::user()->name; // If to be modified
 		$this->globalerror = [];
-		$this->getreport = $request->input('getreport');
+		$this->getreport = $this->request->input('getreport');
 
 		Log::info("PACSUploadStudies Constructor");
-
-
 
 // 	Content-Disposition: form-data; name="anonymize"
 //
@@ -160,8 +185,9 @@ class PACSUploadStudies
 		}
 
         else {
-            Log::info(var_dump($request));
+
             switch ($method) {
+
                 case 'UploadZipPreProcess':
                     $this->UploadZipPreProcess();
                     break;
@@ -169,7 +195,7 @@ class PACSUploadStudies
                      $this->UploadZipToPACS();
                     break;
                 case 'PACSupload':
-                     $this->PACSupload($request);
+                     $this->PACSupload();
                     break;
                 default:
                     //
@@ -463,7 +489,7 @@ class PACSUploadStudies
 
 	}
 
-	public function PACSupload ($request) {
+	public function PACSupload () {
 
 		// $_SESSION['DICOMUPLOAD'] set in the Class to collect the StudyInstanceUID's for the folder, as an array of values.
 		// unless there are uploads at exactly the same second.	 Could add the ID in from of the timestapm also but it is for the user's session anyways.
@@ -477,21 +503,27 @@ class PACSUploadStudies
 		// [data] => Array ( [userid] => 1 [user_name] => sscotti [mrn] => DEV0000005 [anonymize] => normal ) )
 		//$_SESSION['uploaddata']['data']['anonymize']if(session("orthanc_host") == null )
 
-		$KEY = 'DICOMUPLOAD'. $request->input('timestamp');
-		$UUIDS = 'UUIDS'. $request->input('timestamp');
-		$ABORTKEY = 'ABORT'. $request->input('timestamp');
-		$COUNTER = 'COUNTER'. $request->input('timestamp');
-//         $result = DB::connection('mysql')->select('select DISTINCT date_time_key from dicom_uploads_temp where date_time_key = ?', [$KEY]);
-//         foreach( $result as $row) {
-//             self::logVariable($row->date_time_key);
-//         }
-//         self::logVariable($result);
-        Log::info(var_dump($request));
-        //Log::info(json_encode($results[0]->date_time_key));
+		$KEY = 'DICOMUPLOAD'. $this->request->input('timestamp');
+        Log::info($KEY);
+        $this->sessionkey = $KEY;
 
-        $request->session()->push($KEY,microtime(TRUE)); // basically a page visit, count of this is the number of hits to the page.
+		if (Session::has($KEY)) {
 
-        $request->session()->put($COUNTER,intval($request->session()->get($COUNTER)) + 1);
+		}
+
+		else {
+		    session([$KEY.'.COUNTER' => []]);
+		    session([$KEY.'.UUIDS' => []]);
+		    session([$KEY.'.ABORT' => false]);
+		}
+		$this->request->session()->push($KEY.'.COUNTER',microtime(TRUE));
+
+        Log::info(Session::get($KEY));
+        die();
+
+        $this->request->session()->push($KEY,microtime(TRUE)); // basically a page visit, count of this is the number of hits to the page.
+
+        $this->request->session()->put($COUNTER,intval($request->session()->get($COUNTER)) + 1);
 
 		// Extract file's data
 

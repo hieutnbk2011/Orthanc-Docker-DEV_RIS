@@ -145,62 +145,108 @@ var sendFile = function(file, timestamp, total, type) {
         });
         console.log(file);
 
-        const request = new XMLHttpRequest();
+        $.ajax({
+
+//             headers: {
+//                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+//             },
+            beforeSend: function(e) {
+                $("body").addClass("loading");
+            },
+            type: "POST",
+            processData: false,
+            contentType: false,
+            url: '/PACSUploadStudies/PACSupload',
+            dataType: "json",
+            data: formData,
+        })
+        .done(function(data, textStatus, jqXHR) {
+
+//             response = parseMessages(data,true);
+//
+//             if (response.link == "DOWN") {
+//                 showMessage("", "No Connectivity with Image Server");
+//             }
+//
+//             else if (response.error) {
+//
+//                 showMessage("", response.error);
+//             }
+//             else if (event.type == "click") {
+//
+//                 $("#dynamiciframe").append($('<iframe style="width:100%;border:none;margin:0px;overflow:scroll;background-color:transparent;height: 100vh;" class="vieweroverlay-content" id="viewerframe" name ="viewerframe" src="' + response.link + '"></iframe>'));
+//                 //postToViewer(response.link,JWT,"viewerframe");
+//                 document.getElementById("myNav").style.width = "100%";
+//                 $("body").css("overflow", "hidden");
+//
+//             }
+//             else if (response.success == "true" && event.type == "contextmenu") {
+//                 //postToViewer(response.link,JWT,"_blank");
+//                 window.open(response.link);
+//
+//             }
+//             else {
+//                 showMessage("", "Unknown Error");
+//             }
+//             AJAX_Finish(jqXHR);
+        });
+
+        //const request = new XMLHttpRequest();
 
         // HTTP onload handler
 
-        request.onload = function() {
-
-            if (request.readyState === request.DONE) {
-
-                if (request.status === 200) {
-
-                    progress_text.innerHTML = file.name + " (" + (responsecounter + 1) + " of " + total + " ) ";
-                    //console.log(request.response);
-                    if (request.response.status != "Uploaded" || request.response.status != "Done" ) {
-                    skipotherrequests = 1;
-                    }
-                    // Add file name to list
-
-                    item = statusitem(request.response.file, request.response.file.status);
-                    listing.insertAdjacentHTML('beforeend', item);
-                    listing.scrollTop = listing.scrollHeight;
-
-                    responsecounter++;
-                    // progress_text.innerHTML = request.response.file.name + " (" + responsecounter + " of " + total + " ) ";
-
-                    // Show percentage
-                    box.innerHTML = Math.min(responsecounter / total * 100, 100).toFixed(2) + "%";
-
-                    // Show progress bar
-                    elem.innerHTML = Math.round(responsecounter / total * 100, 100) + "%";
-                    elem.style.width = Math.round(responsecounter / total * 100) + "%";
-
-                    if (responsecounter >= total) {
-                    progress_text.innerHTML = "Sending " + total + " file(s) is done!";
-                    loader.style.display = "none";
-
-                    }
-                     if (request.response.file.status == "Done") {
-
-                        console.log(request.response);
-                        $("#uploadresults").html(request.response.results);
-                        showuploaderModal("Done","Click on Upload Summary to see Results");
-                    }
-
-                }
-                else {
-
-                    skipotherrequests = 1;
-                    //alert("error with AJAX requests");
-                }
-            }
-        }
-
-        // Do request, Sent off to the PHP Controller for processing
-
-        request.open("POST", '/PACSUploadStudies/PACSupload');
-        request.send(formData);
+//         request.onload = function() {
+//
+//             if (request.readyState === request.DONE) {
+//
+//                 if (request.status === 200) {
+//
+//                     progress_text.innerHTML = file.name + " (" + (responsecounter + 1) + " of " + total + " ) ";
+//                     //console.log(request.response);
+//                     if (request.response.status != "Uploaded" || request.response.status != "Done" ) {
+//                     skipotherrequests = 1;
+//                     }
+//                     // Add file name to list
+//
+//                     item = statusitem(request.response.file, request.response.file.status);
+//                     listing.insertAdjacentHTML('beforeend', item);
+//                     listing.scrollTop = listing.scrollHeight;
+//
+//                     responsecounter++;
+//                     // progress_text.innerHTML = request.response.file.name + " (" + responsecounter + " of " + total + " ) ";
+//
+//                     // Show percentage
+//                     box.innerHTML = Math.min(responsecounter / total * 100, 100).toFixed(2) + "%";
+//
+//                     // Show progress bar
+//                     elem.innerHTML = Math.round(responsecounter / total * 100, 100) + "%";
+//                     elem.style.width = Math.round(responsecounter / total * 100) + "%";
+//
+//                     if (responsecounter >= total) {
+//                     progress_text.innerHTML = "Sending " + total + " file(s) is done!";
+//                     loader.style.display = "none";
+//
+//                     }
+//                      if (request.response.file.status == "Done") {
+//
+//                         console.log(request.response);
+//                         $("#uploadresults").html(request.response.results);
+//                         showuploaderModal("Done","Click on Upload Summary to see Results");
+//                     }
+//
+//                 }
+//                 else {
+//
+//                     skipotherrequests = 1;
+//                     //alert("error with AJAX requests");
+//                 }
+//             }
+//         }
+//
+//         // Do request, Sent off to the PHP Controller for processing
+//
+//         request.open("POST", '/PACSUploadStudies/PACSupload');
+//         request.send(formData);
     }
     else {
     	// already aborted, probably never gets here because all of the requests are probably sent before skipotherrequests gets set to 1.
