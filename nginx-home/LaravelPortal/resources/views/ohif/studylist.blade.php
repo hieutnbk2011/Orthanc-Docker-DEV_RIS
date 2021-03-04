@@ -36,9 +36,9 @@
         dicomWeb: [
           {
             name: 'ORTHANC',
-            wadoUriRoot: '/api/wado',
-            qidoRoot: '/api/dicom-web',
-            wadoRoot: '/api/dicom-web',
+            wadoUriRoot: '/ohif/wado',
+            qidoRoot: '/ohif/dicom-web',
+            wadoRoot: '/ohif/dicom-web',
             qidoSupportsIncludeField: true,
             imageRendering: 'wadors',
             thumbnailRendering: 'wadors',

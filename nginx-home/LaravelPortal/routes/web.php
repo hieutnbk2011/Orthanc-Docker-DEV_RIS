@@ -55,13 +55,20 @@ Route::middleware(['auth:sanctum', 'verified'])->post('/sendmail', function (Req
 })->name('sendmail');
 
 
+// OHIF VIEWE ROUTES, VIEWS ARE IN ohif/studylist and ohif/studyview in resources->views
+
+Route::middleware(['auth:sanctum', 'verified'])->get('ohifstudylist', function() {
+
+    $user = Auth::user();
+    return view('ohif.studylist');
+
+})->name('ohif_studylist');
+
+
 // PATIENT PORTAL PAGE
 
 Route::middleware(['auth:sanctum', 'verified'])->get('/patients', function () {
-
     $user = Auth::user();
-    Debugbar::error($user);
-    Debugbar::error($user->patientid);
     return view('patients');
 })->name('patients');
 
@@ -425,8 +432,6 @@ Route::middleware(['auth:sanctum', 'verified'])->post('/PACSUploadStudies/PACSup
     echo $PACSUpload->get_json_response();
 
 })->name('PACSupload');
-
-
 
 
 // RADIOLOGY REPORTING ROUTES, REORGANIZE LATER
