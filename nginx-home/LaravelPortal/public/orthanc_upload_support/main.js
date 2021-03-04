@@ -199,7 +199,7 @@ var sendFile = function(file, timestamp, total, type) {
 
         // Do request, Sent off to the PHP Controller for processing
 
-        request.open("POST", '/api/PACSUploadStudies/PACSupload');
+        request.open("POST", '/PACSUploadStudies/PACSupload');
         request.send(formData);
     }
     else {
