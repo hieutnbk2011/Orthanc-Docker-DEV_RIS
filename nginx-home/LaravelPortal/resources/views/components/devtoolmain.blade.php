@@ -289,7 +289,6 @@ height:30px;
 						<a href = "https://packages.debian.org/unstable/orthanc-dev" type="button" target = "_blank" class = "btn btn-info btn-sm">Debian Dev Package</a>
 						<a href = "https://hg.orthanc-server.com/" type="button" target = "_blank" class = "btn btn-info btn-sm">Orthanc Mercurial Server</a>
 						<a href = "https://hg.orthanc-server.com/orthanc-tests/file/Orthanc-1.7.2/Tests/Tests.py#l1473" type="button" target = "_blank" class = "btn btn-info btn-sm">Orthanc Mercurial Unit Tests</a>
-						https://hg.orthanc-server.com/orthanc-tests/file/Orthanc-1.7.2/Tests/Tests.py#l1473
 						</div>
 						<div>
 
