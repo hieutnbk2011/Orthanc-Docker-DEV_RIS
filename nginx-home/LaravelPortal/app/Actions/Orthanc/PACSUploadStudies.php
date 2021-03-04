@@ -507,8 +507,9 @@ class PACSUploadStudies
         Log::info($KEY);
         $this->sessionkey = $KEY;
 
-		if (Session::has($KEY)) {
+		if (Session::has($KEY.'.COUNTER')) {
 
+            //$this->request->session()->push($KEY.'.COUNTER',microtime(TRUE));
 		}
 
 		else {
@@ -519,6 +520,7 @@ class PACSUploadStudies
 		$this->request->session()->push($KEY.'.COUNTER',microtime(TRUE));
 
         Log::info(Session::get($KEY));
+        Session::save();
         die();
 
         $this->request->session()->push($KEY,microtime(TRUE)); // basically a page visit, count of this is the number of hits to the page.
