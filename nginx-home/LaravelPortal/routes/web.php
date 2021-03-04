@@ -416,9 +416,13 @@ Route::middleware(['auth:sanctum', 'verified'])->post('/PACSUploadStudies/Upload
 
 Route::middleware(['auth:sanctum', 'verified'])->post('/PACSUploadStudies/PACSupload', function(Request $request) {
 
-     $PACSUpload = new PACSUploadStudies($request, "PACSupload");
-     echo $PACSUpload->get_json_response();
-
+    if ($request->has('FLAG')) {
+        $PACSUpload = new PACSUploadStudies($request, "PACSuploadFinish");
+    }
+    else {
+        $PACSUpload = new PACSUploadStudies($request, "PACSupload");
+    }
+    echo $PACSUpload->get_json_response();
 
 })->name('PACSupload');
 

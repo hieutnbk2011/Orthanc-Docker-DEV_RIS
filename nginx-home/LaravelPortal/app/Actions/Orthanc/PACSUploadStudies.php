@@ -1,11 +1,8 @@
 <?php
 namespace App\Actions\Orthanc;
 use \DB;
-use \Debugbar;
-use App\Actions\Orthanc\UtilityFunctions;
 use Illuminate\Support\Facades\Auth;
 use ReallySimpleJWT\Token;
-use App\MyModels\DatabaseFactory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\File;
@@ -41,7 +38,7 @@ class PACSUploadStudies
     private static $tagmap;
     private static $deleteAferAnonymization;
     private $request;
-    private $sessionkey;
+
 
     public $json_response;
     public $curlerror;
@@ -61,41 +58,44 @@ class PACSUploadStudies
     		session(['orthanc_host' => config('myconfigs.DEFAULT_ORTHANC_HOST')]);
     	}
 
-// 		self::$userprofileJWT = array (
-//
-// 		'user_id' => Session::get('user_id'),
-//         'user_name' => Session::get('user_name'),
-//         'user_email' => Session::get('user_email'),
-//         'user_roles' => Session::get('user_roles'),  // array of account types / roles
-//         'patientid' => Session::get('patientid'),
-//         'doctor_id' => Session::get('doctor_id'),
-//         'reader_id' => Session::get('reader_id'),
-//         'ip' => $_SERVER['REMOTE_ADDR']
-//
-// 		);
+/*
 
-// (
-//   'method' => 'UploadFolder',
-//   'timestamp' => '2021-03-04-17-03-55',
-//   'counter' => '5',
-//   'total' => '7',
-//   'type' => 'application/dicom',
-//   'webkitpath' => 'Fall_2/Ct_Abdomen - 11788761116134/COR_ABD_2059/IM-0003-0049.dcm',
-//   '_token' => '6ay9qZdjXkxpb672Th0waqQmyOIwkeFUlbnnbvx1',
-//   'anonymize' => 'false',
-//   'altertags' => 'false',
-//   'PatientID' => 'test',
-//   'AccessionNumber' => 'test',
-//   'InstitutionName' => 'test',
-//   'file' =>
-//   Illuminate\Http\UploadedFile::__set_state(array(
-//      'test' => false,
-//      'originalName' => 'IM-0003-0049.dcm',
-//      'mimeType' => 'application/dicom',
-//      'error' => 0,
-//      'hashName' => NULL,
-//   )),
-// )
+THIS IS WHAT IT GETS IN THE REQUEST FOR FILE SENDING.
+(
+  'method' => 'UploadFolder',
+  'timestamp' => '2021-03-04-17-03-55',
+  'counter' => '5',
+  'total' => '7',
+  'type' => 'application/dicom',
+  'webkitpath' => 'Fall_2/Ct_Abdomen - 11788761116134/COR_ABD_2059/IM-0003-0049.dcm',
+  '_token' => '6ay9qZdjXkxpb672Th0waqQmyOIwkeFUlbnnbvx1',
+  'anonymize' => 'false',
+  'altertags' => 'false',
+  'PatientID' => 'test',
+  'AccessionNumber' => 'test',
+  'InstitutionName' => 'test',
+  'file' =>
+  Illuminate\Http\UploadedFile::__set_state(array(
+     'test' => false,
+     'originalName' => 'IM-0003-0049.dcm',
+     'mimeType' => 'application/dicom',
+     'error' => 0,
+     'hashName' => NULL,
+  )),
+)
+
+THIS IS WHAT IT GETS ON THE FINISH, PROBABLY NEED TO ADD BAD SOME OF THE ANONYMIZE STUFF THERE
+
+[2021-03-04 21:12:16] local.INFO: array (
+  'FLAG' => 'FINISH',
+  '_token' => 'U9JhQeouvceYssjbWYXU5RvZ4pXS2sIWOSuGxUbK',
+  'UUIDs' =>
+  array (
+    0 => '061eccc3-089857f8-e667d555-7ce7f0d5-45b20ada',
+    1 => 'e6596260-fdf91aa9-0257a3c2-4778ebda-f2d56d1b',
+  ),
+)
+*/
 
 		self::$server =  DB::table('orthanc_hosts')->where('id', session("orthanc_host"))->first();
 		self::$OrthancURL = self::$server->api_url;
@@ -115,30 +115,6 @@ class PACSUploadStudies
 		$this->getreport = $this->request->input('getreport');
 
 		Log::info("PACSUploadStudies Constructor");
-
-// 	Content-Disposition: form-data; name="anonymize"
-//
-// false
-// -----------------------------176810023517824898321347793756
-// Content-Disposition: form-data; name="altertags"
-//
-// false
-// -----------------------------176810023517824898321347793756
-// Content-Disposition: form-data; name="PatientID"
-//
-// test
-// -----------------------------176810023517824898321347793756
-// Content-Disposition: form-data; name="AccessionNumber"
-//
-// test
-// -----------------------------176810023517824898321347793756
-// Content-Disposition: form-data; name="InstitutionName"
-//
-// test
-// -----------------------------176810023517824898321347793756
-// Content-Disposition: form-data; name="file"; filename="0Â°__FSE_T2_ax_esaote_2.zip"
-// Content-Type: application/zip
-
 
 		$tagmapreference = array (
 
@@ -197,6 +173,8 @@ class PACSUploadStudies
                 case 'PACSupload':
                      $this->PACSupload();
                     break;
+                case 'PACSuploadFinish':
+                    $this->PACSuploadFinish();
                 default:
                     //
             }
@@ -219,7 +197,7 @@ class PACSUploadStudies
 		else {
 		$output = $var;
 		}
-		if (DEBUG) Debugbar::error($output);
+		if (DEBUG) Log::info($$output);
 		return $output;
 
 	}
@@ -485,7 +463,12 @@ class PACSUploadStudies
 
 	public function PACSuploadFinish() {
 
-	    echo '{"status":"DONE"}';
+	    // Sort of a "Stateless" setup to avoid using SESSIONS.  The client collects the unique study uuid's and then send the array of IDs at the end of the upload
+	    // To get a "report", which actually could be a reusable feature to get a Report for any study.
+        Log::info($this->request->UUIDs);
+        $resultsummary = $this->_PostProcessUpload($this->request->UUIDs);
+		$this->json_response = '{"status":"Folder Upload Summary","results":' . json_encode($resultsummary) . '}';
+		return;
 
 	}
 
@@ -504,28 +487,8 @@ class PACSUploadStudies
 		//$_SESSION['uploaddata']['data']['anonymize']if(session("orthanc_host") == null )
 
 		$KEY = 'DICOMUPLOAD'. $this->request->input('timestamp');
-        Log::info($KEY);
-        $this->sessionkey = $KEY;
-
-		if (Session::has($KEY.'.COUNTER')) {
-
-            //$this->request->session()->push($KEY.'.COUNTER',microtime(TRUE));
-		}
-
-		else {
-		    session([$KEY.'.COUNTER' => []]);
-		    session([$KEY.'.UUIDS' => []]);
-		    session([$KEY.'.ABORT' => false]);
-		}
-		$this->request->session()->push($KEY.'.COUNTER',microtime(TRUE));
 
         Log::info(Session::get($KEY));
-        Session::save();
-        die();
-
-        $this->request->session()->push($KEY,microtime(TRUE)); // basically a page visit, count of this is the number of hits to the page.
-
-        $this->request->session()->put($COUNTER,intval($request->session()->get($COUNTER)) + 1);
 
 		// Extract file's data
 
@@ -562,7 +525,7 @@ class PACSUploadStudies
 		$webkitpath = $_POST['webkitpath'];
 
 		$curdir = config('myconfigs.PATH_DICOM_TMP_PARENT');
-		$upload_root	= $curdir	 . DIRECTORY_SEPARATOR . $this->PatientID  . DIRECTORY_SEPARATOR . $request->input('timestamp');
+		$upload_root	= $curdir	 . DIRECTORY_SEPARATOR . $this->PatientID  . DIRECTORY_SEPARATOR . $this->request->input('timestamp');
 		$upload_path = $upload_root . DIRECTORY_SEPARATOR . $webkitpath;
 		$upload_dir = dirname($upload_path);
 		$upload_path = $upload_dir . DIRECTORY_SEPARATOR . $file_name;
@@ -570,122 +533,110 @@ class PACSUploadStudies
 // 		self::logVariable($curdir);
 		if (!is_dir($upload_dir)) mkdir($upload_dir, 0755, true);
 
-		if ($request->session()->get($ABORTKEY) !== true) {
+        // Get here when all of the files have been, get the request from the client.
 
-			//$orthanc_uuid_array = [];  // contains unique uuid's for the upload
-			// Checks to make sure the actual mime type, not just the extension, match one in the allowed list.
-
-			if (!array_key_exists($file_type, $allowed_mimetypes)) {
-				$file_object->status = "Skipping . .";
-				$log_string .= "That Mime Type: ($file_type) is not allowed.\n";
-				echo '{"file":' . json_encode($file_object) . ',"counter":"'	. $request->input('counter') .'"}';
-
-				$log_string .= "That Mime Type: ($file_type) is not allowed.\n";
-				//$error = true;
-			}
-
-			else {
-
-				$success = move_uploaded_file($file_tmp, $upload_path);
-
-				if ($success) {
-
-					$this->logfiletext .= "The file " . basename($file_name) . " has been uploaded, processing . . .\n";
-
-					if ($file_ext == "dcm" && basename($file_name) != "DICOMDIR.dcm" ) {
-						$result = self::_Process_and_Send(basename($file_name), $upload_path, $upload_dir);
-						//if ($result) $orthanc_uuid_array[] = $result->ParentStudy;
-						$request->session()->push($UUIDS,$result->ParentStudy);
-					}
-					else if (basename($file_name) == "DICOMDIR.dcm") {
-
-						$this->logfiletext .= "Stored DICOM Directory, not sent to PACS . . " . basename($file_name) . ".\n";
-					}
-
-					else {
-						 $this->logfiletext .= "Non - .dcm file uploaded, not processed.\n";
-					}
-
-				}
-
-				else {
-
-				// failed to move the file to the directory for some reason.
-
-					$this->logfiletext .= "Upload error for file: " . basename($file_name) . ".\n";
-					$this->globalerror[] = "Upload error for file: " . basename($file_name) . ".\n";
-				}
-			}
-
-			// Above just checks to make sure the file got uploaded and logs the results, error if there is some sort of upload error
-
-			if (count($this->globalerror) > 0) {
-
-				$request->session()->put($ABORTKEY,true);
-				$file_object->status = "Aborting due to:	" . $file_name;
-				// unset the upload
-				$request->session()->forget($KEY);
-				$this->logfiletext .= "There were " . count($this->globalerror) . "server errors.";
-			}
-
-			// Get here when all of the files have been uploaded and partially processed.
-
-			else if (count($request->session()->get($UUIDS)) == $request->input('total')) {
+        if (false) {
 
 
-				$html = "";
-                $orthanc_uuid_array = $request->session()->get($UUIDS);
-				foreach ($orthanc_uuid_array as $orthanc_uuid) {
+            $html = "";
+            $orthanc_uuid_array = $request->session()->get($UUIDS);
+            foreach ($orthanc_uuid_array as $orthanc_uuid) {
 
-					$studydata = $this->writeStudySummaryToDatabase($orthanc_uuid);
-					$html .= '<div style = "border: 1px solid black;">';
+                $studydata = $this->writeStudySummaryToDatabase($orthanc_uuid);
+                $html .= '<div style = "border: 1px solid black;">';
 
-					foreach ($studydata as $name => $value) {
-						$html .= '<div><div style = "display:inline-block !important;width:200px;text-align:left;">' .$name .	 '</div><div style = "display:inline-block !important;width:400px;text-align:left;">' . $value .	'</div></div>';
+                foreach ($studydata as $name => $value) {
+                    $html .= '<div><div style = "display:inline-block !important;width:200px;text-align:left;">' .$name .	 '</div><div style = "display:inline-block !important;width:400px;text-align:left;">' . $value .	'</div></div>';
 
-					}
-					$html .= '</div><hr>';
+                }
+                $html .= '</div><hr>';
 
-					// Anonymized Study
+                // Anonymized Study
 
-					if ($this->anonymize === true) {
+                if ($this->anonymize === true) {
 
-						$studydata = self::_Anonymize($orthanc_uuid);
+                    $studydata = self::_Anonymize($orthanc_uuid);
 
-						foreach ($studydata as $name => $value) {
-						$html .= '<div><div style = "display:inline-block !important;width:200px;text-align:left;">' .$name .	 '</div><div style = "display:inline-block !important;width:400px;text-align:left;">' . $value .	'</div></div>';
-						}
-						$html .= '</div><hr>';
-					}
+                    foreach ($studydata as $name => $value) {
+                    $html .= '<div><div style = "display:inline-block !important;width:200px;text-align:left;">' .$name .	 '</div><div style = "display:inline-block !important;width:400px;text-align:left;">' . $value .	'</div></div>';
+                    }
+                    $html .= '</div><hr>';
+                }
 
-				}
+            }
 
-				$file_object->status = "Done";
-                $request->session()->forget($KEY);
-				$this->json_response = '{"file":' . json_encode($file_object) . ',"results":' . json_encode($html) .'}';
-			}
+            $file_object->status = "Done";
+            $request->session()->forget($KEY);
+            $this->json_response = '{"file":' . json_encode($file_object) . ',"results":' . json_encode($html) .'}';
+        }
 
-			else {
 
-				$file_object->status = "Uploaded";
-				$this->json_response = '{"file":' . json_encode($file_object) . ',"counter":"'	. $_POST['counter'] .'","UUIDs":' . json_encode($request->session()->get($UUIDS)). ',"DICOMUPLOAD":' . json_encode($request->session()->get($KEY)) . ',"COUNTER":' . $request->session()->get($COUNTER) . '}';
-			}
-		}
+        //$orthanc_uuid_array = [];  // contains unique uuid's for the upload
+        // Checks to make sure the actual mime type, not just the extension, match one in the allowed list.
 
-		else {
+        if (!array_key_exists($file_type, $allowed_mimetypes)) {
 
-			$file_object->status = "Already Aborted";
-			$this->logfiletext .= "Bypassing " . $file_name . ", already aborted";
-			$this->json_response = '{"file":' . json_encode($file_object) . ',"counter":"'	. $_POST['counter'] .'"}';
-		}
+            $file_object->status = "Skipping . .";
+            $log_string .= "That Mime Type: ($file_type) is not allowed.\n";
+            echo '{"file":' . json_encode($file_object) . ',"counter":"'	. $request->input('counter') .'"}';
 
+            $log_string .= "That Mime Type: ($file_type) is not allowed.\n";
+            //$error = true;
+        }
+
+        else {
+
+            $orthanc_study_uuid = "";
+            $success = move_uploaded_file($file_tmp, $upload_path);
+
+            if ($success) {
+
+                $this->logfiletext .= "The file " . basename($file_name) . " has been uploaded, processing . . .\n";
+
+                if ($file_ext == "dcm" && basename($file_name) != "DICOMDIR.dcm" ) {
+                    $result = self::_Process_and_Send(basename($file_name), $upload_path, $upload_dir);
+                    if ($result) $orthanc_study_uuid = $result->ParentStudy;
+                }
+                else if (basename($file_name) == "DICOMDIR.dcm") {
+
+                    $this->logfiletext .= "Stored DICOM Directory, not sent to PACS . . " . basename($file_name) . ".\n";
+                }
+
+                else {
+                     $this->logfiletext .= "Non - .dcm file uploaded, not processed.\n";
+                }
+
+            }
+
+            else {
+            // failed to move the file to the directory for some reason.
+
+                $this->logfiletext .= "Upload error for file: " . basename($file_name) . ".\n";
+                $this->globalerror[] = "Upload error for file: " . basename($file_name) . ".\n";
+            }
+        }
+        // Above just checks to make sure the file got uploaded and logs the results, error if there is some sort of upload error
+
+        if (count($this->globalerror) > 0) {
+
+            $request->session()->put($ABORTKEY,true);
+            $file_object->status = "Aborting due to:	" . $file_name;
+            // unset the upload
+            $request->session()->forget($KEY);
+            $this->logfiletext .= "There were " . count($this->globalerror) . "server errors.";
+        }
+        else {
+
+            $file_object->status = "Uploaded";
+            $this->json_response = '{"file":' . json_encode($file_object) . ',"counter":"'	. $this->request->input('counter') .'","UUID":"' . $orthanc_study_uuid . '","KEY":"' . $KEY . '","COUNTER":' . $this->request->input('counter') . '}';
+        }
 		file_put_contents($this->logfilepath , $this->logfiletext, FILE_APPEND );
 	}
 
 	public function UploadZipToPACS() {
 
 		// Below is for just sending a raw zip
-		// No logging to local file here, just to Debug Log
+		// No logging to local file here
 		if ($this->altertags == "true") {
 			echo '{"status":"Not implemented, Orthanc does not really allow."}';
 			die();
