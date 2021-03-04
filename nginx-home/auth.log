@@ -1,0 +1,153 @@
+[04-Mar-2021 01:58:50 UTC] Valid
+[04-Mar-2021 01:58:50 UTC] {
+    "alg": "HS256",
+    "typ": "JWT"
+}
+[04-Mar-2021 01:58:50 UTC] {
+    "iss": "Orthanc PACS",
+    "sub": "Viewer Token",
+    "iat": 1614796540,
+    "uid": 1,
+    "exp": 1614796840,
+    "data": "test"
+}
+[04-Mar-2021 01:58:50 UTC] PHP Fatal error:  Uncaught Error: Cannot access self:: when no class scope is active in /nginx-home/JWTauth.php:150
+Stack trace:
+#0 {main}
+  thrown in /nginx-home/JWTauth.php on line 150
+[04-Mar-2021 01:58:50 UTC] Valid
+[04-Mar-2021 01:58:50 UTC] {
+    "alg": "HS256",
+    "typ": "JWT"
+}
+[04-Mar-2021 01:58:50 UTC] {
+    "iss": "Orthanc PACS",
+    "sub": "Viewer Token",
+    "iat": 1614796540,
+    "uid": 1,
+    "exp": 1614796840,
+    "data": "test"
+}
+[04-Mar-2021 01:58:50 UTC] PHP Fatal error:  Uncaught Error: Cannot access self:: when no class scope is active in /nginx-home/JWTauth.php:150
+Stack trace:
+#0 {main}
+  thrown in /nginx-home/JWTauth.php on line 150
+[04-Mar-2021 01:58:50 UTC] Valid
+[04-Mar-2021 01:58:50 UTC] {
+    "alg": "HS256",
+    "typ": "JWT"
+}
+[04-Mar-2021 01:58:50 UTC] {
+    "iss": "Orthanc PACS",
+    "sub": "Viewer Token",
+    "iat": 1614796540,
+    "uid": 1,
+    "exp": 1614796840,
+    "data": "test"
+}
+[04-Mar-2021 01:58:50 UTC] PHP Fatal error:  Uncaught Error: Cannot access self:: when no class scope is active in /nginx-home/JWTauth.php:150
+Stack trace:
+#0 {main}
+  thrown in /nginx-home/JWTauth.php on line 150
+[04-Mar-2021 01:58:50 UTC] Valid
+[04-Mar-2021 01:58:50 UTC] {
+    "alg": "HS256",
+    "typ": "JWT"
+}
+[04-Mar-2021 01:58:50 UTC] {
+    "iss": "Orthanc PACS",
+    "sub": "Viewer Token",
+    "iat": 1614796540,
+    "uid": 1,
+    "exp": 1614796840,
+    "data": "test"
+}
+[04-Mar-2021 01:58:50 UTC] PHP Fatal error:  Uncaught Error: Cannot access self:: when no class scope is active in /nginx-home/JWTauth.php:150
+Stack trace:
+#0 {main}
+  thrown in /nginx-home/JWTauth.php on line 150
+[04-Mar-2021 01:58:50 UTC] Valid
+[04-Mar-2021 01:58:50 UTC] {
+    "alg": "HS256",
+    "typ": "JWT"
+}
+[04-Mar-2021 01:58:50 UTC] {
+    "iss": "Orthanc PACS",
+    "sub": "Viewer Token",
+    "iat": 1614796540,
+    "uid": 1,
+    "exp": 1614796840,
+    "data": "test"
+}
+[04-Mar-2021 01:58:50 UTC] PHP Fatal error:  Uncaught Error: Cannot access self:: when no class scope is active in /nginx-home/JWTauth.php:150
+Stack trace:
+#0 {main}
+  thrown in /nginx-home/JWTauth.php on line 150
+[04-Mar-2021 01:58:55 UTC] Valid
+[04-Mar-2021 01:58:55 UTC] {
+    "alg": "HS256",
+    "typ": "JWT"
+}
+[04-Mar-2021 01:58:55 UTC] {
+    "iss": "Orthanc PACS",
+    "sub": "Viewer Token",
+    "iat": 1614796540,
+    "uid": 1,
+    "exp": 1614796840,
+    "data": "test"
+}
+[04-Mar-2021 01:58:55 UTC] PHP Fatal error:  Uncaught Error: Cannot access self:: when no class scope is active in /nginx-home/JWTauth.php:150
+Stack trace:
+#0 {main}
+  thrown in /nginx-home/JWTauth.php on line 150
+[04-Mar-2021 02:04:58 UTC] Valid
+[04-Mar-2021 02:04:58 UTC] {
+    "alg": "HS256",
+    "typ": "JWT"
+}
+[04-Mar-2021 02:04:58 UTC] {
+    "iss": "Orthanc PACS",
+    "sub": "Viewer Token",
+    "iat": 1614796540,
+    "uid": 1,
+    "exp": 1614796840,
+    "data": "test"
+}
+[04-Mar-2021 02:04:58 UTC] PHP Fatal error:  Uncaught Error: Cannot access self:: when no class scope is active in /nginx-home/JWTauth.php:150
+Stack trace:
+#0 {main}
+  thrown in /nginx-home/JWTauth.php on line 150
+[04-Mar-2021 02:04:58 UTC] Valid
+[04-Mar-2021 02:04:58 UTC] {
+    "alg": "HS256",
+    "typ": "JWT"
+}
+[04-Mar-2021 02:04:58 UTC] {
+    "iss": "Orthanc PACS",
+    "sub": "Viewer Token",
+    "iat": 1614796540,
+    "uid": 1,
+    "exp": 1614796840,
+    "data": "test"
+}
+[04-Mar-2021 02:04:58 UTC] PHP Fatal error:  Uncaught Error: Cannot access self:: when no class scope is active in /nginx-home/JWTauth.php:150
+Stack trace:
+#0 {main}
+  thrown in /nginx-home/JWTauth.php on line 150
+[04-Mar-2021 02:05:16 UTC] Valid
+[04-Mar-2021 02:05:16 UTC] {
+    "alg": "HS256",
+    "typ": "JWT"
+}
+[04-Mar-2021 02:05:16 UTC] {
+    "iss": "Orthanc PACS",
+    "sub": "Viewer Token",
+    "iat": 1614796540,
+    "uid": 1,
+    "exp": 1614796840,
+    "data": "test"
+}
+[04-Mar-2021 02:05:16 UTC] PHP Fatal error:  Uncaught Error: Cannot access self:: when no class scope is active in /nginx-home/JWTauth.php:150
+Stack trace:
+#0 {main}
+  thrown in /nginx-home/JWTauth.php on line 150

@@ -24,3 +24,11 @@ Route::middleware('auth:sanctum')->post('/studies', function (Request $request) 
     return $request->user()->tokenCan('read');
 });
 
+Route::middleware(['auth:sanctum'])->post('/PACSUploadStudies/PACSupload', function(Request $request) {
+
+     $PACSUpload = new PACSUploadStudies($request,'PACSupload');
+     echo $PACSUpload->get_json_response();
+
+
+})->name('PACSupload');
+

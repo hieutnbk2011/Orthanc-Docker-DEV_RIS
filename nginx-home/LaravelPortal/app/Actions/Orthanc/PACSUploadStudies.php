@@ -50,10 +50,10 @@ class PACSUploadStudies
 	public function __construct(Request $request, $method)
 
 	{
-//         Debugbar::error("Constructor for app/Actions/PACSUploadStudies:  SessionHost:  " . session("orthanc_host"));
 
     	if(session("orthanc_host") == null ) {
-    		echo "Setting server to Default.";
+
+    		Log::info("PACSUploadStudies.  Setting server to Default.");
     		session(['orthanc_host' => config('myconfigs.DEFAULT_ORTHANC_HOST')]);
     	}
 
@@ -87,7 +87,8 @@ class PACSUploadStudies
 		$this->globalerror = [];
 		$this->getreport = $request->input('getreport');
 
-		Log::info($request->get('getreport'));
+		Log::info("PACSUploadStudies Constructor");
+
 
 
 // 	Content-Disposition: form-data; name="anonymize"
@@ -153,13 +154,13 @@ class PACSUploadStudies
 		foreach (self::$tagmap as $key => $value) {
 			self::$dcmdumpargs.= ' +P ' . $value;
 		}
-        Log::info("Get Rerport" . $this->getreport);
+        Log::info("Get Report" . $this->getreport);
 		if ($this->getreport === 'TRUE') {
 		    $this->PACSuploadFinish();
 		}
 
         else {
-
+            Log::info(var_dump($request));
             switch ($method) {
                 case 'UploadZipPreProcess':
                     $this->UploadZipPreProcess();
@@ -462,7 +463,7 @@ class PACSUploadStudies
 
 	}
 
-	public function PACSupload (Request $request) {
+	public function PACSupload ($request) {
 
 		// $_SESSION['DICOMUPLOAD'] set in the Class to collect the StudyInstanceUID's for the folder, as an array of values.
 		// unless there are uploads at exactly the same second.	 Could add the ID in from of the timestapm also but it is for the user's session anyways.
@@ -480,34 +481,16 @@ class PACSUploadStudies
 		$UUIDS = 'UUIDS'. $request->input('timestamp');
 		$ABORTKEY = 'ABORT'. $request->input('timestamp');
 		$COUNTER = 'COUNTER'. $request->input('timestamp');
-        $result = DB::connection('mysql')->select('select DISTINCT date_time_key from dicom_uploads_temp where date_time_key = ?', [$KEY]);
-        foreach( $result as $row) {
-            self::logVariable($row->date_time_key);
-        }
-        self::logVariable($result);
+//         $result = DB::connection('mysql')->select('select DISTINCT date_time_key from dicom_uploads_temp where date_time_key = ?', [$KEY]);
+//         foreach( $result as $row) {
+//             self::logVariable($row->date_time_key);
+//         }
+//         self::logVariable($result);
+        Log::info(var_dump($request));
         //Log::info(json_encode($results[0]->date_time_key));
-		if ($request->session()->has($KEY) !== true) {
 
-		    DB::connection('mysql')->table('dicom_uploads_temp')->insertGetId([
+        $request->session()->push($KEY,microtime(TRUE)); // basically a page visit, count of this is the number of hits to the page.
 
-                'uploader_id' => Auth::user()->id,
-                'uploader_name' => Auth::user()->name,
-                'date_time_key' => $KEY,
-                'counter_index' => 0,
-                'aborted_flag' => 0,
-                'utc_hit_json' => '[]',
-                'study_uuid_json' => '[]'
-            ]);
-
-            $request->session()->push($KEY,microtime(TRUE));
-            $request->session()->put($UUIDS,[]);
-		    $request->session()->put($ABORTKEY,false);
-		    $request->session()->put($COUNTER,0);
-		}
-        else {
-
-            $request->session()->push($KEY,microtime(TRUE)); // basically a page visit, count of this is the number of hits to the page.
-        }
         $request->session()->put($COUNTER,intval($request->session()->get($COUNTER)) + 1);
 
 		// Extract file's data

@@ -6,12 +6,81 @@ $pacs = new OrthancAPI();
 ?>
 <!-- This is supplemental component for CSS and JS for the RIS migration pages -->
 <x-ris_css_js/>
+<script src="https://cdn.rawgit.com/beautify-web/js-beautify/v1.13.6/js/lib/beautify.js"></script>
+<script src="https://cdn.rawgit.com/beautify-web/js-beautify/v1.13.6/js/lib/beautify-css.js"></script>
+<script src="https://cdn.rawgit.com/beautify-web/js-beautify/v1.13.6/js/lib/beautify-html.js"></script>
 <style>
-body * {
-font-family:courier !important;
+/* css for report editor */
+
+.reportdiv {
+
+padding-bottom:30px;
 
 }
 
+.reportheader {
+
+background:black !important;
+color:white !important;
+font-size:10px;
+border:1px solid white;
+border-radius:5px;
+}
+
+.reportheader div span:first-child {
+
+  padding:0px 5px 0px 0px;
+}
+
+.reportdiv .htmlmarkup textarea
+
+{
+	background-color: #555;
+	border: none;
+	color:white;
+	display: block;
+	height: 40px;
+	line-height: normal;
+	resize: both;
+	width: 90%;
+	margin-top:10px;
+	margin-bottom:10px;
+}
+
+.reportdiv .htmlmarkup input[type="text"]
+{
+	background-color: #555;
+	border: none;
+	width: 50em;
+	color:white;
+}
+.reportdiv .htmlmarkup input[type="number"]
+{
+	background-color: #555;
+	border: none;
+	color:white;
+	width: 6em;
+}
+
+.reportdiv .htmlmarkup select
+
+{
+	color: black;
+	display: block;
+	max-width: 55em;
+}
+</style>
+<style>#reportnoheader * {font-family: Tahoma, Geneva, sans-serif;}.htmlmarkup, #reportswrapper > div {padding:10px;margin:0px;background: white;color: #000;;font-size: 12px;font-weight:bold;}#markupform .htmlmarkup {background:black !important;color:white;}.htmlmarkup div, #reportswrapper > div div {display:block;padding:0px;line-height: initial;margin:5px 0px 5px 0px;}.htmlmarkup label, #reportswrapper > div label{font-size: 14px;color:#000;font-weight:bold;padding-right:10px;}.htmlmarkup section > header, #reportswrapper > div section > header{color: #000;font-size: 16px;font-weight: bold;margin-bottom: 0.0cm;margin-top: 0.3cm;}.htmlmarkup section > section > header, #reportswrapper > div section > section > header{color: #000;font-size: 12px;font-weight: bold;margin-bottom: 0.0cm;margin-top: 0.3cm;text-align: left;}.htmlmarkup section > section > section > header, #reportswrapper > div section > section > section > header{color: #000;font-size: 12px;font-weight: bold;margin-bottom: 0.0cm;margin-top: 0.3cm;text-align: left;}.htmlmarkup > section{}.htmlmarkup section > section, #reportswrapper > div section > section{padding-left: 0.8cm;}.htmlmarkup p, #reportswrapper > div p{margin-bottom: 0.0cm;margin-top: 0.0cm;padding-left: 0.8cm;}reportswrapper {width:100%;}#header_info {margin: 20px auto 10px auto;width:100%;;}#header_info, #header_info td {border: 1px solid black;border-collapse: collapse;background:#DDD;font-size: 12px;font-weight: bold;padding: 2px 5px 2px 5px;}#header_info tr:nth-child(even) td {background:#FFF !important;}#disclaimer {margin:20px 10px 0px 10px;text-align: justify;font-size: 8px;}#header_info > tbody > tr > td:first-child {width:350px;}#header_info > tbody > tr > td:nth-child(2){width:250px;}#header_info > tbody > tr > td:nth-child(3){width:190px;}.htmlmarkup, #reportswrapper {width:800px}#reportbody{font-size:12px;width: 90%;word-wrap: break-word;}#sigblock{margin-top:10px;}#apiresults {line-height: normal;font-size: 16px;color: black;background: #FFF;border-radius: 20px;padding: 20px 10px 20px 10px;border: 2px solid black;width:816px;}</style>
+<style>
+body * {
+
+font-family:courier !important;
+
+}
+#trim_report * {
+
+    color:white !important;
+}
 .btn {
     color:white !important;
 
@@ -20,6 +89,7 @@ font-family:courier !important;
     width:100%;
 }
 #attachpdf label {
+
     display:inline-block !important;
     width:100px !important;
 }
@@ -100,8 +170,11 @@ height:30px;
 	}
 
 	#radreport {
+
 		width:100%;
 		min-height:200px;
+		color:black !important;
+		font-size:14px;
 	}
 	body {
 	background:white !important;
@@ -739,13 +812,13 @@ height:30px;
 	</div>
 	<div id = "trim_report">
 
-
-
-			<hr style="border:2px solid black;">
 			<h5>Reports Editor, Trim Reports from <a href = "https://radreport.org/" target="_blank" class = "btn btn-info btn-sm">https://radreport.org</a></h5>
+			<div>Visit that link, download some HTML templates and put everything between the body tags into the editing text area.</div>
+			<div>Trim strips out some of the tags to make it compatible with our editor.  Preview will show you what it will sort of look like..</div>
 			<div class="row unittests">
 				<div class="col-sm-12">
-				<button id = "radreportTrim" class = "trim">Trim Report</button>
+				<button id = "radreportTrim" class = "uibuttonsmallred">Trim Report</button>
+				<button id = "radreportPreview" class = "uibuttonsmallred">Preview Report</button>
 				<textarea id = "radreport"></textarea>
 				</div>
 			</div>
@@ -1576,6 +1649,16 @@ function openViewerByUUID(uuid) {
 	$("#radreportTrim").on("click", function(e) {
 
 		radreportTrim();
+		formatted = html_beautify($("#radreport").val());
+		$("#radreport").val(formatted);
+		$("#radreport").html(formatted);
+
+	});
+
+	$("#radreportPreview").on("click", function(e) {
+
+		showMessage("Preview", '<div id="reportnoheader"><div class="htmlmarkup">' + $("#radreport").val() + '</div></div>');
+
 	});
 
 	function radreportTrim() {

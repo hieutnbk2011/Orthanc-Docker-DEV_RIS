@@ -22,38 +22,33 @@ function checkDicomMime(file) {
 
   const fileReader = new FileReader();
   return new Promise((resolve, reject) => {
-    try {
-        var blob = file.slice(0, 132); //read the first few bytes to get the header
-        fileReader.readAsArrayBuffer(blob);
-        //fileReader.readAsArrayBuffer(file);
-        fileReader.onload = function(event) {
+	var blob = file.slice(0, 132); //read the first few bytes to get the header
+	fileReader.readAsArrayBuffer(blob);
+    //fileReader.readAsArrayBuffer(file);
+    fileReader.onload = function(event) {
 
-          const target = event.target;
-          const array = new Uint8Array(target.result);
-          const start = 128
-          const end = 132;
-          const str = [...array.slice(128, 132)].map(value => String.fromCharCode(value)).join('');
+      const target = event.target;
+      const array = new Uint8Array(target.result);
+      const start = 128
+      const end = 132;
+      const str = [...array.slice(128, 132)].map(value => String.fromCharCode(value)).join('');
 
-          const result = {
-            file,
-            fileName: file.name,
-            isBadFile: true
-          }
+      const result = {
+        file,
+        fileName: file.name,
+        isBadFile: true
+      }
 
-          if (str == "DICM") {
-            result.isBadFile = false;
-            counts.process++;
-          }
-          else {
-            counts.omit++;
-          }
+      if (str == "DICM") {
+        result.isBadFile = false;
+        counts.process++;
+      }
+      else {
+      	counts.omit++;
+      }
 
-          fileReader.onload = null;
-          resolve(result);
-        }
-    }
-    catch(err) {
-        console.log(err.message);
+      fileReader.onload = null;
+      resolve(result);
     }
   });
 }
@@ -80,7 +75,7 @@ picker.addEventListener('change', async event => {
 	total = 0;
 	skipotherrequests = 0;
 	const parsedepoch = new Date().toISOString().match(/(\d{4}\-\d{2}\-\d{2})T(\d{2}:\d{2}:\d{2})/);
-	datetimestamp = parsedepoch[1] + "-" + parsedepoch[2].replace(/:/g, "-");
+	const datetimestamp = parsedepoch[1] + "-" + parsedepoch[2].replace(/:/g, "-");
 	//alert(datetimestamp);
 	picker.setAttribute('data-timestamp', datetimestamp);
 
@@ -94,6 +89,7 @@ picker.addEventListener('change', async event => {
     const processList = await Promise.all(files.map(file => checkDicomMime(file)));
 
 	processList.sort((prev, next) => {
+
     	return prev.fileName > next.fileName;
   	});
 
@@ -104,11 +100,6 @@ picker.addEventListener('change', async event => {
 
   	total = counts.process;
   	if (counts.omit > 0) preprocess_notice.innerHTML = '<div style = "color:red;">Omitting ' + counts.omit + ' file(s) that did not pass criteria"</div><ol>' + badlist + '</ol>';
-  	console.log(counts);
-
-  	if (counts.process == 0)  {
-		showuploaderModal("Done","There were no files to process.");
-    }
 
     for (let result of processList) {
 		const file = result.file;
@@ -134,119 +125,82 @@ statusitem = function(file, status) {
 var sendFile = function(file, timestamp, total, type) {
 
 	if (skipotherrequests == 0) {
-	//console.log(file);
-    const formData = new FormData();
-    // Set post variables
-    requestcounter = requestcounter + 1;
-    formData.set('method', "UploadFolder"); // One object file
-    formData.set('timestamp', timestamp); // One object file
-    formData.set('counter', requestcounter);
-    formData.set('total', total);
-    formData.set('type', type);
-    formData.set('webkitpath', file.webkitRelativePath); // One object file
-    formData.set('file', file); // One object file
 
-    formData.set('anonymize', $("#anonymize").is(":checked")); // One object file
-    formData.set('altertags', $("#altertags").is(":checked")); // One object file
-	$('#edited_tag_inputs [name = "taglistname[]"]').each(function( index ) {
-		formData.set($( this ).val(), $('#edited_tag_inputs [name = "taglistvalue[]"]')[index].value); // One object file
-	});
-	//console.log(file);
+        //console.log(file);
+        const formData = new FormData();
+        // Set post variables
+        requestcounter = requestcounter + 1;
+        formData.set('method', "UploadFolder"); // One object file
+        formData.set('timestamp', timestamp); // One object file
+        formData.set('counter', requestcounter);
+        formData.set('total', total);
+        formData.set('type', type);
+        formData.set('webkitpath', file.webkitRelativePath); // One object file
+        formData.set('file', file); // One object file
+        formData.set('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content')); // One object file
+        formData.set('anonymize', $("#anonymize").is(":checked")); // One object file
+        formData.set('altertags', $("#altertags").is(":checked")); // One object file
+        $('#edited_tag_inputs [name = "taglistname[]"]').each(function( index ) {
+            formData.set($( this ).val(), $('#edited_tag_inputs [name = "taglistvalue[]"]')[index].value); // One object file
+        });
+        console.log(file);
 
-    const request = new XMLHttpRequest();
-    request.responseType = 'json';
+        const request = new XMLHttpRequest();
 
-    // HTTP onload handler
+        // HTTP onload handler
 
-    request.onload = function() {
+        request.onload = function() {
 
-        if (request.readyState === request.DONE) {
+            if (request.readyState === request.DONE) {
 
-            if (request.status === 200) {
+                if (request.status === 200) {
 
-            	progress_text.innerHTML = file.name + " (" + (responsecounter + 1) + " of " + total + " ) ";
-                //console.log(request.response);
-				if (request.response.status != "Uploaded" || request.response.status != "Done" ) {
-				skipotherrequests = 1;
-				}
-                // Add file name to list
+                    progress_text.innerHTML = file.name + " (" + (responsecounter + 1) + " of " + total + " ) ";
+                    //console.log(request.response);
+                    if (request.response.status != "Uploaded" || request.response.status != "Done" ) {
+                    skipotherrequests = 1;
+                    }
+                    // Add file name to list
 
-                item = statusitem(request.response.file, request.response.file.status);
-                listing.insertAdjacentHTML('beforeend', item);
-                listing.scrollTop = listing.scrollHeight;
+                    item = statusitem(request.response.file, request.response.file.status);
+                    listing.insertAdjacentHTML('beforeend', item);
+                    listing.scrollTop = listing.scrollHeight;
 
-				responsecounter++;
-                // progress_text.innerHTML = request.response.file.name + " (" + responsecounter + " of " + total + " ) ";
+                    responsecounter++;
+                    // progress_text.innerHTML = request.response.file.name + " (" + responsecounter + " of " + total + " ) ";
 
-                // Show percentage
-                box.innerHTML = Math.min(responsecounter / total * 100, 100).toFixed(2) + "%";
+                    // Show percentage
+                    box.innerHTML = Math.min(responsecounter / total * 100, 100).toFixed(2) + "%";
 
-                // Show progress bar
-                elem.innerHTML = Math.round(responsecounter / total * 100, 100) + "%";
-                elem.style.width = Math.round(responsecounter / total * 100) + "%";
+                    // Show progress bar
+                    elem.innerHTML = Math.round(responsecounter / total * 100, 100) + "%";
+                    elem.style.width = Math.round(responsecounter / total * 100) + "%";
 
-                if (responsecounter >= total) {
-
+                    if (responsecounter >= total) {
                     progress_text.innerHTML = "Sending " + total + " file(s) is done!";
                     loader.style.display = "none";
 
-                    const xhr = new XMLHttpRequest();
-                    xhr.responseType = 'json';
-                    xhr.open("POST", '/PACSUploadStudies/PACSupload');
-                    xhr.setRequestHeader('Content-Type', 'Content-Type: multipart/form-data');
-                    xhr.setRequestHeader('Accept', 'application/json');
-                    const formData = new FormData();
+                    }
+                     if (request.response.file.status == "Done") {
 
-                    formData.set('method', "UploadFolder"); // One object file
-                    formData.set('timestamp', datetimestamp); // One object file
-                    formData.set('counter', total);
-                    formData.set('total', total);
-                    formData.set('anonymize', $("#anonymize").is(":checked")); // One object file
-                    formData.set('altertags', $("#altertags").is(":checked")); // One object file
-                    formData.set('getreport', "TRUE");
-	                $('#edited_tag_inputs [name = "taglistname[]"]').each(function( index ) {
-		                formData.set($( this ).val(), $('#edited_tag_inputs [name = "taglistvalue[]"]')[index].value); // One object file
-	                });
+                        console.log(request.response);
+                        $("#uploadresults").html(request.response.results);
+                        showuploaderModal("Done","Click on Upload Summary to see Results");
+                    }
 
-                    xhr.send(formData);
+                }
+                else {
 
-                    xhr.onload = function() {
-
-                        if (this.readyState != 4) return;
-
-                        if (this.readyState === this.DONE) {
-
-                            if (xhr.status === 200) {
-                                alert("Thank You");
-           		            }
-           		         }
-           		         else {
-           		            // still waiting
-           		        }
-           		     };
-
-           		 }
-
-//                  if (request.response.file.status == "Done") {
-//
-//                     console.log(request.response);
-//                     $("#uploadresults").html(request.response.results);
-//                     showuploaderModal("Done","Click on Upload Summary to see Results");
-//                  }
-
-            }
-            else {
-            	skipotherrequests = 1;
-            	//alert("error with AJAX requests");
+                    skipotherrequests = 1;
+                    //alert("error with AJAX requests");
+                }
             }
         }
-    }
 
-    // Do request, Sent off to the PHP Controller for processing
+        // Do request, Sent off to the PHP Controller for processing
 
-    request.open("POST", '/PACSUploadStudies/PACSupload');
-    //request.setRequestHeader('Accept', 'application/json');  // needed to add this because the debugbar in Laravel injects the DebugBar into the response if json not specified.
-    request.send(formData);
+        request.open("POST", '/api/PACSUploadStudies/PACSupload');
+        request.send(formData);
     }
     else {
     	// already aborted, probably never gets here because all of the requests are probably sent before skipotherrequests gets set to 1.

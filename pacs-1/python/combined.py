@@ -45,25 +45,25 @@ import pprint # pretty printer
 #  It uses an encrypted JWT that is created, encrypted, etc. by the composer package on the PHP server.  Here:  https://github.com/RobDWaller/ReallySimpleJWT
 #
 
-def Filter(uri, **request):
-
-    print('User trying to access URI: %s' % uri)
-    pprint.pprint(request)
-    authserverurl = "https://nginx/JWTauth.php"
-    sampleJWT = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJPcnRoYW5jIFBBQ1MiLCJzdWIiOiJWaWV3ZXIgVG9rZW4iLCJpYXQiOjE2MTQ3OTY1NDAsInVpZCI6MSwiZXhwIjoxNjE0Nzk2ODQwLCJkYXRhIjoidGVzdCJ9.27Y6A-Ka6jdpt1zU14LTF284klVMz_FEfF_SUnvTuD0"
-    samplePass = "Hello&MikeFooBar123"
-    samplestudyuuid = "test"
-    print('Request send to Auth Server at:' + authserverurl)
-    print('Response from Auth Server, Status Code and Headers')
-    authserver = requests.post(authserverurl, data = {'JWT':sampleJWT, "REQUEST": json.dumps(request)}, verify = False) # Should set to True with certificate, although it is all in the DOCKER.
-    print (authserver.status_code)
-    if (authserver.status_code == 401):
-        # redirect_to_front_end() ????
-        return False
-    else:
-        return True
-
-orthanc.RegisterIncomingHttpRequestFilter(Filter)
+# def Filter(uri, **request):
+# 
+#     print('User trying to access URI: %s' % uri)
+#     pprint.pprint(request)
+#     authserverurl = "https://nginx/JWTauth.php"
+#     sampleJWT = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJPcnRoYW5jIFBBQ1MiLCJzdWIiOiJWaWV3ZXIgVG9rZW4iLCJpYXQiOjE2MTQ3OTY1NDAsInVpZCI6MSwiZXhwIjoxNjE0Nzk2ODQwLCJkYXRhIjoidGVzdCJ9.27Y6A-Ka6jdpt1zU14LTF284klVMz_FEfF_SUnvTuD0"
+#     samplePass = "Hello&MikeFooBar123"
+#     samplestudyuuid = "test"
+#     print('Request send to Auth Server at:' + authserverurl)
+#     print('Response from Auth Server, Status Code and Headers')
+#     authserver = requests.post(authserverurl, data = {'JWT':sampleJWT, "REQUEST": json.dumps(request)}, verify = False) # Should set to True with certificate, although it is all in the DOCKER.
+#     print (authserver.status_code)
+#     if (authserver.status_code == 401):
+#         # redirect_to_front_end() ????
+#         return False
+#     else:
+#         return True
+# 
+# orthanc.RegisterIncomingHttpRequestFilter(Filter)
 
 # SEVERAL PACKAGES HERE
 

@@ -16,3 +16,5 @@ nginx-home/LaravelPortal/composer.lock
 nginx-home/LaravelPortal/package-lock.json
 nginx-home/auth.log
 *.lock
+nginx-home/auth.log
+nginx-home/auth.log
