@@ -142,12 +142,13 @@ class AuthServer  {  // extends Something
 // AuthServer::logVariable($_REQUEST);
 //header('HTTP/1.1 401 Unauthorized'); 
 
-header("HTTP/1.1 200 OK");
+
 
 $valid = AuthServer::ValidateTokenString(AuthServer::$sampletoken);
 $object = AuthServer::get_ObjectFromString(AuthServer::$sampletoken);
 $parsed = AuthServer::ParseTokenObject($object);
-self::logVariable($valid);
-self::logVariable($parsed);
+AuthServer::logVariable($valid);
+AuthServer::logVariable($parsed);
+header("HTTP/1.1 200 OK");
 
 ?>

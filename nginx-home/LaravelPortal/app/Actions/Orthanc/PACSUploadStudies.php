@@ -356,12 +356,15 @@ THIS IS WHAT IT GETS ON THE FINISH, PROBABLY NEED TO ADD BAD SOME OF THE ANONYMI
 	}
 
     // function to add the Modalitie(s) and the Instance count to the Standard result for a Study Query.
+
 	private function Studies_Data_With_Modalities_Count($study_uuid) {
 
 	    $studydata = json_decode($this->executeCURL("studies/"  . $study_uuid));
 	    $instancecount = 0;
 	    $modalities = [];
-	    $series =  $studydata->Series;
+	    $series = [];
+	    if (null !== $studydata->Series && count($studydata->Series) > 0); // could have 0
+	    $series = $studydata->Series;
         foreach ($series as $seriesuuid) {
              $seriesdata = json_decode($this->executeCURL("series/"  . $seriesuuid));
              $instancecount = $instancecount + count($seriesdata->Instances);

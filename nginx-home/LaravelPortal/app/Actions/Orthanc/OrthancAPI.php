@@ -472,6 +472,17 @@ Used for downloadDCMStudyUUID, downloadZipStudyUUID
 
     }
 
+    public function getStudyDetails ($uuid) {
+
+	    $uuid = [$uuid];
+	    $data = json_encode($uuid );
+	    $data =  $this->executeCURLPOSTJSON($data, 'studies/arrayIDs');
+		$result = json_decode($this->result);
+		self::decodeOrthancStudies($result);
+		return $result[0];
+
+	}
+
 	public function getStudiesArray ($query, $patient = false, $doctor = false, $reader = false) {
 
 		Debugbar::error($query);

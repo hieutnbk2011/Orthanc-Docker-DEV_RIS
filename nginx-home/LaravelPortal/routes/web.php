@@ -6,6 +6,7 @@ use App\Actions\Orthanc\OrthancAPI;  // could change this for other PACS Interfa
 use App\Actions\Orthanc\PACSUploadStudies;
 use App\MyModels\Reports;
 use App\Providers\RouteServiceProvider;
+use App\Http\Controllers\MyControllers\HL7Controller;
 
 /*
 |--------------------------------------------------------------------------
@@ -53,6 +54,12 @@ Route::middleware(['auth:sanctum', 'verified'])->post('/sendmail', function (Req
     }
 
 })->name('sendmail');
+
+
+
+// HL7 Controller Routes
+
+Route::middleware(['auth:sanctum', 'verified'])->post('HL7/submit_report', [HL7Controller::class, 'submit_report'])->name('submit_report');
 
 
 // OHIF VIEWE ROUTES, VIEWS ARE IN ohif/studylist and ohif/studyview in resources->views
