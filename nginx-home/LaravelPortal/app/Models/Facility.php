@@ -113,4 +113,39 @@ class Facility extends Model
     // Functions ...
 
     // Relations ...
+
+
+    protected static function letterHeader($id, $embedlogo = false) {
+
+    	$facility = self::where('id', $id)->first();
+    	$html =  '<style>
+#reportheader{position:relative;width:800px;padding: 5px 5px 20px 5px;margin: 0px 0px 10px 0px;text-align:center;overflow:auto;margin:auto;}#reportheader #logo {height:60px;border:none;position:absolute;left:0;right:0;margin:auto;}#reportheader #floatleft{width:350px;display:inline-block;text-align:left;float: left;}#reportheader #floatright{width:max-content;text-align:left;float: right;padding-right:10px;}.letterheadlabel {display:inline-block;width:60px;text-align:right;margin-right:5px;}
+</style>';
+	$html .= '<div id = "reportheader"><div>';
+	$logopath = isset($facility->facilitylogopath)?$facility->facilitylogopath:config('myconfigs.REPORTS_SITE_LOGO');
+	if ($embedlogo == false) {
+	    // base64 data url in the future
+	    $html .= '<img id = "logo" src = "https://' . $_SERVER['HTTP_HOST']. $logopath . '" alt = "sitelogo">';
+	}
+	else {
+	    $html .= '<img id = "logo" src = "' . $facility->facilitylogo_dataurl . '" alt = "sitelogo">';
+	}
+
+	$html .= '<div id = "floatleft">';
+	$html .= isset($facility->name)?$facility->name . '<br>':"";
+	$html .= isset($facility->address_1)?$facility->address_1 . '<br>':'';
+	$html .= isset($facility->address_2)?$facility->address_2 . '<br>':'';
+	$html .= isset($facility->city)?$facility->city . ', ':'';
+	$html .= isset($facility->state) && $facility->state != "OS" ?$facility->state . ', ':'';
+	$html .= isset($facility->country)?$facility->country . ' ':'';
+	$html .= isset($facility->postal_code)?$facility->postal_code . ' ':'';
+	$html .= '</div><div id = "floatright">';
+	$html .= isset($facility->phone_ctry) && isset($facility->phone)?'<span class = "letterheadlabel">Phone:  </span>' . $facility->phone_ctry . ' ' .$facility->phone . '<br>':'';
+	$html .= isset($facility->fax_country) && isset($facility->fax)?'<span class = "letterheadlabel">Fax:  </span>' . $facility->fax_country . ' ' .$facility->fax . '<br>':'';
+	$html .= isset($facility->email)?'<span class = "letterheadlabel">Email:  </span>' . $facility->email . '<br>':'';
+	$html .= isset($facility->website)?'<span class = "letterheadlabel">Website:  </span>' . $facility->website . '<br>':'';
+	$html .= '</div></div></div>';
+	return $html;
+
+    }
 }

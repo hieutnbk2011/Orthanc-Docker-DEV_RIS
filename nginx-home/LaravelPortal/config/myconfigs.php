@@ -51,5 +51,7 @@ return [
     'PATH_DICOM_TMP_PARENT' => realpath(dirname(__FILE__).'/../') . '/TMPUPLOADS',
     'SEND_SMS_NOTIFICATIONS' => false,
     'REPORT_PDF' => true,
+    'DEFAULT_FACILITY_ID'=> 1,
+    'REPORTS_SITE_LOGO' => '/images/sitelogo.png'
 
 ];

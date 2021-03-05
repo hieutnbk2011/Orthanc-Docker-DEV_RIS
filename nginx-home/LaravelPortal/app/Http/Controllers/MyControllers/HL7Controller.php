@@ -682,9 +682,9 @@ PA	Pre-authenticated
 		$reportdate = \DateTime::createFromFormat('YmdHis', $OBX[14][0]);
 		(!$reportdate)?$reportdate = "Not available":$reportdate = $reportdate->format('M-d-Y H:i:s');
 
-		// $header = Config::get("REPORT_CSS") . FacilityModel::letterHeader(Config::get("DEFAULT_FACILITY_ID"), true) .  '<div id = "reportnoheader"><table id = "header_info">
-		$patientname = (!empty($PID[5][0] )?$PID[5][0] :"") . ', ' . (!empty($PID[5][1] )?$PID[5][1] :"");
+		$facilityheader = Facility::letterHeader(config('myconfigs.DEFAULT_FACILITY_ID'), true);
 		$css = self::renderComponent('includes.reportheader');
+		$patientname = (!empty($PID[5][0] )?$PID[5][0] :"") . ', ' . (!empty($PID[5][1] )?$PID[5][1] :"");
 		$header = '<div id = "reportnoheader"><table id = "header_info">
 		<tr>
 			<td id="report_name"> Patient Name: ' . $patientname  . '</td>
@@ -715,9 +715,9 @@ PA	Pre-authenticated
 		$datetime = $date->format('Y-m-d H:i:s');
 		$footer = '<div id = "sigblock">' . $translatestatus[$OBX[11][0]] .
 	'<br>Electronically signed:<br><br>Reader Profile:  '  . $OBX[16][0] .  '<br>'  . $OBX[16][2] . (!empty($OBX[16][3])?" " . $OBX[16][3]:"") . " " . $OBX[16][1] . " " . $OBX[16][5] . '<br>'  . $datetime . '</div>';
-
+        $markup['facilityheader'] = $facilityheader;
 	    $markup['css'] = $css;
-		$markup['header'] = $css . $header;
+		$markup['header'] = $facilityheader . $css . $header;
 		$markup['footer'] = $footer;
 		$markup['footer'] .= '<div id = "disclaimer">' . self::renderComponent("includes.reportdisclaimer") . '</div></div>';
 		$markup['body'] = '<div class = "htmlmarkup" name="htmlmarkup">' . str_replace("\\.br\\", "<br>", $OBX[5][0]) . '</div>';

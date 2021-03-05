@@ -28,27 +28,31 @@ class Reports extends Model {
     /**
      * @var array
      */
-    protected $fillable = ['HL7_message', 'orthanc_uuid', 'mrn', 'accession_number', 'telerad_contract', 'reader_id', 'newstatus', 'oldstatus', 'datetime', 'htmlreport', 'request'];
+    protected $fillable = ['HL7_message', 'orthanc_uuid', 'mrn', 'accession_number', 'telerad_contract', 'reader_id', 'newstatus', 'oldstatus', 'datetime', 'htmlreport', 'template_id', 'json_request_orthanc_add_pdf'];
+
+    // Laravel adds updated_at (dateime) and created_at (timestamp) by default for all Models.  No need to specify them in the $fillable declarationl
 
 
-    public $id;
-    public $HL7_message;
-    public $orthanc_uuid;
-    public $mrn;
-    public $accession_number;
-    public $telerad_contract;
-    public $reader_id;
-    public $newstatus;
-    public $oldstatus;
-    public $datetime;
-    public $htmlreport;
-    private $request;
+//     public $id;
+//     public $HL7_message;
+//     public $orthanc_uuid;
+//     public $mrn;
+//     public $accession_number;
+//     public $telerad_contract;
+//     public $reader_id;
+//     public $newstatus;
+//     public $oldstatus;
+//     public $datetime;
+//     public $htmlreport;
+//     private $request;
 
-    public function __construct($request = null) {
-
-        $this->request = $request;
-
-  	}
+//     public function __construct(array $attributes = [], $request) {
+//
+//         parent::__construct($attributes);
+//
+//         $this->request = $request;
+//
+//   	}
 
 	private static function renderComponent($path) {
 		// setup mostly for getting css, etc. from <includes.reportheader.blade.php
