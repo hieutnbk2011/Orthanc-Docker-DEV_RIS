@@ -1,7 +1,7 @@
 <style>
 
 
-	#reportnoheader * {
+    #reportnoheader * {
 	font-family: Tahoma, Geneva, sans-serif;
 }
 

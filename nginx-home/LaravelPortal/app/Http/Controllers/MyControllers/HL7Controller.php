@@ -16,6 +16,7 @@ use App\Actions\Orthanc\OrthancAPI;
 use App\Models\TeleradContracts;
 use App\Models\Patients;
 use App\Models\Facility;
+use App\MyModels\Reports;
 
 use Illuminate\View\Component;
 
@@ -504,30 +505,39 @@ PA	Pre-authenticated
 		$headerfooter = self::getHeaderFooterFromHL7($parsedMessage);
 		$report = $headerfooter["header"] . $headerfooter["body"] . $headerfooter["footer"];
 
+// 		vs.
+//
+        $insertreport = Reports::create([
 
+            'HL7_message' => $message,
+            'orthanc_uuid' => $this->request->uuid,
+            'mrn' => $studydata->patientid,
+            'accession_number' => $studydata->accession_number,
+            'telerad_contract' => auth()->user()->reader_id,
+            'reader_id' => auth()->user()->reader_id,
+            'oldstatus' => $oldstatus,
+            'newstatus' => $newstatus,
+            'htmlreport' => $report,
+            'datetime' => date("Y-m-d H:i:s", time()),
+            'template_id' => $this->request->template_id
+        ]);
 
-		$array = array (
-
-		"HL7_message" => $message,
-		"orthanc_uuid" => $this->request->uuid,
-		"mrn" => $studydata->patientid,
-		"accession_number" => $studydata->accession_number,
-		"telerad_contract" => auth()->user()->reader_id,
-		"reader_id" => auth()->user()->reader_id,
-		"oldstatus" => $oldstatus,
-		"newstatus" => $newstatus,
-		"htmlreport" => $report,
-		"datetime" => date("Y-m-d H:i:s", time()),
-		"template_id" => $this->request->template_id
-		);
 
 		// Use the Accesssion Number to get info from local database, pass the htmlreport
+		//$id = DatabaseFactory::insertarray("reports", $array, null);
 
-		$id = DatabaseFactory::insertarray("reports", $array, null);
+		$id = $insertreport->id;
+
+		Log::info("Inserting Report into DB" . $message);
+		Log::info("Insertion ID in Reports:  " . $id);
+
 
 		// Handles notification of Patient and Referring Physician about new report.
 
-		if (Config::get('SEND_SMS_NOTIFICATIONS') == true) DatabaseFactory::logVariable(ReportsModel::sendNotifications($studydata->accession_number));
+		if (config('myconfigs.SEND_SMS_NOTIFICATIONS') == true) {
+		    ReportsModel::sendNotifications($studydata->accession_number);
+		    DB::table("SENDING SMS notifications");
+		}
 
 		/*
 		"Value:": {
@@ -536,13 +546,28 @@ PA	Pre-authenticated
     	}
     	*/
 
+
 		// HTML markup for report, attach PDF.
 
-		if (Config::get('REPORT_PDF') == 1) {
+		if (config('myconfigs.REPORT_PDF') == 1) {
 
-			$result = $ORTHANC->addPDF("html", $report, "" , $headerfooter['readerid'] . ':' . $headerfooter['readername'], $newstatus, $data->uuid, 0, 1, $id);
+			$result = $ORTHANC->addPDF([
+
+			    "method" => "html",
+			    "html" => $report,
+			    "base64" => "" ,
+			    "title" => $newstatus,
+			    "studyuuid" => $this->request->uuid,
+			    "return" => 0,
+			    "attach" => 1,
+			    "author" => $headerfooter['readerid']
+			]);
+
 			$result = json_decode($result);
-			if (isset($result->error)) {
+
+            Log::info("Sent for PDF to Orthanc" . json_encode($result, JSON_PRETTY_PRINT));
+
+            if (isset($result->error)) {
 				$error = $result->error;
 				$error = preg_replace('/[\x00-\x1F\x7F]/', '', $error);
 				$error = json_encode("Report Saved Locally, unable to save to PACS, " . addslashes($error));
@@ -556,6 +581,7 @@ PA	Pre-authenticated
 				$_SESSION["jsonmessages"]["HL7"][] = '{"status":"Saved Locally and to PACS"}';
 			}
 		}
+
 		else {
 			$_SESSION["jsonmessages"]["HL7"][] =  '{"status":"Report Saved Locally"}';
 		}
@@ -658,6 +684,7 @@ PA	Pre-authenticated
 
 		// $header = Config::get("REPORT_CSS") . FacilityModel::letterHeader(Config::get("DEFAULT_FACILITY_ID"), true) .  '<div id = "reportnoheader"><table id = "header_info">
 		$patientname = (!empty($PID[5][0] )?$PID[5][0] :"") . ', ' . (!empty($PID[5][1] )?$PID[5][1] :"");
+		$css = self::renderComponent('includes.reportheader');
 		$header = '<div id = "reportnoheader"><table id = "header_info">
 		<tr>
 			<td id="report_name"> Patient Name: ' . $patientname  . '</td>
@@ -688,7 +715,9 @@ PA	Pre-authenticated
 		$datetime = $date->format('Y-m-d H:i:s');
 		$footer = '<div id = "sigblock">' . $translatestatus[$OBX[11][0]] .
 	'<br>Electronically signed:<br><br>Reader Profile:  '  . $OBX[16][0] .  '<br>'  . $OBX[16][2] . (!empty($OBX[16][3])?" " . $OBX[16][3]:"") . " " . $OBX[16][1] . " " . $OBX[16][5] . '<br>'  . $datetime . '</div>';
-		$markup['header'] = $header;
+
+	    $markup['css'] = $css;
+		$markup['header'] = $css . $header;
 		$markup['footer'] = $footer;
 		$markup['footer'] .= '<div id = "disclaimer">' . self::renderComponent("includes.reportdisclaimer") . '</div></div>';
 		$markup['body'] = '<div class = "htmlmarkup" name="htmlmarkup">' . str_replace("\\.br\\", "<br>", $OBX[5][0]) . '</div>';

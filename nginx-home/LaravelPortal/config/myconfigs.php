@@ -49,5 +49,7 @@ return [
     'API_Token' => 'wxwzisme',
     'PATH_DCMTK' => '/usr/bin/', // the path in the Docker php-fpm container, which has that installed.
     'PATH_DICOM_TMP_PARENT' => realpath(dirname(__FILE__).'/../') . '/TMPUPLOADS',
+    'SEND_SMS_NOTIFICATIONS' => false,
+    'REPORT_PDF' => true,
 
 ];

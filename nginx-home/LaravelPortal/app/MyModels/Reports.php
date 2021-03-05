@@ -16,6 +16,8 @@ use Exception;
 
 class Reports extends Model {
 
+    protected $connection= 'mysql2';
+
     /**
      * The table associated with the model.
      *
@@ -42,7 +44,7 @@ class Reports extends Model {
     public $htmlreport;
     private $request;
 
-    public function __construct(Request $request) {
+    public function __construct($request = null) {
 
         $this->request = $request;
 
