@@ -4,6 +4,5 @@
             {{ __('Patients') }}
         </h2>
     </x-slot>
-   <livewire:PatientTable />
-
+   <livewire:search-patients />
 </x-app-layout>

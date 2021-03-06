@@ -26,7 +26,7 @@ Route::get('/', function () {
 });
 
 Route::get('/patients/patients.table', function () {
-    return view('patients.patients_table');
+    return view('livewire.SearchPatients');
 });
 
 // DEFAULT PAGE AFTER USER LOGGED IN
