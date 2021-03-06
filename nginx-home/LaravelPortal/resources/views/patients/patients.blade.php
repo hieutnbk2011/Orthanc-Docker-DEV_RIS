@@ -11,7 +11,7 @@
 <div id="patientlist">
 
 
-<form class="searchform" data-action = "/ManagePatients/listpatients">
+<form class="searchform" data-action = "/patients/search">
 
 				<div class="row divtableheader widemedia">
 					<div class="col-sm-2">
@@ -170,7 +170,9 @@
         </div>
     </div>
 </div>
-
+<div class = "laravel_pagination">
+{{ $patients->onEachSide(3)->links('pagination::tailwind') }}
+</div>
 <div id="patientswrapper" class = "listwrapper">
 <?php
 

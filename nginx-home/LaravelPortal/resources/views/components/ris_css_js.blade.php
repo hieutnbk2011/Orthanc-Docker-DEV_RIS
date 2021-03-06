@@ -70,6 +70,21 @@ body.loading .spinner_overlay{
 
 body {overflow-y:scroll !important;}
 
+.sharelist {
+
+color:black;
+font-size;12px;
+border:1px solid black;
+
+}
+
+.shareform textarea {
+
+color:black;
+font-size;12px;
+border:1px solid black;
+}
+
 /* jQueryUI Tabs */
 
 .centertabs {
@@ -1705,6 +1720,28 @@ background: transparent;
     label .fa-asterisk {
 	color:red !important;
 }
+.laravel_pagination {
+
+	margin: auto;
+	width: max-content;
+	padding-bottom: 20px;
+	position: relative;
+}
+
+.laravel_pagination div:nth-child(2) {
+    display:block;
+}
+
+.laravel_pagination div:nth-child(1) p {
+    margin:0;
+}
+
+span[aria-current="page"] * {
+font-weight:bold;
+color:red;
+
+}
+
 </style>
 
 <!-- AJAX SPINNER BEGIN -->
@@ -1735,6 +1772,117 @@ function AJAX_Finish(xhr) {
 //     $("body").removeClass("loading");
 //     console.log(xhr);
 // }
+
+$(function() {
+
+$("[data-dbsearch]").on("click", function(e) {
+
+let form = $(this).closest("form");
+e.preventDefault();
+
+if ($(this).data("dbsearch") == "searchorthanc") {
+
+getSearchParams();
+searchOrthanc();
+}
+else if ($(this).data("dbsearch") == "search_shared") {
+searchShared($('[name=searchform]').serialize());
+}
+
+else {
+
+var wrapper = form.parent().find(".listwrapper");
+
+    $.ajax({
+
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        },
+        type: "POST",
+        url: form.data('action'),
+        dataType: "json",
+        data: $(this).closest("form").serialize(),
+        context: $(this),
+        beforeSend: function(e) {
+            $("body").addClass("loading");
+        },
+
+    })
+    .done(function(data, textStatus, jqXHR) {
+
+    	if (data.status) {
+			showMessage("","No Matches");
+		}
+		else {
+		wrapper.html(data.html);
+		colorrows(wrapper.find(".worklist"));
+		form.find(".RISpaginator").html(data.RISpaginator);
+
+		if ($(this).attr("data-dbsearch") == "search_patients")   {
+
+		    getStudyCount($("#patientswrapper .patient"));
+            getOrderCount($("#patientswrapper .patient"));
+		}
+		}
+    });
+}
+});
+
+$(".clearsearchform").on('click', function(e) {
+
+		e.preventDefault();
+		let list = $(this).closest("form").parent().find(".listwrapper .worklist");
+		list.css("display", "flex", "important");
+		$(".searchparam").val("");
+		colorrows(list);
+
+});
+
+$("body").on ("click", ".showpatienthistory",  function(e) {
+
+    e.preventDefault();
+	e.stopImmediatePropagation();
+	if ($(this).closest(".worklist").next().attr("id") != "historydiv") {
+    var activepatient = $(this).closest('.worklist');
+    $.ajax({
+
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        },
+    	url: '/patients/history',
+    	type: 'POST',
+    	dataType: 'html',
+    	data: {"id" : activepatient.data('mrn')}, // for later maybe, one will be set for existing patient.
+    	beforeSend: function(e) {
+        $("#spinner").css("display", "block");
+        },
+	})
+	.done(function(data, textStatus, xhr) {
+
+		if (isJsonString(data)) {
+			parseMessages(data, true);
+		}
+		else {
+		$("#historydiv").remove();  // remove it if is is already there.
+		$(activepatient).after('<div id="historydiv" style="display:contents;">' + data + '</div>');
+		colorrows($("#historydiv .worklist"));
+		$('#historydiv').append('<div class = "form-group shadedform col-sm-12" style="text-align:center;"><button type="button" id="closeorderoverlay" class="uibuttonsmallred">Close</button></div>');  // ajax does not come with the close button
+		$('#closeorderoverlay').on('click', function() {
+			$("#historydiv").remove();
+			$("html, body").animate({scrollTop: 0}, 500);
+		});
+		attacheditableform('#medhistory');
+		}
+
+	});
+	}
+	else {
+	$("#historydiv").remove();
+	}
+
+});
+
+});
 
 </script>
 

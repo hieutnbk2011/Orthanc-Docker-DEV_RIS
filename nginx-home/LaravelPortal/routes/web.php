@@ -9,6 +9,9 @@ use App\Http\Controllers\MyControllers\HL7Controller;
 use App\Http\Controllers\MyControllers\ReportsController;
 use App\Http\Controllers\MyControllers\PatientsController;
 
+
+use App\Models\Referrers\ReferringPhysician;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -21,26 +24,26 @@ use App\Http\Controllers\MyControllers\PatientsController;
 */
 
 // LANDING PAGE FOR USERS NOT LOGGED IN
-
 Route::get('/', function () {
     return view('welcome');
 });
 
-Route::middleware(['auth:sanctum', 'verified'])->get('/patients/patients', [PatientsController::class, 'patient_list'])->name('patient_list');
-
-// Route::get('/patients/patients', function () {
-//     return view('patients/patients');
-// });
-
-// Route::get('/patients/patients.table', function () {
-//     return view('livewire.SearchPatients');
-// });
-
 // DEFAULT PAGE AFTER USER LOGGED IN
-
 Route::middleware(['auth:sanctum', 'verified'])->get('/dashboard', function () {
     return view('dashboard');
 })->name('dashboard');
+
+// LIST PATIENTS LANDING PAGE, GET
+Route::middleware(['auth:sanctum', 'verified'])->get('/patients/patients', [PatientsController::class, 'patient_list'])->name('patient_list');
+
+// LIST PATIENTS VIA QUERY, POST
+Route::middleware(['auth:sanctum', 'verified'])->post('/patients/search', [PatientsController::class, 'patient_search'])->name('patient_search');
+
+// DISPLAY / GET THE PATIENT HISTORY FORM
+Route::middleware(['auth:sanctum', 'verified'])->post('/patients/history', [PatientsController::class, 'patient_history'])->name('patient_history');
+
+
+
 
 // SORT OF A CONTROLLER, BUT HANDLED SENDING A WEBFORM, PROTOTYPE
 
@@ -282,18 +285,18 @@ Route::middleware(['auth:sanctum', 'verified'])->post('loadallstudies', function
     }
 })->name('loadallstudies');
 
-// DEV TOOL & ORTHANC API Routes
+// DEV TOOL & ORTHANC API Routes, mostly a group calling methods in OrthancAPI();
 
+// GET PHPINFO PAGE AT NGINX ROOT
 Route::middleware(['auth:sanctum', 'verified'])->post('/OrthancDev/PHPINFO', function() {
     $orthanc = new OrthancAPI();
     echo $orthanc->PHPINFO();
 })->name('PHPINFO');
-
+// getOrthancModalities, list of modalities to which studies can be routed, configured in orthanc.json
 Route::middleware(['auth:sanctum', 'verified'])->post('/OrthancDev/getOrthancModalities', function() {
     $orthanc = new OrthancAPI();
     echo $orthanc->getOrthancModalities();
 })->name('getOrthancModalities');
-
 
 
 Route::middleware(['auth:sanctum', 'verified'])->post('/OrthancDev/ServerStatus', function() {
@@ -381,6 +384,14 @@ Route::middleware(['auth:sanctum', 'verified'])->post('/OrthancDev/pydicom', fun
     echo $orthanc->pydicom($request->input('uuid'));
 })->name('pydicom');
 
+
+// SUBGROUP REGARDING DOWNLOADING ISO'S AND ZIPS, ROUTING TO MODALITIES
+// fetch_study
+Route::middleware(['auth:sanctum', 'verified'])->post('/Studies/fetch_study', function (Request $request) {
+    $orthanc = new OrthancAPI();
+    $orthanc->fetch_study($request->input('id'), $request->input('uuid'));
+})->name('fetch_study');
+
 // OrthancDev/downloadStudyUUID
 
 Route::middleware(['auth:sanctum', 'verified'])->post('OrthancDev/downloadStudyUUID', function (Request $request) {
@@ -460,14 +471,6 @@ Route::middleware(['auth:sanctum', 'verified'])->post('/HL7/getallhl7_reports', 
 
 Route::middleware(['auth:sanctum', 'verified'])->post('/Reports/choose_template', [ReportsController::class, 'choose_template'])->name('choose_template');
 
-
-
-// Partially Working, loads a template into the report editor
-// Route::middleware(['auth:sanctum', 'verified'])->post('/Reports/choose_template', function(Request $request) {
-//     $template = Reports::choose_template($request->input('uuid'), $request->input('templateid'));
-// })->name('choose_template');
-
-// Partially Working, sends html or base64 to orthanc plugin and processes it there.
 Route::middleware(['auth:sanctum', 'verified'])->post('/OrthancDev/addPDF', function(Request $request) {
     // Kind of had to 'hack' this.
     $orthanc = new OrthancAPI();
@@ -494,3 +497,15 @@ Route::middleware(['auth:sanctum', 'verified'])->post('/OrthancDev/addPDF', func
 */
 
 })->name('addPDF');
+
+// RIS STUDIES RELEATED, NOT Orthanc
+
+Route::middleware(['auth:sanctum', 'verified'])->post('/Referrers/sharelist', function() {
+    ReferringPhysician::sharelist();
+
+})->name('sharelist');
+
+Route::middleware(['auth:sanctum', 'verified'])->post('/Referrers/share', function(Request $request) {
+    ReferringPhysician::share($request, Auth::user());
+
+})->name('ShareStudy');

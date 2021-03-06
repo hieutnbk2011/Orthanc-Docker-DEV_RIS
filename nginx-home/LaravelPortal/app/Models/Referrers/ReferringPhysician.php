@@ -3,6 +3,9 @@
 namespace App\Models\Referrers;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Log;
+use \DB;
+use Illuminate\Http\Request;
 
 /**
  * @property string     $identifier
@@ -101,6 +104,28 @@ class ReferringPhysician extends Model
     // Scopes...
 
     // Functions ...
+
+    public static function sharelist()
+
+    {       Log::info("sharelist");
+        	$query = "SELECT a.*, b.description, b.degree from referring_physician a INNER JOIN provider_types b WHERE a.provider_type = b.id";  // degree
+			$params = [];
+            $doctors = DB::connection('mysql2')->select($query,$params);
+            $selectlist = '<select class = "sharelist" name = "identifier" required style="display:block;margin:auto";><option disabled selected>Choose Doctor</option>';
+            foreach ($doctors as $doctor) {
+                $selectlist .= '<option value = "' . $doctor->identifier . '">' . $doctor->fname . ' ' . $doctor->lname . ' ' . $doctor->degree . ' ' . $doctor->description . ' ' . $doctor->mobile_phone_country . ' ' . $doctor->mobile_phone . ' ' . $doctor->email . '</option>';
+
+            }
+            $selectlist .= '</select>';
+            echo $selectlist;
+    }
+
+    public static function share(Request $request, $user) {
+         Log::info($user);
+        // DoctorsModel::shareStudy ($user->doctor_id, $request->input('identifier'), $request->input('uuid'), $request->input('sharenote'));
+        echo '{"error":"Not Yet Fully Implemented"}';
+    }
+
 
     // Relations ...
 }

@@ -255,7 +255,8 @@ function confirmSave(element) {
 }
 
 function colorrows (e) {
-
+return true;
+// may not need this anymore !!
   e.filter(function(index) {return $(this).css('display') == 'flex' || $(this).css('display') == 'table'}).filter(':even').css({"background-color" : "#DDD"});
   e.filter(function(index) {return $(this).css('display') == 'flex' || $(this).css('display') == 'table'}).filter(':odd').css({"background-color" : "#AAA"});
 
@@ -308,68 +309,68 @@ function isValidDate(date) {
 
 $( ".myuitabs").tabs();  // for uitabs, since the bootstrap ones do not seem to work that well.
 
-$("[data-dbsearch]").on("click", function(e) {
+// $("[data-dbsearch]").on("click", function(e) {
+//
+// let form = $(this).closest("form");
+// e.preventDefault();
+//
+// if ($(this).data("dbsearch") == "searchorthanc") {
+//
+// getSearchParams();
+// searchOrthanc();
+// }
+// else if ($(this).data("dbsearch") == "search_shared") {
+// searchShared($('[name=searchform]').serialize());
+// }
+//
+// else {
+//
+// var wrapper = form.parent().find(".listwrapper");
+//
+//     $.ajax({
+//
+//         headers: {
+//             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+//         },
+//         type: "POST",
+//         url: form.data('action'),
+//         dataType: "json",
+//         data: $(this).closest("form").serialize(),
+//         context: $(this),
+//         beforeSend: function(e) {
+//             $("body").addClass("loading");
+//         },
+//
+//     })
+//     .done(function(data, textStatus, jqXHR) {
+//
+//     	if (data.status) {
+// 			showMessage("","No Matches");
+// 		}
+// 		else {
+// 		wrapper.html(data.html);
+// 		colorrows(wrapper.find(".worklist"));
+// 		form.find(".RISpaginator").html(data.RISpaginator);
+//
+// 		if ($(this).attr("data-dbsearch") == "search_patients")   {
+//
+// 		    getStudyCount($("#patientswrapper .patient"));
+//             getOrderCount($("#patientswrapper .patient"));
+// 		}
+// 		}
+//     });
+// }
+// });
 
-let form = $(this).closest("form");
-e.preventDefault();
-
-if ($(this).data("dbsearch") == "searchorthanc") {
-
-getSearchParams();
-searchOrthanc();
-}
-else if ($(this).data("dbsearch") == "search_shared") {
-searchShared($('[name=searchform]').serialize());
-}
-
-else {
-
-var wrapper = form.parent().find(".listwrapper");
-
-    $.ajax({
-
-        headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-        },
-        type: "POST",
-        url: form.data('action'),
-        dataType: "json",
-        data: $(this).closest("form").serialize(),
-        context: $(this),
-        beforeSend: function(e) {
-            $("body").addClass("loading");
-        },
-
-    })
-    .done(function(data, textStatus, jqXHR) {
-
-    	if (data.status) {
-			showMessage("","No Matches");
-		}
-		else {
-		wrapper.html(data.html);
-		colorrows(wrapper.find(".worklist"));
-		form.find(".RISpaginator").html(data.RISpaginator);
-
-		if ($(this).attr("data-dbsearch") == "search_patients")   {
-
-		    getStudyCount($("#patientswrapper .patient"));
-            getOrderCount($("#patientswrapper .patient"));
-		}
-		}
-    });
-}
-});
-
-$(".clearsearchform").on('click', function(e) {
-
-		e.preventDefault();
-		let list = $(this).closest("form").parent().find(".listwrapper .worklist");
-		list.css("display", "flex", "important");
-		$(".searchparam").val("");
-		colorrows(list);
-
-	});
+// $(".clearsearchform").on('click', function(e) {
+//
+// 		e.preventDefault();
+// 		let list = $(this).closest("form").parent().find(".listwrapper .worklist");
+// 		list.css("display", "flex", "important");
+// 		$(".searchparam").val("");
+// 		colorrows(list);
+//
+// });
 
 function isJsonString(str) {  // checks to see if a string is JSON for those instances when AJAX response could be HTML or JSON string, kind of weird, but a way to pass error codes back.
     try {
@@ -1202,7 +1203,7 @@ $("#studieswrapper").css("display", "block");
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
         },
         type: "POST",
-        url: "/Utilities/sharelist",
+        url: "/Referrers/sharelist",
         dataType: "html",
         data: {},
         beforeSend: function(e) {
@@ -3333,7 +3334,7 @@ fetch('/OrthancDev/downloadStudyUUID', {
     a.download = clicked.data("name") + ".zip";
     document.body.appendChild(a);
     a.click();
-    AJAX_Finish(xhr);
+    AJAX_Finish(response.xhr);
 })
 
 }

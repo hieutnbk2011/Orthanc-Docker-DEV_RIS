@@ -3,6 +3,7 @@
 namespace App\Models\Patients;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Log;
 
 /**
  * @property string     $mrn
@@ -116,4 +117,13 @@ class Patients extends Model
     {
         return $this->$key = $value;
     }
+
+    public static function patient_history($PatientID)
+    {
+        Log::info("patient_history");
+        $patient = self::where(["mrn" => $PatientID])->first();
+        Log::info( $patient);
+        //return view('patients.history')
+    }
+
 }
