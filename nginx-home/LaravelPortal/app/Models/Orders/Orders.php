@@ -1,6 +1,6 @@
 <?php
 
-namespace App;
+namespace App\Models\Orders;
 
 use Illuminate\Database\Eloquent\Model;
 
@@ -76,7 +76,7 @@ class Orders extends Model
      * @var array
      */
     protected $hidden = [
-        
+
     ];
 
     /**

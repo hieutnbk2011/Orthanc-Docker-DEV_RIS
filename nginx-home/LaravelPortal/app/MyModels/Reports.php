@@ -59,7 +59,7 @@ class Reports extends Model {
 		return view($path);
 	}
 
-  	public static function parseHL7($message) {
+  	private static function parseHL7($message) {
 
         Log::info(" parseHL7");
         Log::info($message);
@@ -90,7 +90,7 @@ class Reports extends Model {
 
 	}
 
-    public function templateslist()  {
+    private function templateslist()  {
 
             Debugbar::error($this->request);
 

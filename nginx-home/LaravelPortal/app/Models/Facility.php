@@ -148,4 +148,26 @@ class Facility extends Model
 	return $html;
 
     }
+
+    protected static function getMailingAddress($id) {
+        $facility = self::where('id', $id)->first();
+        $address = $this->name;
+    	$address .= (!empty($this->mail_street))?'<br>' . $this->mail_street:"";
+    	$address .= (!empty($this->mail_street2))?'<br>' . $this->mail_street2:"";
+    	$lastline = (!empty($this->mail_city))?$this->mail_city . ", ":"";
+    	$lastline .= (!empty($this->mail_state) && $this->mail_state != "OS")?$this->mail_state . ", ":"";
+    	$lastline .= (!empty($this->mail_country))?$this->mail_country . " ":"";
+    	$lastline .= (!empty($this->mail_zip))?$this->mail_zip:"";
+    	$address .= (!empty($lastline))?'<br>' . $lastline:"";
+    	return '<div>' . $address . '</div>';
+    }
+
+    protected static function getPhoneFAXEmailWeb($id) {
+
+    	$html  = (!empty($this->phone_ctry) && !empty($this->phone))?'<div style = "color:white;"><div style = "display: inline-block;width: 40px;text-align: left;">Phone:  </div><div style = "display: inline-block;padding-left: 10px;">' . $this->phone_ctry . ' ' . $this->phone . "</div></div>":"";
+    	$html .= (!empty($this->fax_country) && !empty($this->fax))?'<div><div style = "display: inline-block;width: 40px;text-align: left;">Fax:  </div><div style = "display: inline-block;padding-left: 10px;">' . $this->fax_country . ' ' . $this->fax . "</div></div>":"";
+    	$html .= (!empty($this->email))?'<div><div style = "display: inline-block;width: 40px;text-align: left;">E-mail:  </div><div style = "display: inline-block;padding-left: 10px;"><a href="mailto:Support<' . $this->email . '?Support Request">' . $this->email .  '</a></div></div>':"";
+    	$html .= (!empty($this->website))?'<div><div style = "display: inline-block;width: 40px;text-align: left;">Web:  </div><divstyle = "display: inline-block;padding-left: 10px;"><a href="' . $this->website .  '" target="_blank">' . $this->website . '</a></div></div>':"";
+    	return '<div>' . $html . '</div>';
+    }
 }
