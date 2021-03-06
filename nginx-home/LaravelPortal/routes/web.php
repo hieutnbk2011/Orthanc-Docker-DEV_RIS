@@ -25,6 +25,10 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::get('/patients/patients.table', function () {
+    return view('patients.patients_table');
+});
+
 // DEFAULT PAGE AFTER USER LOGGED IN
 
 Route::middleware(['auth:sanctum', 'verified'])->get('/dashboard', function () {

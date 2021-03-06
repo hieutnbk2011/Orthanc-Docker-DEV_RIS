@@ -45,8 +45,8 @@
                                 <x-slot name="content">
                                     <!-- Placeholder -->
 
-                                    <x-jet-dropdown-link href="/user/profile">
-                                        {{ __('Placeholder') }}
+                                    <x-jet-dropdown-link href="/patients/patients.table">
+                                        {{ __('List Patients') }}
                                     </x-jet-dropdown-link>
 
 <!--
