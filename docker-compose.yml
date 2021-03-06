@@ -7,7 +7,7 @@ services:
     restart: unless-stopped
     ports: ["443:443"]
     volumes:
-       - ./nginx-home:/nginx-home 
+       - ./nginx-home:/nginx-home
        - ./tls:/etc/nginx/tls
        - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
   php-fpm:

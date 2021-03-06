@@ -12,7 +12,9 @@ Thumbs.db
 /public/storage
 /storage/*.key
 
-
+/storage/app/livewire-tmp/*.*
+/storage/app/public/profile-photos/*.*
+/storage/debugbar/*.*
 
 npm-debug.log
 yarn-error.log
