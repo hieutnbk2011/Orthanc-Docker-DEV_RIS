@@ -28,3 +28,5 @@ nginx-home/auth.log
 nginx-home/auth.log
 
 
+*.php
+nginx-home/LaravelPortal/storage/logs/laravel.log
