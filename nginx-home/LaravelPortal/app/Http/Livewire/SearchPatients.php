@@ -22,7 +22,7 @@ class SearchPatients extends TableComponent
 
     public function query() : Builder
     {
-        return Patients::with('last');
+        return Patients::with('lname');
 
     }
 

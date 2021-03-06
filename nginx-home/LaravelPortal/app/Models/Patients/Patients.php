@@ -107,4 +107,9 @@ class Patients extends Model
     // Functions ...
 
     // Relations ...
+
+    public function lname()
+    {
+        return ['lname' => 'Guest Author'];
+    }
 }

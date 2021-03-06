@@ -4,9 +4,9 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use App\Actions\Orthanc\OrthancAPI;  // could change this for other PACS Interface or add others and capture that below
 use App\Actions\Orthanc\PACSUploadStudies;
-use App\MyModels\Reports;
 use App\Providers\RouteServiceProvider;
 use App\Http\Controllers\MyControllers\HL7Controller;
+use App\Http\Controllers\MyControllers\ReportsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -447,22 +447,18 @@ Route::middleware(['auth:sanctum', 'verified'])->post('/PACSUploadStudies/PACSup
 
 // RADIOLOGY REPORTING ROUTES, REORGANIZE LATER
 
-// Partially Working, gets a list of available template for reporting.
-Route::middleware(['auth:sanctum', 'verified'])->post('/Reports/radreport_templates_list', function(Request $request) {
-    $list = (new Reports($request))->templateslist();
-    echo $list;
-})->name('radreport_templates_list');
+Route::middleware(['auth:sanctum', 'verified'])->post('/Reports/radreport_templates_list', [ReportsController::class, 'radreport_templates_list'])->name('radreport_templates_list');
 
-// Partially Working, get all of the existing reports for an accession number and returns the data so old reports can be show in the editor
-Route::middleware(['auth:sanctum', 'verified'])->post('/HL7/getallhl7_reports', function(Request $request) {
-   $list = Reports::getallhl7_reports($request->input('accession_number'));
-    echo $list;
-})->name('getallhl7_reports');
+Route::middleware(['auth:sanctum', 'verified'])->post('/HL7/getallhl7_reports', [ReportsController::class, 'getallhl7_reports'])->name('getallhl7_reports');
+
+Route::middleware(['auth:sanctum', 'verified'])->post('/Reports/choose_template', [ReportsController::class, 'choose_template'])->name('choose_template');
+
+
 
 // Partially Working, loads a template into the report editor
-Route::middleware(['auth:sanctum', 'verified'])->post('/Reports/choose_template', function(Request $request) {
-    $template = Reports::choose_template($request->input('uuid'), $request->input('templateid'));
-})->name('choose_template');
+// Route::middleware(['auth:sanctum', 'verified'])->post('/Reports/choose_template', function(Request $request) {
+//     $template = Reports::choose_template($request->input('uuid'), $request->input('templateid'));
+// })->name('choose_template');
 
 // Partially Working, sends html or base64 to orthanc plugin and processes it there.
 Route::middleware(['auth:sanctum', 'verified'])->post('/OrthancDev/addPDF', function(Request $request) {

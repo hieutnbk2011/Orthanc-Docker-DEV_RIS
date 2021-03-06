@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Log;
 
 use App\Actions\Orthanc\OrthancAPI;
 use App\Models\TeleradContracts;
-use App\Models\Patients;
+use App\Models\Patients\Patients;
 use App\Models\Facility;
 use App\MyModels\Reports;
 
