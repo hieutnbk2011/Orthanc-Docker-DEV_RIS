@@ -108,8 +108,12 @@ class Patients extends Model
 
     // Relations ...
 
-    public function lname()
+    public function get($key)
     {
-        return ['lname' => 'Guest Author'];
+        return $this->$key;
+    }
+    public function set($key, $value)
+    {
+        return $this->$key = $value;
     }
 }

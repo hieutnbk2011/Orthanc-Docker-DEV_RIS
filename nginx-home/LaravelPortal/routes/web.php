@@ -7,6 +7,7 @@ use App\Actions\Orthanc\PACSUploadStudies;
 use App\Providers\RouteServiceProvider;
 use App\Http\Controllers\MyControllers\HL7Controller;
 use App\Http\Controllers\MyControllers\ReportsController;
+use App\Http\Controllers\MyControllers\PatientsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -25,9 +26,15 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/patients/patients.table', function () {
-    return view('livewire.SearchPatients');
-});
+Route::middleware(['auth:sanctum', 'verified'])->get('/patients/patients', [PatientsController::class, 'patient_list'])->name('patient_list');
+
+// Route::get('/patients/patients', function () {
+//     return view('patients/patients');
+// });
+
+// Route::get('/patients/patients.table', function () {
+//     return view('livewire.SearchPatients');
+// });
 
 // DEFAULT PAGE AFTER USER LOGGED IN
 

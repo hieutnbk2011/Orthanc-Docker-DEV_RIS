@@ -793,6 +793,20 @@ font-family: courier;
 .SumoSelect > .CaptionCont {
 background-color:unset !important;
 }
+.worklist:nth-child(even), .worklist:nth-child(even) *,  .worklist:nth-child(even) .CaptionCont  {
+
+background:#DDD;
+color:black;
+font-weight:bold;
+font-size:10px;
+}
+
+.worklist:nth-child(odd), .worklist:nth-child(odd) *, .worklist:nth-child(odd) .CaptionCont {
+background:#FFF;
+color:black;
+font-weight:bold;
+font-size:10px;
+}
 
 .shadedform:nth-child(even), .shadedform:nth-child(even) *,  .shadedform:nth-child(even) .CaptionCont  {
 
