@@ -13,6 +13,13 @@ class SearchPatients extends TableComponent
 {
     use HtmlComponents;
 
+//     protected $lname = 'test';
+//
+//     public function mount($lname) {
+//
+//         $this->lname = $lname;
+//     }
+
     public function query() : Builder
     {
         return Patients::with('last');
