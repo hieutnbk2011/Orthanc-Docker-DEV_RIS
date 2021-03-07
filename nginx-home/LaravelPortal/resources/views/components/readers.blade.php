@@ -1186,15 +1186,18 @@ $("#studieswrapper").css("display", "block");
 //  Kind of a long function to retrieve the sharelist, either from the SESSION (current set), vs. making an API call everytime.
 //  Submits the uuid, the doctor identifier and the sharenote.  The sharing doctor is stored in the SESSION as doctor_id.  The receiver is the identifier.
 
-    $("#delegator").on("click", ".share", function(e) {
+$("#delegator").on("click", ".share", function(e) {
+
 	e.preventDefault();
     e.stopImmediatePropagation();
 
-        var studyrow = $(this).closest(".worklist");
-        if (studyrow.next().hasClass("shareform")) {
-             studyrow.next().remove();
-        }
-        else {
+    var studyrow = $(this).closest(".worklist");
+    if (studyrow.next().hasClass("shareform")) {
+         studyrow.next().remove();
+    }
+
+    else {
+
         let uuid = studyrow.data("uuid");
         let accession_number = studyrow.data("accession");
         $.ajax({
@@ -1211,16 +1214,16 @@ $("#studieswrapper").css("display", "block");
         },
         })
         .done(function(data, textStatus, jqXHR) {
-
+            AJAX_Finish(jqXHR);
             studyrow.after('<form style = "width:100%;text-align:center;margin:auto;" class = "shareform"><input type="hidden" name="uuid" value="' + uuid + '"><input type="hidden" name="accession_number" value="' + accession_number + '">' + data +  '<textarea style="width:100%;margin:0px 20px 0px 20px;" name = "sharenote"></textarea><br><button class = "uibuttonsmallred" type = "submit">Share</button></form>');
             $("#sharenote").focus();
             var form = studyrow.next();
             form.validate();
             form.on("submit", function(e) {
-            if (form.valid()) {
-            e.preventDefault();
+                if (form.valid()) {
+                e.preventDefault();
 
-               $.ajax({
+                $.ajax({
                 headers: {
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                 },
@@ -1233,15 +1236,18 @@ $("#studieswrapper").css("display", "block");
                 },
                 })
                 .done(function(data, textStatus, jqXHR) {
-					parseMessages(data, true);
+                    parseMessages(data, true);
                 });
-                }
+            }
                 else {
-                    alert("not valid");
-                }
+                alert("not valid");
+            }
             });
+        })
+        .fail(function( jqXHR, textStatus, errorThrown) {
+            AJAX_Finish(jqXHR);
         });
-        }
+    }
 });
 
 
@@ -2941,7 +2947,7 @@ var parent = $(this).closest(".worklist");
 
     })
     .fail(function( jqXHR, textStatus, errorThrown) {
-
+        AJAX_Finish(jqXHR);
     });
     }
     else {

@@ -1864,17 +1864,19 @@ $("body").on ("click", ".showpatienthistory",  function(e) {
 		}
 		else {
 		$("#historydiv").remove();  // remove it if is is already there.
-		$(activepatient).after('<div id="historydiv" style="display:contents;">' + data + '</div>');
+		showMessage("", '<div id="historydiv" style="display:contents;">' + data + '</div>')
+		// $(activepatient).after('<div id="historydiv" style="display:contents;">' + data + '</div>');
 		colorrows($("#historydiv .worklist"));
-		$('#historydiv').append('<div class = "form-group shadedform col-sm-12" style="text-align:center;"><button type="button" id="closeorderoverlay" class="uibuttonsmallred">Close</button></div>');  // ajax does not come with the close button
-		$('#closeorderoverlay').on('click', function() {
-			$("#historydiv").remove();
-			$("html, body").animate({scrollTop: 0}, 500);
-		});
-		attacheditableform('#medhistory');
+		//$('#historydiv').append('<div class = "form-group shadedform col-sm-12" style="text-align:center;"><button type="button" id="closeorderoverlay" class="uibuttonsmallred">Close</button></div>');  // ajax does not come with the close button
+// 		$('#closeorderoverlay').on('click', function() {
+// 			$("#historydiv").remove();
+// 			$("html, body").animate({scrollTop: 0}, 500);
+// 		});
 		}
-
-	});
+	})
+    .fail(function( jqXHR, textStatus, errorThrown) {
+        AJAX_Finish(jqXHR);
+    });
 	}
 	else {
 	$("#historydiv").remove();

@@ -3,6 +3,9 @@
 namespace App\Models\Orders;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Log;
+use \DB;
+
 
 /**
  * @property string     $priority
@@ -107,6 +110,28 @@ class Orders extends Model
     // Scopes...
 
     // Functions ...
+
+    public static function getOrderByAccession($accession_number) {
+
+    	$query = 'SELECT * FROM orders o1 WHERE timestamp = (SELECT MAX(timestamp) FROM orders o2 WHERE o1.accession_number = o2.accession_number) AND o1.accession_number = ?';
+	    $results = DB::connection('mysql2')->select($query, [$accession_number]);
+	    Log::info($results);
+		if (!$results || count($results) == 0) return false;
+	    return $results[0];
+
+    }
+
+    public static function getShortOrderByAccession($accession_number) {  // gets the order for a given accession, which should be one if it exists.
+
+		$query = "SELECT indication, coded_exam, description, requested_procedure_id FROM orders o1 WHERE timestamp = (SELECT MAX(timestamp) FROM orders o2 WHERE o1.accession_number = o2.accession_number) AND o1.accession_number = ?";
+		$results = DB::connection('mysql2')->select($query, [$accession_number]);
+		Log::info($results);
+		if (!$results || count($results) == 0) return false;
+	    return $results[0];
+
+
+    }
+
 
     // Relations ...
 }

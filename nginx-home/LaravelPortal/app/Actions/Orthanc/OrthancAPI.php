@@ -9,6 +9,7 @@ use App\MyModels\DatabaseFactory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Log;
+use App\Models\Orders\Orders;
 
 class OrthancAPI  {
 
@@ -575,8 +576,8 @@ Used for downloadDCMStudyUUID, downloadZipStudyUUID
 			// missing so far
 			$study->created = date_create_from_format("Ymd His", $study->study_date . ' '  . mb_substr($study->study_time, 0, 6));
 			if ($study->created) $study->created = $study->created->format("Y-m-d H:i:s");
-            $order = false;
-			//$order = OrderModel::getShortOrderByAccession($study->accession_number);  // should always exist if there is an order, but maybe not
+            // $order = false;
+			$order = Orders::getShortOrderByAccession($study->accession_number);  // should always exist if there is an order, but maybe not
 			$study->indication = (!empty($order))?$order->indication:"No Order"; // migrate to order
 			$study->coded_exam = (!empty($order))?$order->coded_exam:"[]"; // migrate to order
 			$study->requested_procedure_id =  (!empty($order))?$order->requested_procedure_id:"No Order";  // migrate to order, part of the order
