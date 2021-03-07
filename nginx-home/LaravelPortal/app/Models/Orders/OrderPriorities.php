@@ -3,6 +3,7 @@
 namespace App\Models\Orders;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Log;
 
 /**
  * @property string     $text
@@ -77,6 +78,24 @@ class OrderPriorities extends Model
     // Scopes...
 
     // Functions ...
+
+    protected static function getOrderPriorities ($selected = null) {
+
+        Log::info("getOrderPriorities");
+        $priorities = self::all();
+        $priority = '<option disabled selected value="">Select option</option>';
+
+        foreach ($priorities as $row) {
+            $priority .= '<option value="' . $row->hl7_code . '"';
+            if ($selected == $row->hl7_code) {
+                $priority.= ' selected';
+            }
+            $priority.= '>' . $row->text . '</option>';
+        }
+        Log::info($priority);
+        return $priority;
+
+    }
 
     // Relations ...
 }

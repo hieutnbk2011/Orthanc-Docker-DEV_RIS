@@ -1,0 +1,5 @@
+{
+    "require": {
+        "protonemedia/laravel-form-components": "^2.5"
+    }
+}

@@ -5,7 +5,7 @@ use \Debugbar;
 use App\Actions\Orthanc\UtilityFunctions;
 use Illuminate\Support\Facades\Auth;
 use ReallySimpleJWT\Token;
-use App\MyModels\DatabaseFactory;
+use App\Helpers\DatabaseFactory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Log;
@@ -70,8 +70,6 @@ class OrthancAPI  {
 
 		if (!empty($serverid)) {
         $this->server = DB::table('orthanc_hosts')->where('id', $serverid)->first();
-// 	    $query = 'SELECT * from orthanc_hosts WHERE id = ?';
-//     	$this->server = DatabaseFactory::selectByQuery($query, [$serverid])->fetch(PDO::FETCH_OBJ);
     	$this->OrthancURL = $this->server->api_url;
 
 		}
@@ -326,20 +324,20 @@ Used for downloadDCMStudyUUID, downloadZipStudyUUID
     public static function getServersArray() {
 
     	$query = 'SELECT * from orthanc_hosts';
-    	return DatabaseFactory::selectByQuery($query, [])->fetchAll(\PDO::FETCH_OBJ);
+    	return DB::table('orthanc_hosts')->get();
+    	//return DatabaseFactory::selectByQuery($query, [])->fetchAll(\PDO::FETCH_OBJ);
 
     }
     // passed
     public static function createAPIandInfoFromServerID($id) {
 
-		$query = 'SELECT * from orthanc_hosts WHERE id = ?';
-    	$server = DatabaseFactory::selectByQuery($query, [$id])->fetch(\PDO::FETCH_OBJ);
+    	$server = DB::table('orthanc_hosts')->where('id', $id)->first();
     	if ($server) {
-    	$APIStrings = new \stdClass();
-    	$APIStrings->api_url = $server->api_url;
-    	$APIStrings->server = $server;
-    	$APIStrings->display ='AET:  ' . $server->AET. '    Name:  ' . $server->server_name ;
-    	return $APIStrings;
+            $APIStrings = new \stdClass();
+            $APIStrings->api_url = $server->api_url;
+            $APIStrings->server = $server;
+            $APIStrings->display ='AET:  ' . $server->AET. '    Name:  ' . $server->server_name ;
+            return $APIStrings;
     	}
     	else return false;
 

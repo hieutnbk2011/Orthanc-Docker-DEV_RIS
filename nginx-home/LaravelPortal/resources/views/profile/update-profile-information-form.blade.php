@@ -1,3 +1,20 @@
+<style>
+
+label {
+
+font-weight:bold !important;
+
+}
+
+input {
+
+font-weight:bold !important;
+padding:2px !important;
+
+}
+
+</style>
+
 <x-jet-form-section submit="updateProfileInformation">
     <x-slot name="title">
         {{ __('Profile Information') }}
@@ -45,17 +62,59 @@
         @endif
 
         <!-- Name -->
-        <div class="col-span-6 sm:col-span-4">
+        <div class="col-span-4 sm:col-span-4">
             <x-jet-label for="name" value="Name" />
             <x-jet-input id="name" type="text" class="mt-1 block w-full" wire:model.defer="state.name" autocomplete="name" />
             <x-jet-input-error for="name" class="mt-2" />
         </div>
 
         <!-- Email -->
-        <div class="col-span-6 sm:col-span-4">
+        <div class="col-span-4 sm:col-span-4">
             <x-jet-label for="email" value="Email" />
             <x-jet-input id="email" type="email" class="mt-1 block w-full" wire:model.defer="state.email" />
             <x-jet-input-error for="email" class="mt-2" />
+        </div>
+
+         <!-- lname -->
+        <div class="col-span-4 sm:col-span-4">
+            <x-jet-label for="lname" value="Last Name" />
+            <x-jet-input id="lname" type="text" class="mt-1 block w-full" wire:model.defer="state.lname" />
+            <x-jet-input-error for="lname" class="mt-2" />
+        </div>
+
+        <!-- fname -->
+        <div class="col-span-4 sm:col-span-4">
+            <x-jet-label for="fname" value="First Name" />
+            <x-jet-input id="fname" type="text" class="mt-1 block w-full" wire:model.defer="state.fname" />
+            <x-jet-input-error for="fname" class="mt-2" />
+        </div>
+
+        <!-- mname -->
+        <div class="col-span-4 sm:col-span-4">
+            <x-jet-label for="mname" value="Middle Name" />
+            <x-jet-input id="mname" type="text" class="mt-1 block w-full" wire:model.defer="state.mname" />
+            <x-jet-input-error for="mname" class="mt-2" />
+        </div>
+
+        <!-- patientid -->
+        <div class="col-span-4 sm:col-span-4">
+            <x-jet-label for="lname" value="PatientID" />
+            <x-jet-input id="patientid" type="text" class="mt-1 block w-full" wire:model.defer="state.patientid" />
+            <x-jet-input-error for="patientid" class="mt-2" />
+        </div>
+
+        <!-- doctor_id -->
+        <div class="col-span-4 sm:col-span-4">
+            <x-jet-label for="doctor_id" value="ReferringPhysicianName" />
+            <x-jet-input id="doctor_id" type="text" class="mt-1 block w-full" wire:model.defer="state.doctor_id" />
+            <x-jet-input-error for="doctor_id" class="mt-2" />
+        </div>
+
+        <!-- reader_id -->
+        <div class="col-span-4 sm:col-span-4">
+            <x-jet-label for="reader_id" value="Principal Result Interpreter/NameOfPhysiciansReadingStudy/(0008,1060)" />
+            <x-jet-input id="reader_id" type="text" class="mt-1 block w-full" wire:model.defer="state.reader_id" />
+            <x-jet-input-error for="reader_id" class="mt-2" />
         </div>
 
     </x-slot>

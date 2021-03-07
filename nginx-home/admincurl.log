@@ -93,3 +93,7 @@
     "method": "PHPINFO",
     "api_url": "http:\/\/pacs-1:8042\/"
 }
+[07-Mar-2021 03:35:40 UTC] {
+    "method": "PHPINFO",
+    "api_url": "http:\/\/pacs-1:8042\/"
+}

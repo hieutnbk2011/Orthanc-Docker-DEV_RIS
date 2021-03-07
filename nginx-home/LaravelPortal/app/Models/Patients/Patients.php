@@ -84,7 +84,7 @@ class Patients extends Model
      * @var array
      */
     protected $casts = [
-        'mrn' => 'string', 'last' => 'string', 'first' => 'string', 'mname' => 'string', 'alias' => 'string', 'icd10codes' => 'string', 'medications' => 'string', 'surgical_history' => 'string', 'medical_history' => 'string', 'medications_text' => 'string', 'birth_date' => 'date', 'sex' => 'string', 'mobile_phone_country' => 'string', 'mobile_phone' => 'string', 'alt_mobile_phone_country' => 'string', 'allergies' => 'string', 'alt_mobile_phone' => 'string', 'email' => 'string', 'alt_email' => 'string', 'address_1' => 'string', 'address_2' => 'string', 'city' => 'string', 'state' => 'string', 'country' => 'string', 'postal' => 'string', 'patient_notes' => 'string', 'uuid' => 'string', 'date_created' => 'datetime', 'marital_status' => 'string', 'facility_id' => 'int', 'appt_reminders' => 'boolean', 'reports_notification' => 'boolean', 'send_reports' => 'boolean'
+        'mrn' => 'string', 'last' => 'string', 'first' => 'string', 'mname' => 'string', 'alias' => 'string', 'icd10codes' => 'string', 'medications' => 'string', 'surgical_history' => 'string', 'medical_history' => 'string', 'medications_text' => 'string', 'birth_date' => 'date:Y-m-d', 'sex' => 'string', 'mobile_phone_country' => 'string', 'mobile_phone' => 'string', 'alt_mobile_phone_country' => 'string', 'allergies' => 'string', 'alt_mobile_phone' => 'string', 'email' => 'string', 'alt_email' => 'string', 'address_1' => 'string', 'address_2' => 'string', 'city' => 'string', 'state' => 'string', 'country' => 'string', 'postal' => 'string', 'patient_notes' => 'string', 'uuid' => 'string', 'date_created' => 'datetime', 'marital_status' => 'string', 'facility_id' => 'int', 'appt_reminders' => 'boolean', 'reports_notification' => 'boolean', 'send_reports' => 'boolean'
     ];
 
     /**
@@ -95,6 +95,8 @@ class Patients extends Model
     protected $dates = [
         'birth_date', 'date_created'
     ];
+
+    protected $dateFormat = 'Y-m-d';
 
     /**
      * Indicates if the model should be timestamped.

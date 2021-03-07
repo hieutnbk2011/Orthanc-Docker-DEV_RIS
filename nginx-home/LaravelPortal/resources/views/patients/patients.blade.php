@@ -239,3 +239,95 @@ echo '</div>';
 ?>
 </div>
 </x-app-layout>
+
+<script>
+
+$.ajaxSetup({
+    headers: {
+        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+    }
+});
+
+$('.placeorder, .modifyorder').on('click', function(e) {
+
+	e.preventDefault();
+    e.stopImmediatePropagation();
+	PlaceModifyOrder($(this));
+
+});
+
+function PlaceModifyOrder(clicked, callback = false) {
+
+    let row = clicked.closest('.worklist');
+    let extradata;
+    let accession = row.data("accession"); // only applies for order worklist and an existing order.
+    let mrn = row.data("mrn");
+    let ordertype = clicked.data("ordertype");  // from the listpatients view form or from the orders tables, the element clicked.
+    extradata = {"mrn": mrn, "accession": accession, "ordertype": ordertype};
+
+    $.ajax({
+    	url: '/orders/orderform',
+    	type: 'GET',
+    	dataType: 'html',
+    	data: extradata,
+    	complete: function(xhr, textStatus) {
+    	},
+    	success: function(data, textStatus, xhr) {
+
+
+    	    	$('#modalDiv').html(data);
+    	    	$('#modalDiv').show();
+    	    	$("html, body").animate({ scrollTop: 0 }, "slow");
+    	    	$("body").css("overflow", "hidden");
+
+    	    	$('#closeorderoverlay').on('click', function() {  // could just trigger a click on Show Orders ?
+
+//      	    	    if (accession != undefined) {
+//      	    	    replaceOrderRow(accession);
+//      	    	    }
+//      	    	    if($("#orderswrapper").length == 0) { // on the patients page
+//
+//     	    	    row.find(".showorders").trigger("click");
+//     	    	    getOrderCount(row);
+//     	    	    }
+                    $('#modalDiv').html("");
+                    $("body").css("overflow", "auto");
+                    $('#modalDiv').hide();
+                    $("html, body").animate({scrollTop: 0}, 500);
+
+
+                });
+
+                $('#modalDiv input').focusout(function(e){  // dynamically updates jquery validate
+                    $(this).valid();
+                });
+
+                attachDateTimePicker();
+                attachSumoSelect('#modalDiv');
+                submitorderhandler();  // attaches the submitorderhandler, below.
+
+//                 if ($("#calendaryear").length != 0) {  // load the calendar appointments for the month and year, if the calendar is open.
+//                     loadappointments($("#calendaryear").data("year"), $("#calendarmonth").data("month"), "01", "");
+//                 }
+                $('#scheduled_procedure_step_start_date').on ("change", function() {
+
+                	// if the calendar is open then scroll the calendar to the date and view.
+                	if ($("#calmainwrapper").length == 1) {
+
+                	date = $('#scheduled_procedure_step_start_date').val();
+					if (isValidDate(date) && typeof scrollCalendar == 'function') {
+                	dateobject = splitDate(date);
+                    scrollCalendar(dateobject.year, dateobject.month, dateobject.day, "" ,"");  // view is grabbed from session, callback is empty
+                    //showCalDay(date);
+                    }
+                    }
+                });
+
+                if (typeof callback === "function") {
+                	completeOrderProcess();
+                }
+    	}
+    });
+}
+
+</script>

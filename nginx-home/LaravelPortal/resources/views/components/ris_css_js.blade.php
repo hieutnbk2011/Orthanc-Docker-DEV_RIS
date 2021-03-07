@@ -14,6 +14,7 @@ COOKIE:  X-XSRF-TOKEN , set that header if you want to read the COOKIE
 <link rel="stylesheet" href="/bower/bootstrap/dist/css/bootstrap.min.css"/>
 <link rel="stylesheet" href="/bower/jquery-ui/themes/dark-hive/jquery-ui.min.css" type="text/css">
 <link rel="stylesheet" href="/bower/jquery-timepicker-jt/jquery.timepicker.min.css" />
+<link rel="stylesheet" href="/bower/sumoselect/sumoselect.css" />
 
 <script src="/bower/jquery/dist/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-migrate/3.0.1/jquery-migrate.min.js"></script>
@@ -25,10 +26,34 @@ COOKIE:  X-XSRF-TOKEN , set that header if you want to read the COOKIE
 <script src="/bower/moment-timezone/builds/moment-timezone-with-data-1970-2030.min.js"></script>
 <script src="/bower/jquery-validation/dist/jquery.validate.min.js"></script>
 <script src="/bower/jquery-validation/dist/additional-methods.min.js"></script>
-
+<script src="/bower/sumoselect/jquery.sumoselect.min.js"></script>
 
 <!-- AJAX SPINNER BEGIN -->
 <div class="spinner_overlay"></div>
+<div id= "modalDiv"></div>
+<!-- The Modal -->
+<div class="modal fade hide" id="myModal" data-keyboard="true" data-backdrop="true" tabindex='-1'>
+
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+      <!-- Modal Header -->
+      <div class="modal-header">
+        <h4 class="modal-title"></h4>
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+      </div>
+
+      <!-- Modal body -->
+      <div class="modal-body"></div>
+
+      <!-- Modal footer -->
+      <div class="modal-footer">
+        <button type="button" class="uibuttonsmallred" data-dismiss="modal">Close</button>
+      </div>
+
+    </div>
+  </div>
+</div>
 <style>
 
 .spinner_overlay {
@@ -1462,10 +1487,10 @@ width: 10px;
     display:none !important;
   }
   .searchform .narrowmedia, #searchform .narrowmedia {
+
     display:inline-block;
     width:100%;
-    color:white !important;
-    background:black !important;
+    color:black !important;
     padding-bottom:5px;
 
   }
@@ -1883,9 +1908,195 @@ $("body").on ("click", ".showpatienthistory",  function(e) {
 	}
 
 });
-
 });
 
+function attachDateTimePicker()  {
+
+//             year = new Date().getFullYear();
+            $('.datepicker:not(.hasdatepicker)').datepicker({
+
+            orientation: "top",
+            autoclose: true,
+            showOtherMonths: true,
+            selectOtherMonths: true,
+            showButtonPanel: true,
+            changeMonth: true,
+            changeYear: true,
+            dateFormat: 'yy-mm-dd',
+            showWeek: true,
+            firstDay: 1,
+            yearRange: '1920:2030' ,
+            constrainInput: false,
+            beforeShow: function(element, ui){
+                //console.log(ui.dpDiv);
+                ui.dpDiv.css('font-size', 12),
+                ui.dpDiv.css('z-index', 100000);
+            },
+            onSelect: function(d,i){
+            if(d !== i.lastVal){
+                 $(this).change();
+                 $(this).valid();
+            }
+            }
+            });
+
+            $('.timepicker:not(.ui-timepicker-input)').timepicker({
+              timeFormat: 'H:i',
+              step: "15",
+              dynamic:true,
+              maxHour: 24
+            });
+}
+
+function attachSumoSelect(element) {
+
+            // sets direction of opening
+            if ($("#insurance" + " select").closest("#insurance").length == 1) up = true;
+            else up = false;
+            $(element + " select").SumoSelect({
+
+                placeholder: 'Select Here',
+                csvDispCount: 0,
+                captionFormat: '{2} Selected',
+                floatWidth: 500,
+                forceCustomRendering: false,
+                nativeOnDevice: ['Android', 'BlackBerry', 'iPhone', 'iPad', 'iPod', 'Opera Mini', 'IEMobile', 'Silk'],
+                outputAsCSV : false,
+                csvSepChar : ',',
+                okCancelInMulti: true,
+                isClickAwayOk: false,
+                triggerChangeCombined : true,
+                selectAll : false,
+                search : true,
+                searchText : 'Search...',
+                noMatch : 'No matches for "{0}"',
+                prefix : '',
+                locale :  ['OK', 'Cancel', 'Select All'],
+                up : up,
+                showTitle : false
+            });
+
+            $(element +" .CaptionCont").removeAttr("title");  // the showTitle option does not work.
+
+            /*
+            $(".SumoSelect").on("keydown", function(e) {
+
+                select = $(this).find(".SumoUnder");
+                count = select.find("option").size();
+                currentindex = select.prop('selectedIndex');
+                handle = $(this)[0];
+                console.log(handle);
+                switch(e.which) {
+                case 37: // left
+                break;
+
+                case 38: // up
+                currentindex = Math.max(0, currentindex-1);
+                console.log(currentindex);
+                select.prop('selectedIndex', currentindex);
+                break;
+
+                case 39: // right
+                break;
+
+                case 40: // down
+                currentindex = Math.min(count -1 , currentindex+1);
+                console.log(currentindex);
+                select.prop('selectedIndex', currentindex);
+                break;
+
+                default: return; // exit this handler for other keys
+                }
+                e.preventDefault(); // prevent the default action (scroll / move caret)
+
+            });
+
+            */
+            /*  Country Flags, performance hit, but nice.
+            CountryCode = [];
+            original = $(element + " #country option, " + element + " #mobile_phone option, " + element + " #alt_mobile_phone_country option," + element + " #mobile_phone_ctry option, " + element + " #ins_mobile_phone option, " + element + " #ins_country option" );
+            $.each(original, function(key, value) {
+
+            CountryCode[key] = $(value).attr("value");
+            });
+
+
+            Rendered = original.closest(element +" .SumoSelect").find(".opt" );
+            ListItems = [];
+            $.each(Rendered, function(key, value) {
+            if (CountryCode[key] == "" || CountryCode[key] =="" || CountryCode[key] =="") CountryCode[key] = "US";
+            $(value).prepend("<img src='/css/flags/" + CountryCode[key] + ".ico' >");
+            ListItems[key] = value;
+            });
+            */
+
+
+}
+
+function submitorderhandler() {
+
+
+$('#submitorder').on('click', function(e) {
+testing = false;
+var mrn = $("#patientid").val();
+if (testing == true || $('#orderform').valid()) {
+e.preventDefault(e);
+
+$.ajax({
+    url: '/HL7/submit_order',
+    type: 'POST',
+    dataType: 'json',
+    data: $('#orderform').serialize(),
+    context: $('#orderform'),
+    beforeSend: function(e) {
+    $("#spinner").css("display", "block");
+    },
+    success: function(data, textStatus, xhr) {
+
+            response = parseMessages(data, true);
+            if (!response.error || response.error == "OK") {
+
+                if ($("#referrerrequest").html() != "") {
+                    removefromQueue($("#referrerrequest").data("id"));
+                }
+                $("#accession_number").val(response.accession_number);
+                $("#appointment_id").val(response.appointment_id);
+                $("#status")[0].sumo.selectItem(response.ourstatus);
+                date = $('#scheduled_procedure_step_start_date').val();
+                if (isValidDate(date) && typeof scrollCalendar == 'function') {
+                dateobject = splitDate(date);
+                // goes to the specified date using the current date, no week or callback
+                scrollCalendar(dateobject.year, dateobject.month, dateobject.day, "" ,"");
+                }
+            }
+            else {
+                // alert("error");
+            }
+    }
+});
+}
+else {
+//invalid form
+}
+});
+}
+
+function showmodal (title, body) {
+
+    $("#myModal .modal-body").html(body);
+    $("#myModal .modal-header").html(title);
+    $('#myModal').modal('show');
+
+}
+
+function showMessage(title, message) {
+
+    showmodal(title, message);
+
+}
+
 </script>
+
+
 
 <!-- AJAX SPINNER END -->

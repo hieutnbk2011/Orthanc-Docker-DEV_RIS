@@ -74,7 +74,7 @@
 </div>
 
 <?php
-use App\MyModels\Widgets;
+use App\Helpers\Widgets;
 use App\Actions\Orthanc\OrthancAPI;
 $pacs = new OrthancAPI();
 
@@ -161,39 +161,13 @@ $selectlist .= '</select>
 ?>
 
         </div> <!-- end of studies -->
-<div id="toolstab"></div> <!-- end of tools -->
+<div id="toolstab"><x-slot name="modal"></div> <!-- end of tools -->
 <div id="contactinfo">
-	<?php // $this->renderWithoutHeaderAndFooter("contactinfo/contactinfo");
-	?>
+<x-contactform />
 </div> <!-- end of contactinfo -->
 
 </div>
 <!-- end of delegator / wrapper -->
-<!-- The Modal -->
-<div class="modal fade hide" id="myModal" data-keyboard="true" data-backdrop="true" tabindex='-1'>
-
-  <div class="modal-dialog">
-    <div class="modal-content">
-
-      <!-- Modal Header -->
-      <div class="modal-header">
-        <h4 class="modal-title">Modal Heading</h4>
-        <button type="button" class="close" data-dismiss="modal">&times;</button>
-      </div>
-
-      <!-- Modal body -->
-      <div class="modal-body">
-        Modal body..
-      </div>
-
-      <!-- Modal footer -->
-      <div class="modal-footer">
-        <button type="button" class="uibuttonsmallred" data-dismiss="modal">Close</button>
-      </div>
-
-    </div>
-  </div>
-</div>
 
 <script nonce = "<?php // echo $_SESSION['nonce'] ?>">
 
@@ -379,14 +353,6 @@ function isJsonString(str) {  // checks to see if a string is JSON for those ins
         return false;
     }
     return isNaN(str);
-}
-
-function showmodal (title, body) {
-
-    $("#myModal .modal-body").html(body);
-    $("#myModal .modal-header").html(title);
-    $('#myModal').modal('show');
-
 }
 
 function parseMessages(messages, display) {  // Accepts an Array of objects, or a String of an array of objects, returns false if not an array.
@@ -3356,11 +3322,6 @@ $("body").on("click", ".downloadzip_orthanc", function(e) {
     downloadstudy_orthanc("zip", $(this).closest(".worklist"));
 });
 
-function showMessage(title, message) {
-
-    showmodal(title, message);
-
-}
 
 function template_old(study) {
 

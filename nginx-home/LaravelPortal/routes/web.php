@@ -8,6 +8,7 @@ use App\Providers\RouteServiceProvider;
 use App\Http\Controllers\MyControllers\HL7Controller;
 use App\Http\Controllers\MyControllers\ReportsController;
 use App\Http\Controllers\MyControllers\PatientsController;
+use App\Http\Controllers\MyControllers\OrdersController;
 
 
 use App\Models\Referrers\ReferringPhysician;
@@ -41,6 +42,9 @@ Route::middleware(['auth:sanctum', 'verified'])->post('/patients/search', [Patie
 
 // DISPLAY / GET THE PATIENT HISTORY FORM
 Route::middleware(['auth:sanctum', 'verified'])->post('/patients/history', [PatientsController::class, 'patient_history'])->name('patient_history');
+
+// GET THE ORDER FORM,  VIA GET (NEW), OR POST(EXISTING)
+Route::middleware(['auth:sanctum', 'verified'])->match(['get', 'post'],'/orders/orderform', [OrdersController::class, 'orderform'])->name('orderform');
 
 
 
