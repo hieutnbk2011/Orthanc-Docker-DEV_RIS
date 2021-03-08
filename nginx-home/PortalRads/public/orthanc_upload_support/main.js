@@ -195,7 +195,6 @@ var sendFile = function(file, timestamp, total, type) {
 //                 showuploaderModal("Done","Click on Upload Summary to see Results");
 //             }
 
-            //AJAX_Finish(jqXHR);
         });
 
 }
@@ -218,7 +217,6 @@ function getFinalResults() {
     .done(function(data, textStatus, jqXHR) {
         $("#uploadresults").html(data.results);
         showuploaderModal("Done","Click on Upload Summary to see Results");
-        //AJAX_Finish(jqXHR);
     });
 
 }

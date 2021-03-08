@@ -1,6 +1,6 @@
 <?php
 
-use App\MyModels\Widgets;
+use App\Helpers\Widgets;
 use App\Actions\Orthanc\OrthancAPI;
 $pacs = new OrthancAPI();
 ?>

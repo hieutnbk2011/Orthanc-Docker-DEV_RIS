@@ -1773,30 +1773,7 @@ color:red;
 
 <script>
 
-function AJAX_Finish(xhr) {
 
-    $("body").removeClass("loading");
-    console.log(xhr);
-}
-// NODE.JS
-// const axios = require('axios');
-//
-// axios.post('/user', {
-//
-//     firstName: 'Fred',
-//     lastName: 'Flintstone'
-// })
-// .then(function (response) {
-//     console.log(response);
-// })
-// .catch(function (error) {
-//     console.log(error);
-// });
-//
-// function AJAX_Finish(xhr) {
-//     $("body").removeClass("loading");
-//     console.log(xhr);
-// }
 
 $(function() {
 
@@ -1899,15 +1876,13 @@ $("body").on ("click", ".showpatienthistory",  function(e) {
 // 		});
 		}
 	})
-    .fail(function( jqXHR, textStatus, errorThrown) {
-        AJAX_Finish(jqXHR);
-    });
 	}
 	else {
 	$("#historydiv").remove();
 	}
 
 });
+
 });
 
 function attachDateTimePicker()  {
@@ -2094,6 +2069,7 @@ function showMessage(title, message) {
     showmodal(title, message);
 
 }
+
 
 </script>
 

@@ -77,57 +77,13 @@
 use App\Helpers\Widgets;
 use App\Actions\Orthanc\OrthancAPI;
 $pacs = new OrthancAPI();
-
-
-$load = 1;
-$selectlist = "";
-
-
-/*
-$orthanc_hosts = $data['orthanc_hosts'];
-$telerad_contract = $data['telerad_contract'];
-
-$selectlistoptions = [];
-
-$selectlist = '<form id="orthancPACS" name="orthancPACS" action="/OrthancDev/orthanc_index" method="POST">
-
-<select id="orthanc_host" name="orthanc_host">';
-
-if ($_SERVER['REQUEST_METHOD'] == 'GET') {
-
-    if (count($orthanc_hosts) > 1  && !isset($_SESSION["orthanc_host"])) {
-		$selectlist.= '<option value="" selected="selected">SELECT AN ORTHANC SERVER</option>';
-	}
-	else if (count($orthanc_hosts) == 0) {
-		$selectlist.= '<option value="" selected="selected">You Do not have a Server Configured.</option>';
-	}
-}
-
-
-foreach ($orthanc_hosts as $orthanc_host) {
-
-	$optionselected = "";
-
-	$_SESSION["telerad_contract"] = $telerad_contract;
-
-	if ( (isset($_SESSION["orthanc_host"]) && ($_SESSION["orthanc_host"] == $orthanc_host->id)) || count($orthanc_hosts) == 1) {
-
-		$optionselected = ' selected = "selected"';
-		$load = 1;
-	}
-
-$selectlist.='<option value="' . $orthanc_host->id  . '"' .  $optionselected . '>' . $orthanc_host->server_name . '</option>';
-}
-$selectlist .= '</select>
-<input type="hidden"  name="csrf_token" value="' . Csrf::makeToken() . '" />
-</form>';
-
-*/
 ?>
+
 <div style = "margin:auto;text-align:center;width:max-content;font-size:12px;">
 <?php  echo $pacs->serverStatusWidget(); ?>
 <?php  echo Widgets::PACSSelectorTool("readers"); ?>
 </div>
+
 <div id="delegator" class = "myuitabs">
 
 <ul class="centertabs">
@@ -138,38 +94,26 @@ $selectlist .= '</select>
 
 <div id="studylist">
 
-          <div class="row studylistheader">
-          <div class="col">
-          	<?php echo $selectlist; ?>
-          </div>
-          </div>
-
-          <?php
-
-          if ($load == 1) {
-		?>
+    <?php echo Widgets::studiesSearchForm() ?>
+    <?php echo Widgets::dateRadioSelectorstudies("searchform", "#studieswrapper", "searchorthanc") ?>
+    <?php echo Widgets::serverStatus() ?>
+    <?php echo Widgets::studyRowSelector() ?>
+    <?php echo Widgets::studiesLengend() ?>
+    <?php echo Widgets::studiesContainer() ?>
 
 
-        <?php echo Widgets::studiesSearchForm() ?>
-        <?php echo Widgets::dateRadioSelectorstudies("searchform", "#studieswrapper", "searchorthanc") ?>
-		<?php echo Widgets::serverStatus() ?>
-		<?php echo Widgets::studyRowSelector() ?>
-		<?php echo Widgets::studiesLengend() ?>
-		<?php echo Widgets::studiesContainer() ?>
-<?php
-}
-?>
-
-        </div> <!-- end of studies -->
-<div id="toolstab"><x-slot name="modal"></div> <!-- end of tools -->
+</div>
+<!-- end of studies -->
+<div id="toolstab"><x-slot name="modal"></div>
+<!-- end of tools -->
 <div id="contactinfo">
 <x-contactform />
-</div> <!-- end of contactinfo -->
-
+</div>
+<!-- end of contactinfo -->
 </div>
 <!-- end of delegator / wrapper -->
 
-<script nonce = "<?php // echo $_SESSION['nonce'] ?>">
+<script>
 
 
 $("#togglelegend").on("click", function(e) {
@@ -455,7 +399,6 @@ function logViewStudy(study, event) {
         else {
             showMessage("", "Unknown Error");
         }
-        AJAX_Finish(jqXHR);
     });
 
 }
@@ -607,8 +550,6 @@ $(document).on("click, contextmenu", '.viewstudy', function(event) {
 
                 },
                 success: function(data, textStatus, xhr) {
-
-                    AJAX_Finish(xhr)
                     response = parseMessages(data, true);
 
                     if(!response.error) {
@@ -752,7 +693,6 @@ $(document).on("click, contextmenu", '.viewstudy', function(event) {
 
           		},
           		success: function(data, textStatus, xhr) {
-          		 AJAX_Finish(xhr)
           		 response = parseMessages(data, true);
 //           		 alert(response.HL7Message);
 //                 data=response.reports;
@@ -1180,7 +1120,6 @@ $("#delegator").on("click", ".share", function(e) {
         },
         })
         .done(function(data, textStatus, jqXHR) {
-            AJAX_Finish(jqXHR);
             studyrow.after('<form style = "width:100%;text-align:center;margin:auto;" class = "shareform"><input type="hidden" name="uuid" value="' + uuid + '"><input type="hidden" name="accession_number" value="' + accession_number + '">' + data +  '<textarea style="width:100%;margin:0px 20px 0px 20px;" name = "sharenote"></textarea><br><button class = "uibuttonsmallred" type = "submit">Share</button></form>');
             $("#sharenote").focus();
             var form = studyrow.next();
@@ -1210,9 +1149,6 @@ $("#delegator").on("click", ".share", function(e) {
             }
             });
         })
-        .fail(function( jqXHR, textStatus, errorThrown) {
-            AJAX_Finish(jqXHR);
-        });
     }
 });
 
@@ -2909,12 +2845,7 @@ var parent = $(this).closest(".worklist");
 
         parent.after('<div id ="ajaxdiv">' + data + '</div>');
         initLoader();
-        AJAX_Finish(jqXHR);
-
     })
-    .fail(function( jqXHR, textStatus, errorThrown) {
-        AJAX_Finish(jqXHR);
-    });
     }
     else {
         $("#ajaxdiv").remove();
@@ -3050,7 +2981,6 @@ beforeSend: function(e) {
 })
 .done(function(data, textStatus, jqXHR) {
 
-    AJAX_Finish(jqXHR);
     if (data == null) {
     alert("Emtpy Response from Server");
     }
@@ -3248,8 +3178,6 @@ function get_routes_list(selectlist) {
 
 		selectlist.html(data);
 		selectlist.show();
-		 AJAX_Finish(xhr);
-
 	}
 	});
 
@@ -3307,7 +3235,6 @@ fetch('/OrthancDev/downloadStudyUUID', {
     a.download = clicked.data("name") + ".zip";
     document.body.appendChild(a);
     a.click();
-    AJAX_Finish(response.xhr);
 })
 
 }
@@ -3568,7 +3495,6 @@ return html;
             dataType: 'json',
             data: formdata,  // gets all of the hl7 reports encoded as JSON, api gets all hl7 reports for study
             complete: function(xhr, textStatus) {
-                 AJAX_Finish(xhr);
             },
             success: function(data, textStatus, xhr) {
                 $("#templateid").html(data.selectlist);
@@ -3601,7 +3527,6 @@ return html;
 			    $("body").addClass("loading");
 			},
             success: function(data, textStatus, xhr) {
-                 AJAX_Finish(xhr);
                 // create the select list for existing reports
                 $("#reportselectorwrapper").html('&nbsp;&nbsp;<span style="color:white;">. . . loading reports</span>');
                 response = parseMessages(data, true);
@@ -3725,6 +3650,23 @@ return html;
             }
 
     }
+
+
+// Shorthand for $( document ).ready()
+$(function() {
+        $(document).ajaxComplete(function( event, request, settings ) {
+
+    $("body").removeClass("loading");
+    console.log("Request");
+    console.log(request);
+    console.log("settings");
+    console.log(settings);
+    console.log("event");
+    console.log(event);
+});
+});
+
+
 
 </script>
 
