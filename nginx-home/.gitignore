@@ -4,8 +4,6 @@
 .env.backup
 /vendor/**
 /node_modules/**
-/PortalDocs/**
-/PortalPatients/**
 /RIS/**
 auth.log
 .DS_Store
