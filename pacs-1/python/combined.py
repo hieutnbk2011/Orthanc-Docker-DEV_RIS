@@ -296,6 +296,24 @@ def FindWithMetadata(output, uri, **request):
             response["error"] = "Page Number and/or Items Per Page Error"
             output.AnswerBuffer(json.dumps(response, indent = 3), 'application/json')
         else:
+            userprofilejwt = json.loads(request['headers']['userprofilejwt'])
+            print("QUERY")
+            pprint.pprint(query)
+            print("USERPROFILEJWT")
+            pprint.pprint(userprofilejwt)
+            print(userprofilejwt['patientid'])
+            response['PatientID'] = "NOT in Query"
+            if ("PatientID" in query['Query']):
+                PatientID = query['Query']['PatientID']
+                passed = "PASSED PatientID" if (PatientID == userprofilejwt['patientid']) else  "FAILED PatientID"
+                print(passed)
+                response['PatientID'] = passed
+            response['ReferringPhysicianName'] = "NOT in Query"
+            if ("ReferringPhysicianName" in query['Query']):
+                ReferringPhysicianName = query['Query']['ReferringPhysicianName']
+                passed = "PASSED ReferringPhysicianName" if (userprofilejwt['doctor_id'] in ReferringPhysicianName) else  "FAILED ReferringPhysicianName"
+                print(passed)
+                response['ReferringPhysicianName'] = passed
             modality = False
             if 'Tags' in query and "0008,0060" in query['Tags']:
                 modality  = query['Tags']["0008,0060"]
@@ -431,15 +449,13 @@ def FindWithMetadata(output, uri, **request):
             if 'widget' in query:
                 widget = CreateWidget(limit, pagenumber, url , count)
                 #studies.insert(0,{"paginationwidget":widget})
-            studiessorted.insert(0, {"widget": widget, "results":len(studiessorted), "limit":limit, "offset":offset, "pagenumber":pagenumber, "count":count})
+            studiessorted.insert(0, {"widget": widget, "results":len(studiessorted), "limit":limit, "offset":offset, "pagenumber":pagenumber, "count":count,"PatientID":response['PatientID'],"ReferringPhysicianName":response['ReferringPhysicianName']})
             # Return the filtered answers in the JSON format
             if int(platform.python_version_tuple()[0]) < 3:
                 logging.warning("Suggest using Python 3.x.x, using:  " + platform.python_version())
             else:
                 print(platform.python_version_tuple()[0])
                 logging.warning("Suggest using Python 3.x.x, using:  " + platform.python_version())
-            print("Query")
-            pprint.pprint(request)
             output.AnswerBuffer(json.dumps(studiessorted, indent = 3), 'application/json')
 
 #param is the tag to sortby

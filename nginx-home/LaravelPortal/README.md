@@ -1,1 +1,0 @@
-# Orthanc-Laravel-Portal

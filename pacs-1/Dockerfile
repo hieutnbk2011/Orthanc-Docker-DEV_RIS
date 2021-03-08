@@ -21,7 +21,7 @@ RUN mkdir /etc/orthanc/dicomFiles
 COPY dicomFiles/*.* /etc/orthanc/dicomFiles/
 
 RUN mkdir /python
-COPY python/combined.py /python
+# COPY python/combined.py /python, bound to folder on host where script is
 # COPY lua/scriptname.lua /etc/orthanc/scriptname.lua
 
 RUN apt-get update

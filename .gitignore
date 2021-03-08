@@ -1,34 +1,10 @@
-MWLFiles/*
-!MWLFiles/.gitkeep
-
-MySQL_DB/*
-!MySQL_DB/.gitkeep
-
-OrthancIndex/*
-!OrthancIndex/.gitkeep
-
-OrthancStorage/*
-!OrthancStorage/.gitkeep
-
-/pacs-1/dicomFiles/Archive.zip
-php-error.log
+/MWLFiles/**
+/MySQL_DB/**
+/OrthancIndex/**
+/OrthancStorage/**
 .DS_Store
-
-composer.lock
-nginx-home/LaravelPortal/composer.lock
-
-vendor/
+*.lock
+/vendor/**
 
 # Commit your application's lock file https://getcomposer.org/doc/01-basic-usage.md#commit-your-composer-lock-file-to-version-control
 # You may choose to ignore a library lock file http://getcomposer.org/doc/02-libraries.md#lock-file
-
-*.lock
-nginx-home/LaravelPortal/package-lock.json
-nginx-home/auth.log
-*.lock
-nginx-home/auth.log
-nginx-home/auth.log
-
-
-*.php
-nginx-home/LaravelPortal/storage/logs/laravel.log

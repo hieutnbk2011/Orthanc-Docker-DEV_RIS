@@ -18,9 +18,8 @@ RUN apt-get update && apt-get install -y \
 
 # Clear cache
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
-RUN mkdir /dicomFiles
-COPY dicomFiles/ /dicomFiles/
 COPY php.ini /usr/local/etc/php/php.ini
+
 # adjustments to php.ini base on the production version.
 
 # Install extensions and configure
