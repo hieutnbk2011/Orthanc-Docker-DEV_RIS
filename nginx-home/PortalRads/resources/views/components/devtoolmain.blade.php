@@ -416,8 +416,15 @@ height:30px;
                         <option data-controllerselect = "getDICOMTagValueforUUID" value = "tags">getDICOMTagValueforUUID</option>
                         <option data-controllerselect = "getInstanceDICOM" value = "tags">getInstanceDICOM</option>
                         <option data-controllerselect = "getInstancePNGPreview" value = "tags">getInstancePNGPreview</option>
+                        <option data-controllerselect = "getInstanceJPGPreview" value = "tags">getInstanceJPGPreview</option>
                         </select><br>
-                        <label for="tagcodes"></label>
+                        <label for="pngjpg"></label>
+                        <select id="pngjpg" name="pngjpg">
+                        <option value = "image/png">image/png</option>
+                        <option value = "image/jpg">image/jpg</option>
+                        </select>
+                        <br>
+                        <label for="tagcodes">For Tag Values</label><br>
 						<input id="tagcodes" type="text" name="tagcodes" value="" placeholder = "e.g. 0008,0012 is date, 0010,0020 ID, single or recursive"/>
 						</form>
 						</div>
@@ -462,38 +469,8 @@ height:30px;
                         </div>
 
 
-						<form class="row" method="POST" accept-charset="UTF-8" id="apiselection" name="apiselection">
-							<div class="col-md-12">
-								<label for="command">
-									Select List for Basic Orthanc REST calls <span style="font-size:14px;font-weight:bold;">(hit ESC to clear results)</span>
-								</label>
-
-								<select class="form-control" id="command" name="command">
-
-									<option value="tools/find" data-query = "generic" data-param = "#toolsfindquery" data-method = "postquery">
-										Query Orthanc - /tools/find
-									</option>
-									<option value="studies/page" data-query = "studiespage" data-param = "#studiespagequery" data-method = "postquery">
-										Query Orthanc - /studies/page
-									</option>
-									<option value="/studies/arrayIDs" data-query = "studiesIDarray" data-param = "#studiesIDarray" data-method = "postquery">
-										Query Orthanc - /studies/arrayIDs
-									</option>
-									<option value="studies" data-append = "true" data-param = "#uuid" data-method = "get" data-query = "metadataget">
-										Get MetaData Val for Study
-									</option>
-									<option value="studies" data-append = "true" data-param = "#uuid" data-method = "put" data-query = "metadataset">
-										Set MetaData Val for Study
-									</option>
-									<option value="parseHL7" data-param = "#parseHL7">
-										parseHL7
-									</option>
-								</select>
-							</div>
-						</form>
-
-                        <div class = "row">
-                        <div>Scratch Pad</div>
+                        <div class = "row" style="margin: 10px 0px 10px 0px;text-align: center;display: block;border:1px solid black;">
+                        <h5>Scratch Pad</h5>
 						<textarea style = "width:100%;height:100px;text-align:left;border: 1px solid black;"></textarea>
 						<div style="position: static;" class="form-group pd-right ui-draggable-handle col-md-12">
 								<button type="submit" class="btn btn-info btn-sm">
@@ -504,26 +481,31 @@ height:30px;
                         <div class = "row">
 
                             <div class = "col-md-3">
-                            <label for="data-mrn">
-                                patientid for studycounts (converted to array in Controller)
-                            </label>
-                            <input id="data-mrn" type="text" name="data-mrn" value="DEV0000001" />
 
-                        </div>
+                            <form>
+						    <button data-devcontroller = "studyCountByPatientId" type="button" class = "btn btn-danger btn-sm">studyCountByPatientId</button><br>
+						    <label for="">studycounts for PatientID</label><br>
+						    <input type="text" name="PatientID[]" value="DEV0000001" /><br>
+                            <input type="text" name="PatientID[]" value="DEV0000002" />
+						    </form>
 
+                            </div>
+
+                            <div class = "col-md-3">
+
+                            <form>
+						    <button data-devcontroller = "getStudyArrayOfUUIDs" type="button" class = "btn btn-danger btn-sm">getStudyArrayOfUUIDs</button><br>
+						    <label for="">getStudyArrayOfUUIDs</label><br>
+						    <input type="text" name="getStudyArrayOfUUIDs[]" value="" /><br>
+                            <input type="text" name="getStudyArrayOfUUIDs[]" value="" />
+						    </form>
+
+                            </div>
 
 							<div class = "col-md-3">
-								<label for="tagcodes">
-								getDICOMTagValueforUUID
-								Tag Codes, single  recursive:  e.g. 0008,0012 is date, 0010,0020 ID
-								</label>
-								<input id="tagcodes" type="text" name="tagcodes[]" value="0010,0020" />
-							</div>
-							</div>
-
-						<div class = "row formatheight" style = "width:100%;">
-							<div class = "col-md-3">
-								<input id="metadatavalue" type="text" name="metadatavalue" placeholder = "For Set Value" />
+							    <form>
+							    <button data-devcontroller = "getMetaDataValueForUUID" type="button" class = "btn btn-danger btn-sm">getMetaDataValueForUUID</button><br>
+								<input type="text" name="uuid" placeholder = "uuid" />
 								<label for="metadatachoice">
 									MetaData Choices
 								</label>
@@ -534,55 +516,37 @@ height:30px;
 								<option value = "1027">LatestReportStatus/1027</option>
 								<option value = "1028">RequestHistory/1028</option>
 								</select>
-							</div>
-							<div class = "col-md-3">
-								<label for="pngjpg">
-									pngjpg Png or Jpg, image/png or image/jpg fo thumbnail, for getInstancePNGPreview
-								</label>
-								<select id="pngjpg" name="pngjpg">
-								<option value = "image/png">image/png</option>
-								<option value = "image/jpg">image/jpg</option>
-								</select>
-							</div>
-							<div class = "col-md-3">
-								<label for="display">
-									Display vs. Execute
-								</label>
-								<input id="display" type="text" name="display" value="display" /><br>
-							</div>
-	<!--
-							<div class = "col-md-3">
-								<label for="queryLevel">
-									Query Level
-								</label>
-								<select id="queryLevel" name="queryLevel">
-									<option value="Study" selected>Study</option>
-									<option value="Series">Series</option>
-									<option value="Instance">Instance</option>
-									<option value="Patient">Patient</option>
-								</select>
-							</div>
-	 -->
+								</form>
+
 							</div>
 
+							<div class = "col-md-3">
+							    <form>
+							    <button data-devcontroller = "getMetaDataValueForUUID" type="button" class = "btn btn-danger btn-sm">setMetaDataValueForUUID</button><br>
+								<input type="text" name="uuid" placeholder = "uuid" />
+								<input type="text" name="setvalue" placeholder = "setvalue" />
+								<label for="metadatachoice">
+									MetaData Choices
+								</label>
+								<select id="metadatachoice" name="metadatachoice">
+								<option value = "1024">OutsideStudy/1024</option>
+								<option value = "1025">InternalMRN/1025</option>
+								<option value = "1026">InternalAccession/1026</option>
+								<option value = "1027">LatestReportStatus/1027</option>
+								<option value = "1028">RequestHistory/1028</option>
+								</select>
+								</form>
 
-							<div class = "row" style = "width:100%;">
+							</div>
+
+						</div>
+
+						<div class = "row" style="margin: 10px 0px 10px 0px;text-align: center;display: block;border:1px solid black;">
 							<div class = "col-md-12">
-								<label for="toolsfindquery">
-									Query for /studies/arrayIDs
-								</label>
-								<input style = "width:100%;font-size:14px;" id="studiesIDarray" type="text" name="studiesIDarray" value='{"6c65289b-db2fcb71-7eaf73f4-8e12470c-a4d6d7cf":"74f3713f-6b8c0332-e467fc99-6daadc28-cabfa5d2"}' />
-							</div>
-							</div>
-
-							<div class = "row" style = "width:100%;">
-							<div class = "col-md-9">
-								<label for="toolsfindquery">
-									Query for /tools/find  queries
-								</label>
+							    <form>
+							    <button data-devcontroller = "studyCountByPatientId" type="button" class = "btn btn-danger btn-sm">tools/find</button><br>
+								<label for="toolsfindquery"></label>
 								<input style = "width:100%;font-size:14px;" id="toolsfindquery" type="text" name="toolsfindquery" value='{"PatientID":"*000*","StudyDate":"20141111-20200503"}' />
-							</div>
-							<div class = "col-md-3">
 								<label for="queryLevel">
 									Query Level
 								</label>
@@ -592,26 +556,16 @@ height:30px;
 									<option value="Instance">Instance</option>
 									<option value="Patient">Patient</option>
 								</select>
+								</form>
 							</div>
-							<div class = "col-md-12">
-								<label for="toolsfindquery">
-									Query for/studies/page queries
-								</label>
+						</div>
+						<div class = "row" style="margin: 10px 0px 10px 0px;text-align: center;display: block;border:1px solid black;">
+						<div class = "col-md-12">
+						        <form>
+						         <button data-devcontroller = "studyCountByPatientId" type="button" class = "btn btn-danger btn-sm">studies/page</button><br>
+								<label for="toolsfindquery"></label>
 								<input style = "width:100%;font-size:14px;" id="studiespagequery" type="text" name="studiespagequery" value='{"PatientName":"**","PatientBirthDate":"","PatientSex":"","PatientID":"","AccessionNumber":"","StudyDescription":"**","ReferringPhysicianName":"**","StudyDate":""}' />
-							</div>
-							<div class = "col-md-12">
-								<label for="toolsfindquery">
-									MetaData for/studies/page queries<br>
-									"OutsideStudy" : 1024,<br>
-									"InternalMRN" : 1025,<br>
-									"InternalAccession" : 1026,<br>
-									"LatestReportStatus": 1027,<br>
-									"RequestHistory": 1028<br>
-								</label>
-								<input style = "width:100%;font-size:14px;" id="studiespagequerymeta" type="text" name="studiespagequerymeta" value='' />
-							</div>
-							</div>
-							<div class = "row">
+							    <div class = "row">
 							<div class = "col-md-2">
 								<label for="pagenumber">
 									Page Number for /studies/page
@@ -651,15 +605,10 @@ height:30px;
 
 							</div>
 							</div>
+								</form>
+						</div>
+						</div>
 
-	<button id = "createPDF" name = "createPDF" class = "btn btn-info btn-sm" data-target = "#MWLform">createPDF</button>
-	<button id="pdfattach" name="pdfattach" class="btn btn-info btn-sm">Attach To Study</button>
-	<button id="pdfopeninviewer" name="pdfopeninviewer" class="btn btn-info btn-sm">Open After Created</button>
-	<div style = "width: 350px;text-align: center;margin: auto;">
-	<input id="pdfmodality" name="pdfmodality" value="OT" type="text" class="form-control">
-	<input id="pdfdescription" name="pdfdescription" value="TEST PDF" type="text" class="form-control">
-	<input id="pdfstudyuuid" name="pdfstudyuuid" value="6c65289b-db2fcb71-7eaf73f4-8e12470c-a4d6d7cf" type="text" class="form-control">
-	</div>
 
 	<form id="MWLform" name = "MWLform">
 

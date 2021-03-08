@@ -905,5 +905,24 @@ return $html;
 
     }
 
+    	// passed
+
+	public function studyCountByPatientId($patientids) {
+
+ 		$result = json_decode($this->executeCURLPOSTJSON(json_encode($patientids), 'patient/studycounts'));
+		$counts = [];
+		foreach ($result as $key => $count) {
+			$counts[$key] = $count;
+		}
+		return $counts;
+	}
+
+	public function getStudyArrayOfUUIDs ($uuids) {
+
+	    $data = json_encode($uuids);
+	    $data =  $this->executeCURLPOSTJSON($data, 'studies/arrayIDs');
+		return $this->result;
+	}
+
 }
 ?>

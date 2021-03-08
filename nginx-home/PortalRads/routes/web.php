@@ -371,6 +371,13 @@ Route::middleware(['auth:sanctum', 'verified'])->post('/OrthancDev/getInstancePN
     echo '<img src="data:image/png;base64,' . $image_data_base64 . '" alt="img"/ >';
 })->name('getInstancePNGPreview');
 
+Route::middleware(['auth:sanctum', 'verified'])->post('/OrthancDev/getInstanceJPGPreview', function(Request $request) {
+    $orthanc = new OrthancAPI();
+    $raw = $orthanc->getInstancePNGPreview($request->input('uuid'), $request->input('pngjpg'));
+    $image_data_base64 =  base64_encode ($raw);  // also image/jpeg
+    echo '<img src="data:image/jpg;base64,' . $image_data_base64 . '" alt="img"/ >';
+})->name('getInstanceJPGPreview');
+
 Route::middleware(['auth:sanctum', 'verified'])->post('/OrthancDev/downloadZipStudyUUID', function(Request $request) {
     $orthanc = new OrthancAPI();
     header('Content-type: application/zip');
@@ -387,6 +394,16 @@ Route::middleware(['auth:sanctum', 'verified'])->post('/OrthancDev/pydicom', fun
     $orthanc = new OrthancAPI();
     echo $orthanc->pydicom($request->input('uuid'));
 })->name('pydicom');
+
+Route::middleware(['auth:sanctum', 'verified'])->post('/OrthancDev/studyCountByPatientId', function(Request $request) {
+    $orthanc = new OrthancAPI();
+    echo json_encode($orthanc->studyCountByPatientId($_POST['PatientID']));
+})->name('studyCountByPatientId');
+
+Route::middleware(['auth:sanctum', 'verified'])->post('/OrthancDev/getStudyArrayOfUUIDs', function(Request $request) {
+    $orthanc = new OrthancAPI();
+    echo $orthanc->getStudyArrayOfUUIDs($_POST['getStudyArrayOfUUIDs']);
+})->name('getStudyArrayOfUUIDs');
 
 
 // SUBGROUP REGARDING DOWNLOADING ISO'S AND ZIPS, ROUTING TO MODALITIES
