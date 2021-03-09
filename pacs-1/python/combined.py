@@ -568,7 +568,7 @@ def CreateAndSave(output, uri, **request):
     if request['method'] != 'POST':
         output.SendMethodNotAllowed('POST')
     else:
-    
+
         query = json.loads(request['body'])
         pathtodump2dcm = shutil.which("dump2dcm")
         pathtoworklist = json.loads(orthanc.GetConfiguration())['Worklists']['Database']
@@ -696,13 +696,14 @@ def CreateAndSave(output, uri, **request):
             filename = pathtoworklist + '/' + query['AccessionNumber']
             returnedtext = ""
             original = sys.stdout
-            for line in mwl:
-                returnedtext = returnedtext + line + "\n"
-
+            print(filename)
+            print(pathtodump2dcm)
             with open(filename + ".txt", 'w+') as filehandle:
+            
                 # set the new output channel
                 sys.stdout = filehandle
                 for line in mwl:
+                    returnedtext = returnedtext + str(line) + "\n"
                     print(line)
                 # restore the old output channel
                 sys.stdout = original

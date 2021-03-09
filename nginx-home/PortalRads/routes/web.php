@@ -163,21 +163,6 @@ Route::middleware(['auth:sanctum', 'verified'])->post('get_modalities', function
 })->name('get_modalities');
 
 
-Route::middleware(['auth:sanctum', 'verified'])->post('/OrthancDev/studies/page', function (Request $request) {
-
-    $fullQuery = new \stdclass();
-    $fullQuery->Query = json_decode($request->input('studiespagequery'));
-    $fullQuery->pagenumber = intval($request->input('pagenumber'));
-    $fullQuery->itemsperpage = intval($request->input('itemsperpage'));
-    $fullQuery->reverse = intval($request->input('reverse'));
-    $fullQuery->widget = intval($request->input('widget'));
-    $fullQuery->sortparam = $request->input('sortbytagname');
-
-    $fullQuery->Level = "Study";
-    $orthanc = new OrthancAPI();
-    echo  json_encode($orthanc->getStudiesArray ($fullQuery), JSON_PRETTY_PRINT);
-
-})->name('/OrthancDev/studies/page');
 
 
 // THING to FETCH STUDIES from PACS SERVER BASED ON POST DATA, ORTHANC for NOW
@@ -426,6 +411,27 @@ Route::middleware(['auth:sanctum', 'verified'])->post('/OrthancDev/performQuery'
     $orthanc = new OrthancAPI();
     echo $orthanc->performQuery($request->input('queryLevel'), $request->input('query'), True, 100);
 })->name('performQuery');
+
+Route::middleware(['auth:sanctum', 'verified'])->post('/OrthancDev/studies/page', function (Request $request) {
+
+    $fullQuery = new \stdclass();
+    $fullQuery->Query = json_decode($request->input('studiespagequery'));
+    $fullQuery->pagenumber = intval($request->input('pagenumber'));
+    $fullQuery->itemsperpage = intval($request->input('itemsperpage'));
+    $fullQuery->reverse = intval($request->input('reverse'));
+    $fullQuery->widget = intval($request->input('widget'));
+    $fullQuery->sortparam = $request->input('sortbytagname');
+
+    $fullQuery->Level = "Study";
+    $orthanc = new OrthancAPI();
+    echo  json_encode($orthanc->getStudiesArray ($fullQuery), JSON_PRETTY_PRINT);
+
+})->name('/OrthancDev/studies/page');
+
+Route::middleware(['auth:sanctum', 'verified'])->post('/OrthancDev/mwl/file/make', function(Request $request) {
+    $orthanc = new OrthancAPI();
+    echo $orthanc->saveTestMWL(json_encode($request->input()));
+})->name('mwl/file/make');
 
 
 // SUBGROUP REGARDING DOWNLOADING ISO'S AND ZIPS, ROUTING TO MODALITIES

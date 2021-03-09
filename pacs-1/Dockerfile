@@ -5,6 +5,7 @@ ENV HTTP_BUNDLE_DEFAULTS=false
 # disable the auth defaults since we specify them in orthanc.json
 ENV AC_BUNDLE_DEFAULTS=false
 
+
 COPY orthanc.json /etc/orthanc/
 
 RUN pip3 install pydicom
@@ -26,7 +27,7 @@ RUN mkdir /python
 
 RUN apt-get update
 RUN apt-get --assume-yes install wkhtmltopdf
-
+RUN apt-get --assume-yes install dcmtk
 
 
 

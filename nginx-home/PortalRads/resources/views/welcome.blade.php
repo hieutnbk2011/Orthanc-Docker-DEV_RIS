@@ -29,7 +29,7 @@ setcookie('PACStoken', 'genoneinfo', [
 				font-family: 'Nunito';
 			}
 			.cookie-consent {
-				height: 100px;
+				height: max-content;
 				margin: auto;
 				width: 100%;
 				border: 5px solid black;

@@ -435,6 +435,7 @@ height:30px;
 
         <form id = "attachpdf">
 
+<!--
             <button data-devcontroller = "addPDF" type="button" class = "btn btn-danger btn-sm">Attach HTML as PDF to Study UUID</button><br>
             <div class = "viewerequestwrapper">
                 <label for="studyuuid">Study UUID</label>
@@ -442,6 +443,7 @@ height:30px;
                 <button class="openinviwer btn btn-danger btn-sm" href="#" target="_blank" data-viewer = "osimis">Open in Osimis</button><br>
                 <button class="openinviwer btn btn-danger btn-sm" href="#" target="_blank" data-viewer = "stone">Open in Stone</button>
             </div>
+ -->
 
             <label for="reportmethod">html or base64</label>
             <input id="reportmethod" name = "method" type="text" value="html" placeholder = "html"/><br>
@@ -612,7 +614,7 @@ height:30px;
 
 
 	<form id="MWLform" name = "MWLform">
-      <button data-devcontroller = "studyCountByPatientId" type="button" class = "btn btn-danger btn-sm">mwl/file/make</button><br>
+      <button data-devcontroller = "mwl/file/make" type="button" class = "btn btn-danger btn-sm">mwl/file/make</button><br>
 	  <div>Creates a .text file named AccessionNumber.txt and converts it to a .wl file</div>
 	  <div>Returns JSON, See Docs</div>
 	  <div class="form-group row">
@@ -670,6 +672,53 @@ height:30px;
 		</div>
 	  </div>
 	  <div class="form-group row">
+		<label for="PatientAddress" class="col-4 col-form-label">PatientAddress</label>
+		<div class="col-8">
+		  <input id="PatientAddress" name="PatientAddress" value="PatientAddress" type="text" required="required" class="form-control">
+		</div>
+	  </div>
+	  <div class="form-group row">
+		<label for="PatientTelephoneNumbers" class="col-4 col-form-label">PatientTelephoneNumbers</label>
+		<div class="col-8">
+		  <input id="PatientTelephoneNumbers" name="PatientTelephoneNumbers" value="PatientTelephoneNumbers" type="text" required="required" class="form-control">
+		</div>
+	  </div>
+
+
+	  <div class="form-group row">
+		<label for="PatientTelecomInformation" class="col-4 col-form-label">PatientTelecomInformation</label>
+		<div class="col-8">
+		  <input id="PatientTelecomInformation" name="PatientTelecomInformation" value="PatientTelecomInformation" type="text" required="required" class="form-control">
+		</div>
+	  </div>
+
+	  <div class="form-group row">
+		<label for="PhysicianIDforSequence" class="col-4 col-form-label">PhysicianIDforSequence</label>
+		<div class="col-8">
+		  <input id="PhysicianIDforSequence" name="PhysicianIDforSequence" value="PhysicianIDforSequence" type="text" required="required" class="form-control">
+		</div>
+	  </div>
+
+
+	  <div class="form-group row">
+		<label for="PersonTelephoneNumbers" class="col-4 col-form-label">PersonTelephoneNumbers</label>
+		<div class="col-8">
+		  <input id="PersonTelephoneNumbers" name="PersonTelephoneNumbers" value="PersonTelephoneNumbers" type="text" required="required" class="form-control">
+		</div>
+	  </div>
+
+
+	  <div class="form-group row">
+		<label for="PersonTelecomInformation" class="col-4 col-form-label">PersonTelecomInformation</label>
+		<div class="col-8">
+		  <input id="PersonTelecomInformation" name="PersonTelecomInformation" value="PersonTelecomInformation" type="text" required="required" class="form-control">
+		</div>
+	  </div>
+
+
+
+
+	  <div class="form-group row">
 		<label for="MedicalAlerts" class="col-4 col-form-label">MedicalAlerts</label>
 		<div class="col-8">
 		  <input id="MedicalAlerts" name="MedicalAlerts" value="MedicalAlerts" type="text" class="form-control">
@@ -697,6 +746,12 @@ height:30px;
 		<label for="RequestingPhysician" class="col-4 col-form-label">RequestingPhysician</label>
 		<div class="col-8">
 		  <input id="RequestingPhysician" name="RequestingPhysician" value="RequestingPhysician" type="text" required="required" class="form-control">
+		</div>
+	  </div>
+	  <div class="form-group row">
+		<label for="ReferringPhysiciansName" class="col-4 col-form-label">ReferringPhysiciansName</label>
+		<div class="col-8">
+		  <input id="ReferringPhysiciansName" name="ReferringPhysiciansName" value="ReferringPhysiciansName" type="text" required="required" class="form-control">
 		</div>
 	  </div>
 	  <div class="form-group row">
