@@ -545,9 +545,9 @@ height:30px;
         <div class = "row" style="margin: 10px 0px 10px 0px;text-align: center;display: block;border:1px solid black;">
             <div class = "col-md-12">
                 <form>
-                <button data-devcontroller = "studyCountByPatientId" type="button" class = "btn btn-danger btn-sm">tools/find</button><br>
+                <button data-devcontroller = "performQuery" type="button" class = "btn btn-danger btn-sm">tools/find / performQuery</button><br>
                 <label for="toolsfindquery"></label>
-                <input style = "width:100%;font-size:14px;" id="toolsfindquery" type="text" name="toolsfindquery" value='{"PatientID":"*000*","StudyDate":"20141111-20200503"}' />
+                <input style = "width:100%;font-size:14px;" id="toolsfindquery" type="text" name="query" value='{"PatientID":"*000*","StudyDate":"20141111-20200503"}' />
                 <label for="queryLevel">
                     Query Level
                 </label>
@@ -563,7 +563,7 @@ height:30px;
         <div class = "row" style="margin: 10px 0px 10px 0px;text-align: center;display: block;border:1px solid black;">
         <div class = "col-md-12">
                 <form>
-                 <button data-devcontroller = "studyCountByPatientId" type="button" class = "btn btn-danger btn-sm">studies/page</button><br>
+                 <button data-devcontroller = "studies/page" type="button" class = "btn btn-danger btn-sm">studies/page</button><br>
                 <label for="toolsfindquery"></label>
                 <input style = "width:100%;font-size:14px;" id="studiespagequery" type="text" name="studiespagequery" value='{"PatientName":"**","PatientBirthDate":"","PatientSex":"","PatientID":"","AccessionNumber":"","StudyDescription":"**","ReferringPhysicianName":"**","StudyDate":""}' />
                 <div class = "row">
