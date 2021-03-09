@@ -435,7 +435,6 @@ height:30px;
 
         <form id = "attachpdf">
 
-<!--
             <button data-devcontroller = "addPDF" type="button" class = "btn btn-danger btn-sm">Attach HTML as PDF to Study UUID</button><br>
             <div class = "viewerequestwrapper">
                 <label for="studyuuid">Study UUID</label>
@@ -443,7 +442,7 @@ height:30px;
                 <button class="openinviwer btn btn-danger btn-sm" href="#" target="_blank" data-viewer = "osimis">Open in Osimis</button><br>
                 <button class="openinviwer btn btn-danger btn-sm" href="#" target="_blank" data-viewer = "stone">Open in Stone</button>
             </div>
- -->
+
 
             <label for="reportmethod">html or base64</label>
             <input id="reportmethod" name = "method" type="text" value="html" placeholder = "html"/><br>
