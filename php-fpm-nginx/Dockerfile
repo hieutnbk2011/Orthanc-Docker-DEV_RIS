@@ -28,7 +28,7 @@ COPY php.ini /usr/local/etc/php/php.ini
 
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg
 RUN docker-php-ext-configure zip
-RUN docker-php-ext-install pdo_mysql zip exif pcntl gd
+RUN docker-php-ext-install pdo_mysql zip exif pcntl gd sockets
 
 
 # RUN sed -E -i -e 's/max_execution_time = 1200/max_execution_time = 120/' /etc/php.ini \
@@ -41,5 +41,6 @@ RUN docker-php-ext-install pdo_mysql zip exif pcntl gd
 # sudo docker exec -it  orthanc-docker-dev_ris_php-fpm_1 /bin/bash
 COPY default.conf /etc/nginx/conf.d/default.conf
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-ENTRYPOINT ["/usr/bin/supervisord"]
+COPY entrypoint.sh /
+ENTRYPOINT ["/bin/bash","/entrypoint.sh"]
 
