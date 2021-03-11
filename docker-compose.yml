@@ -1,4 +1,5 @@
 #docker-compose up --build
+#If you run as root, remove "user" part. If you are run as non-root, replace user "1001:1001" withyour uid:gid ( can check with command "id -u" and "id -g" )
 version: "3"
 services:
   nginx:
@@ -16,6 +17,7 @@ services:
       depends_on: [postgres_index-db]
       restart: unless-stopped
       ports: ["4444:4242"]
+      user: "1001:1001"
       volumes: ["./OrthancStorage:/var/lib/orthanc/db","./MWLFiles:/var/lib/orthanc/worklists","./pacs-1/dicomFiles:/etc/orthanc/dicomFiles", "./pacs-1/python:/python"]
       environment:
 
@@ -65,6 +67,7 @@ services:
       image: postgres
       ports: ["5555:5432"]
       restart: unless-stopped
+      user: "1001:1001"
       volumes:
           - ./OrthancIndex:/var/lib/postgresql/data
       environment:
@@ -79,6 +82,7 @@ services:
         --default-authentication-plugin=mysql_native_password
         --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     restart: unless-stopped
+    user: "1001:1001"
     tty: true
     environment:
       MYSQL_ROOT_PASSWORD: 'root'
