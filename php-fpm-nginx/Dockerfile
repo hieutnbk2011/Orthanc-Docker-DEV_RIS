@@ -14,7 +14,9 @@ RUN apt-get update && apt-get install -y \
     curl \
     libzip-dev \
     dcmtk \
-    wkhtmltopdf
+    wkhtmltopdf \
+    nginx \
+    supervisor
 
 # Clear cache
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
@@ -37,6 +39,7 @@ RUN docker-php-ext-install pdo_mysql zip exif pcntl gd
 # php artisan storage:link 
 # THAT NEEDS TO BE RUN FROM THE nginx-home/LaravelPortal/ directory to symlink the storage directory.  NEED to figure out how to do that.
 # sudo docker exec -it  orthanc-docker-dev_ris_php-fpm_1 /bin/bash
-
-ENTRYPOINT ["php-fpm"]
+COPY default.conf /etc/nginx/conf.d/default.conf
+COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+ENTRYPOINT ["/usr/bin/supervisord"]
 
